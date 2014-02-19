@@ -4,6 +4,10 @@
 		"username" : "login",
 		"password" : "password",
 		"secret" : "supersecret",
-		"callbackurl" : "http://callback.com/feeds"
+		"callbackurl" : "http://domain.com/feeds",
+		"listen" : {
+			"host" : "domain.com",
+			"port" : 3000
+		}
 	}
 }
