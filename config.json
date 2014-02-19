@@ -1,13 +1,20 @@
 {
-	"pubsubhubbub" : {
-		"hub" : "https://push.superfeedr.com",
-		"username" : "login",
-		"password" : "password",
-		"secret" : "supersecret",
-		"callbackurl" : "http://domain.com/feeds",
-		"listen" : {
-			"host" : "domain.com",
-			"port" : 3000
+	"pubsubhubbub": {
+		"hub": "https://push.superfeedr.com",
+		"username": "login",
+		"password": "password",
+		"secret": "supersecret",
+		"callbackurl": "http://domain.com/feeds",
+		"listen": {
+			"host": "domain.com",
+			"port": 3000
 		}
+	},
+	"postgres": {
+		"user": "user",
+		"password": "password",
+		"host": "localhost",
+		"port": null,
+		"database": "postgres"
 	}
 }

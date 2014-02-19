@@ -14,7 +14,8 @@
 	"author": "David Beath",
 	"license": "MIT",
 	"dependencies": {
-		"request": "*"
+		"request": "*",
+		"pg": "*"
 	},
 	"devDependencies": {
 		"mocha": "*",
