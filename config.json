@@ -14,7 +14,7 @@
 		"user": "user",
 		"password": "password",
 		"host": "localhost",
-		"port": null,
+		"port": 5432,
 		"database": "postgres"
 	}
 }
