@@ -1,4 +1,4 @@
-var pubSubHubbub = require("./pubsubhubbub/index.js"),
+var pubSubHubbub = require("./node_modules/pubsubhubbub/index.js"),
     crypto = require("crypto"),
     fs = require("fs"),
     config = require("./config.json");

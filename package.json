@@ -15,7 +15,8 @@
 	"license": "MIT",
 	"dependencies": {
 		"request": "*",
-		"pg": "*"
+		"pg": "*",
+		"pubsubhubbub": "git+https://git@github.com/DBeath/pubsubhubbub.git#master"
 	},
 	"devDependencies": {
 		"mocha": "*",
