@@ -5,6 +5,7 @@
 		"password": "password",
 		"secret": "supersecret",
 		"callbackurl": "http://domain.com/feeds",
+		"format": "json",
 		"listen": {
 			"host": "domain.com",
 			"port": 3000
