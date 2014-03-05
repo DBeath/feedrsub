@@ -53,11 +53,11 @@ pubsub.on('listen', function (){
 
 pubsub.on('feed', function (data){
 
-    var json = JSON.parse(data);
+    var json = JSON.parse(data.feed);
     for (var i = 0; i < json.items.length; i++) {
         mongo.feeds.insert(json.items[i], {w:1}, function (err) {
             if (err) console.log(err.message);
-            else console.log(moment().format()+' | Inserted feed item: '+ json.items[i].title);
+            else console.log(moment().format()+' | Inserted feed item');
         });   
     };   
 });
