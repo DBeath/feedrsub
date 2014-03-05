@@ -27,7 +27,12 @@ pubsub.on('subscribe', function (data){
     console.log("Subscribe");
     console.log(data);
 
-    console.log("Subscribed "+data.topic+" to "+data.hub);
+    mongo.subcriptions.insert({'topic': data.topic, 'subtime': moment().unix()}, {w:1}, 
+        function (err) {
+            if (err) console.log(err.message);
+        });
+
+    console.log("Subscribed "+data.topic+" to "+data.hub+" at "+moment().format());
 });
 
 pubsub.on('unsubscribe', function (data){
@@ -50,8 +55,9 @@ pubsub.on('feed', function (data){
 
     var json = JSON.parse(data);
     for (var i = 0; i < json.items.length; i++) {
-        mongo.feeds.insert(json.items[i]);
-        console.log(moment().format()+' | Inserted feed item: '+ json.items[i].title);
-    }
-    
+        mongo.feeds.insert(json.items[i], {w:1}, function (err) {
+            if (err) console.log(err.message);
+            else console.log(moment().format()+' | Inserted feed item: '+ json.items[i].title);
+        });   
+    };   
 });
