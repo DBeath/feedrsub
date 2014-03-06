@@ -6,28 +6,15 @@ var mongo = require('./db/mongodb.js');
 var moment = require('moment');
 
 var pubsub = pubSubHubbub.createServer({
-<<<<<<< HEAD
-	callbackUrl: config.pubsub.callbackurl,
-	secret: config.pubsub.secret,
-	username: config.pubsub.username,
-	password: config.pubsub.password,
-    format: config.pubsub.format
+  callbackUrl: config.pubsub.callbackurl,
+  secret: config.pubsub.secret,
+  username: config.pubsub.username,
+  password: config.pubsub.password,
+  format: config.pubsub.format
 });
 
 mongo.init(function (error) {
-    
-    pubsub.listen(config.pubsub.listen.port);
-=======
-  callbackUrl: config.pubsubhubbub.callbackurl,
-  secret: config.pubsubhubbub.secret,
-  username: config.pubsubhubbub.username,
-  password: config.pubsubhubbub.password,
-  format: config.pubsubhubbub.format
-});
-
-mongo.init(function (error) {
-  pubsub.listen(config.pubsubhubbub.listen.port);
->>>>>>> 265e36b758666189508f7f6c1b161e94ff4f9004
+  pubsub.listen(config.pubsub.listen.port);
 });
 
 pubsub.on('denied', function (data) {
@@ -39,17 +26,10 @@ pubsub.on('subscribe', function (data) {
   console.log("Subscribe");
   console.log(data);
 
-<<<<<<< HEAD
-    mongo.subscriptions.insert({'topic': data.topic, 'subtime': moment().format('X')}, {w:1}, 
-        function (err) {
-            if (err) console.log(err.message);
-        });
-=======
   mongo.subcriptions.insert({'topic': data.topic, 'subtime': moment().format('X')}, {w:1}, 
     function (err) {
       if (err) console.log(err.message);
     });
->>>>>>> 265e36b758666189508f7f6c1b161e94ff4f9004
 
   console.log("Subscribed "+data.topic+" to "+data.hub+" at "+ moment().format());
 });
