@@ -1,27 +1,26 @@
 {
-	"name": "feedrsub",
-	"version": "0.1.0",
-	"description": "Node.js subscriber for Superfeedr",
-  	"main": "feedrsub.js",
-	"scripts": {
-		"test": "make test"
-	},
-	"homepage": "http://github.com/DBeath/feedrsub",
-	"repository": {
-		"type": "git",
-		"url": "http://github.com/DBeath/feedrsub"
-	},
-	"author": "David Beath",
-	"license": "MIT",
-	"dependencies": {
-		"request": "*",
-		"pg": "*",
-		"mongodb": "*",
-		"moment": "*",
-		"pubsubhubbub": "git+https://git@github.com/DBeath/pubsubhubbub.git#master"
-	},
-	"devDependencies": {
-		"mocha": "*",
-		"chai": "*"
-	}
+  "name": "feedrsub",
+  "version": "0.1.0",
+  "description": "Node.js subscriber for Superfeedr",
+    "main": "feedrsub.js",
+  "scripts": {
+    "test": "make test"
+  },
+  "homepage": "http://github.com/DBeath/feedrsub",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/DBeath/feedrsub"
+  },
+  "author": "David Beath",
+  "license": "MIT",
+  "dependencies": {
+    "request": "*",
+    "mongodb": "*",
+    "moment": "*",
+    "pubsubhubbub": "git+https://git@github.com/DBeath/pubsubhubbub.git#master"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "chai": "*"
+  }
 }

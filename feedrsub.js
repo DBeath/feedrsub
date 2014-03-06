@@ -6,16 +6,16 @@ var mongo = require('./db/mongodb.js');
 var moment = require('moment');
 
 var pubsub = pubSubHubbub.createServer({
-	callbackUrl: config.pubsubhubbub.callbackurl,
-	secret: config.pubsubhubbub.secret,
-	username: config.pubsubhubbub.username,
-	password: config.pubsubhubbub.password,
-    format: config.pubsubhubbub.format
+	callbackUrl: config.pubsub.callbackurl,
+	secret: config.pubsub.secret,
+	username: config.pubsub.username,
+	password: config.pubsub.password,
+    format: config.pubsub.format
 });
 
 mongo.init(function (error) {
     
-    pubsub.listen(config.pubsubhubbub.listen.port);
+    pubsub.listen(config.pubsub.listen.port);
 });
 
 pubsub.on('denied', function (data){
@@ -27,7 +27,7 @@ pubsub.on('subscribe', function (data){
     console.log("Subscribe");
     console.log(data);
 
-    mongo.subcriptions.insert({'topic': data.topic, 'subtime': moment().unix()}, {w:1}, 
+    mongo.subscriptions.insert({'topic': data.topic, 'subtime': moment().format('X')}, {w:1}, 
         function (err) {
             if (err) console.log(err.message);
         });

@@ -5,6 +5,9 @@ mongo.init(function (error) {
 	mongo.feeds.insert({'test': 123}, function(err, objects) {
 		console.log('inserted');
 	});
+	mongo.subscriptions.insert({'topic': 'http://test.com'}, function (err, objects) {
+		console.log('inserted');
+	});
 });
 
 // var db = new Database();
