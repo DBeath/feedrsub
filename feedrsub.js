@@ -6,6 +6,7 @@ var mongo = require('./db/mongodb.js');
 var moment = require('moment');
 
 var pubsub = pubSubHubbub.createServer({
+<<<<<<< HEAD
 	callbackUrl: config.pubsub.callbackurl,
 	secret: config.pubsub.secret,
 	username: config.pubsub.username,
@@ -16,48 +17,66 @@ var pubsub = pubSubHubbub.createServer({
 mongo.init(function (error) {
     
     pubsub.listen(config.pubsub.listen.port);
+=======
+  callbackUrl: config.pubsubhubbub.callbackurl,
+  secret: config.pubsubhubbub.secret,
+  username: config.pubsubhubbub.username,
+  password: config.pubsubhubbub.password,
+  format: config.pubsubhubbub.format
 });
 
-pubsub.on('denied', function (data){
-    console.log("Denied");
-    console.log(data);
+mongo.init(function (error) {
+  pubsub.listen(config.pubsubhubbub.listen.port);
+>>>>>>> 265e36b758666189508f7f6c1b161e94ff4f9004
 });
 
-pubsub.on('subscribe', function (data){
-    console.log("Subscribe");
-    console.log(data);
+pubsub.on('denied', function (data) {
+  console.log("Denied");
+  console.log(data);
+});
 
+pubsub.on('subscribe', function (data) {
+  console.log("Subscribe");
+  console.log(data);
+
+<<<<<<< HEAD
     mongo.subscriptions.insert({'topic': data.topic, 'subtime': moment().format('X')}, {w:1}, 
         function (err) {
             if (err) console.log(err.message);
         });
+=======
+  mongo.subcriptions.insert({'topic': data.topic, 'subtime': moment().format('X')}, {w:1}, 
+    function (err) {
+      if (err) console.log(err.message);
+    });
+>>>>>>> 265e36b758666189508f7f6c1b161e94ff4f9004
 
-    console.log("Subscribed "+data.topic+" to "+data.hub+" at "+moment().format());
+  console.log("Subscribed "+data.topic+" to "+data.hub+" at "+ moment().format());
 });
 
-pubsub.on('unsubscribe', function (data){
-    console.log("Unsubscribe");
-    console.log(data);
+pubsub.on('unsubscribe', function (data) {
+  console.log("Unsubscribe");
+  console.log(data);
 
-    console.log("Unsubscribed "+data.topic+" from "+data.hub);
+  console.log("Unsubscribed "+data.topic+" from "+data.hub);
 });
 
-pubsub.on('error', function (error){
-    console.log("Error");
-    console.log(error);
+pubsub.on('error', function (error) {
+  console.log("Error");
+  console.log(error);
 });
 
-pubsub.on('listen', function (){
-    console.log("Server listening on port %s", pubsub.port);
+pubsub.on('listen', function () {
+  console.log("Server listening on port %s", pubsub.port);
 });
 
-pubsub.on('feed', function (data){
+pubsub.on('feed', function (data) {
 
-    var json = JSON.parse(data.feed);
-    for (var i = 0; i < json.items.length; i++) {
-        mongo.feeds.insert(json.items[i], {w:1}, function (err) {
-            if (err) console.log(err.message);
-            else console.log(moment().format()+' | Inserted feed item');
-        });   
-    };   
+  var json = JSON.parse(data.feed);
+  for (var i = 0; i < json.items.length; i++) {
+    mongo.feeds.insert(json.items[i], {w:1}, function (err) {
+      if (err) console.log(err.message);
+      else console.log(moment().format()+' | Inserted feed item');
+    });   
+  };   
 });
