@@ -42,8 +42,17 @@ pubsub.on('unsubscribe', function (data) {
 });
 
 pubsub.on('error', function (error) {
-  console.log("Error");
-  console.log(error);
+  console.log('Error: '+error);
+  var err = null;
+  if(error.code){
+    err = {'code': error.code, 'message': error.message};
+  } else {
+    err = {'code': 500, 'message': error.message};
+  }
+  mongo.errors.insert(err, {w:1}, function (err) {
+    if (err) console.log(err.message);
+    else console.log('Logged error');
+  });
 });
 
 pubsub.on('listen', function () {

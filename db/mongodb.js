@@ -8,6 +8,7 @@ module.exports.init = function (callback) {
     module.exports.mongoclient = mongoclient;
     module.exports.feeds = new mongodb.Collection(db, 'feeds');
     module.exports.subscriptions = new mongodb.Collection(db, 'subscriptions');
+    module.exports.errors = new mongodb.Collection(db, 'errors');
     callback(error);
   });
 };
