@@ -23,13 +23,11 @@ pubsub.on('denied', function (data) {
 });
 
 pubsub.on('subscribe', function (data) {
-  console.log("Subscribe");
-  console.log(data);
 
   mongo.subcriptions.insert({'topic': data.topic, 'subtime': moment().format('X')}, {w:1}, 
     function (err) {
       if (err) console.log(err.message);
-    });
+  });
 
   console.log("Subscribed "+data.topic+" to "+data.hub+" at "+ moment().format());
 });
