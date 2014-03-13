@@ -24,7 +24,11 @@ pubsub.on('denied', function (data) {
 
 pubsub.on('subscribe', function (data) {
 
-  mongo.subcriptions.insert({'topic': data.topic, 'subtime': moment().format('X')}, {w:1}, 
+  mongo.subcriptions.insert({
+      'topic': data.topic, 
+      'subtime': moment().format('X'),
+      'status': 'subscribed'
+    }, {w:1}, 
     function (err) {
       if (err) console.log(err.message);
   });
@@ -35,6 +39,11 @@ pubsub.on('subscribe', function (data) {
 pubsub.on('unsubscribe', function (data) {
   console.log("Unsubscribe");
   console.log(data);
+  
+  mongo.subscriptions.update({ topic: data.topic },{$set:{ status: 'unsubscribed' }}, 
+    function (err) {
+      if (err) console.log(err.message);
+  });
 
   console.log("Unsubscribed "+data.topic+" from "+data.hub);
 });
