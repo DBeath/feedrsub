@@ -13,9 +13,14 @@ var pubsub = pubSubHubbub.createServer({
   format: config.pubsub.format
 });
 
-mongo.init(function (error) {
-  pubsub.listen(config.pubsub.listen.port);
-});
+module.exports.pubsub = pubsub;
+module.exports.pubsubinit = function (callback) {
+  mongo.init(function (error) {
+    if (error) console.log(error);
+    pubsub.listen(config.pubsub.listen.port);
+  });
+  callback();
+};
 
 pubsub.on('denied', function (data) {
   console.log("Denied");
@@ -73,10 +78,12 @@ pubsub.on('listen', function () {
 pubsub.on('feed', function (data) {
 
   var json = JSON.parse(data.feed);
-  for (var i = 0; i < json.items.length; i++) {
-    mongo.feeds.insert(json.items[i], {w:1}, function (err) {
-      if (err) console.log(err.message);
-      else console.log(moment().format()+' | Inserted feed item');
-    });   
-  };   
+  if (json.items) {
+    for (var i = 0; i < json.items.length; i++) {
+      mongo.feeds.insert(json.items[i], {w:1}, function (err) {
+        if (err) console.log(err.message);
+        else console.log(moment().format()+' | Inserted feed item');
+      });   
+    };   
+  }; 
 });
