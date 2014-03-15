@@ -24,11 +24,15 @@ pubsub.on('denied', function (data) {
 
 pubsub.on('subscribe', function (data) {
 
-  mongo.subscriptions.insert({
-      'topic': data.topic, 
-      'subtime': moment().format('X'),
-      'status': 'subscribed'
-    }, {w:1}, 
+  mongo.subscriptions.update({
+      topic: data.topic
+    },
+    {
+      topic: data.topic, 
+      subtime: moment().format('X'),
+      status: 'subscribed'
+    }, 
+    { upsert: true }, 
     function (err) {
       if (err) console.log(err.message);
   });
