@@ -76,14 +76,20 @@ pubsub.on('listen', function () {
 });
 
 pubsub.on('feed', function (data) {
-
-  var json = JSON.parse(data.feed);
-  if (json.items) {
-    for (var i = 0; i < json.items.length; i++) {
-      mongo.feeds.insert(json.items[i], {w:1}, function (err) {
-        if (err) console.log(err.message);
-        else console.log(moment().format()+' | Inserted feed item');
-      });   
-    };   
-  }; 
+  console.log('Received notification at %s', moment().format());
+  if (data.headers['content-type'] === 'application/json') {
+    var json = JSON.parse(data.feed);
+    if (json.items) {
+      for (var i = 0; i < json.items.length; i++) {
+        mongo.feeds.insert(json.items[i], {w:1}, function (err) {
+          if (err) console.log(err.message);
+          else console.log(moment().format()+' | Inserted feed item');
+        });   
+      };   
+    } else {
+      console.log('No items in notification');
+    };  
+  } else {
+    console.log('Notification was not JSON');
+  };  
 });
