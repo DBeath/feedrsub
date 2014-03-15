@@ -24,7 +24,7 @@ pubsub.on('denied', function (data) {
 
 pubsub.on('subscribe', function (data) {
 
-  mongo.subcriptions.insert({
+  mongo.subscriptions.insert({
       'topic': data.topic, 
       'subtime': moment().format('X'),
       'status': 'subscribed'
