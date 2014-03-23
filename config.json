@@ -10,5 +10,10 @@
       "host": "domain.com",
       "port": 3000
     }
+  },
+  "express": {
+    "admin": "admin",
+    "adminpass": "password",
+    "port": 4000
   }
 }

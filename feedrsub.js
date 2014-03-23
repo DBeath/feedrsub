@@ -72,7 +72,7 @@ pubsub.on('error', function (error) {
 });
 
 pubsub.on('listen', function () {
-  console.log("Server listening on port %s", pubsub.port);
+  console.log("Pubsub server listening on port %s", pubsub.port);
 });
 
 pubsub.on('feed', function (data) {

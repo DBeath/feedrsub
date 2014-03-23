@@ -1,0 +1,7 @@
+{{#each subscriptions}}
+	<p>Topic: <a href="/subscription/{{_id}}">{{topic}}</a> Status: {{status}} Subtime: {{subtime}}</p>
+	<form method="POST" action="/subscription/{{_id}}">
+		<input type="hidden" name="_method" value="DELETE"/>
+		<input type="submit" value="Delete" />
+	</form>	
+{{/each}}
