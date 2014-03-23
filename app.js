@@ -3,6 +3,7 @@ var feedrsub = require('./feedrsub.js');
 var mongo = require('./db/mongodb.js');
 var config = require('./config.json');
 var hbs = require('hbs');
+var moment = require('moment');
 var ObjectID = require('mongodb').ObjectID;
 
 var app = module.exports = express();
@@ -18,43 +19,51 @@ app.configure(function () {
   app.use(express.basicAuth(config.express.admin, config.express.adminpass));
 });
 
+hbs.registerHelper('unix_to_date', function (unixDate) {
+  return moment.unix(unixDate).format('DD/MM/YYYY')
+});
+
 app.get('/', function (req, res) {
-  // mongo.subscriptions.find().toArray(function (err, docs) {
-  //   res.render('subscription_list', {title: 'Subscriptions', subscriptions:docs});
-  // });
   mongo.subscriptions.listAll(function (err, docs) {
     res.render('subscription_list', {title: 'Subscriptions', subscriptions:docs});
   });
 });
 
 app.get('/subscription/:id', function (req, res) {
-  mongo.subscriptions.findOne({_id: ObjectID.createFromHexString(req.params.id)}, function (err, doc) {
+  mongo.subscriptions.findOneById({_id: ObjectID.createFromHexString(req.params.id)}, function (err, doc) {
     mongo.feeds.find({topic: doc.topic}).limit(10).toArray(function (err, docs) {
       res.render('subscription', {title: 'Feeds for '+doc.topic, feeds: docs});
+    });
+  });
+
+  mongo.subscriptions.findOne(req.params.id, function (err, doc) {
+    if (err) console.log(err);
+    mongo.feeds.list(doc.topic, 100, function (err, docs) {
+      if (err) console.log(err);
+      res.render('subscription', {title: 'Feeds for ' + doc.topic, feeds: docs})
     });
   });
 });
 
 app.del('/subscription/:id', function (req, res) {
-  console.log('Deleting %s', req.params.id);
-  // mongo.subscriptions.remove({_id: ObjectID.createFromHexString(req.params.id)}, true, function (err, doc) {
-  //   res.redirect('/');
-  // });
   mongo.subscriptions.delete(req.params.id, function (err, num) {
     if (err) console.log(err);
+    console.log('Deleted %s', req.params.id);
     res.redirect('/');
   });
 });
 
-// app.get('/newsub', function (req, res) {
-//   res.render('new_subscription', {title: 'Subscribe'});
-// });
+app.get('/subscribe', function (req, res) {
+  res.render('new_subscription', {title: 'Subscribe'});
+});
 
-// app.post('/newsub', function (req, res) {
-//   mongo.subscriptions.insert({topic: req.param('topic')}, function (err, docs) {
-//     res.redirect('/');
-//   });
-// });
+app.post('/subscribe', function (req, res) {
+  mongo.subscriptions.subscribe(req.param('topic'), function (err, result) {
+    if (err) console.log(err);
+    console.log('Subscribed to %s', req.param('topic'));
+    res.redirect('/');
+  })
+});
 
 feedrsub.pubsubinit(function () {
   console.log('Feedrsub initiated');

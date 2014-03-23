@@ -78,13 +78,20 @@ pubsub.on('listen', function () {
 pubsub.on('feed', function (data) {
   console.log('Received notification at %s', moment().format());
   if (data.headers['content-type'] === 'application/json') {
+
     var json = JSON.parse(data.feed);
+
+    mongo.subscriptions.update(json.status, function (err, result) {
+      if (err) console.log(err);
+    });
+
     if (json.items) {
       for (var i = 0; i < json.items.length; i++) {
-        mongo.feeds.insert(json.items[i], {w:1}, function (err) {
-          if (err) console.log(err.message);
+
+        mongo.feeds.insert(json.items[i], function (err) {
+          if (err) console.log(err);
           else console.log(moment().format()+' | Inserted feed item');
-        });   
+        });  
       };   
     } else {
       console.log('No items in notification');
