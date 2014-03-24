@@ -28,33 +28,17 @@ pubsub.on('denied', function (data) {
 });
 
 pubsub.on('subscribe', function (data) {
-
-  mongo.subscriptions.update({
-      topic: data.topic
-    },
-    {
-      topic: data.topic, 
-      subtime: moment().format('X'),
-      status: 'subscribed'
-    }, 
-    { upsert: true }, 
-    function (err) {
-      if (err) console.log(err.message);
+  mongo.subscriptions.subscribe(data.topic, function (err, result) {
+    if (err) console.log(err);
+    else console.log("Subscribed "+data.topic+" to "+data.hub+" at "+ moment().format());
   });
-
-  console.log("Subscribed "+data.topic+" to "+data.hub+" at "+ moment().format());
 });
 
-pubsub.on('unsubscribe', function (data) {
-  console.log("Unsubscribe");
-  console.log(data);
-  
-  mongo.subscriptions.update({ topic: data.topic },{$set:{ status: 'unsubscribed' }}, 
-    function (err) {
-      if (err) console.log(err.message);
+pubsub.on('unsubscribe', function (data) { 
+  mongo.subscriptions.unsubscribe(data.topic, function (err, result) {
+    if (err) console.log(err);
+    else console.log("Unsubscribed "+data.topic+" from "+data.hub);
   });
-
-  console.log("Unsubscribed "+data.topic+" from "+data.hub);
 });
 
 pubsub.on('error', function (error) {
