@@ -2,8 +2,9 @@
   "name": "feedrsub",
   "version": "0.1.0",
   "description": "Node.js subscriber for Superfeedr",
-    "main": "feedrsub.js",
+  "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "test": "make test"
   },
   "homepage": "http://github.com/DBeath/feedrsub",
