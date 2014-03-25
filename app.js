@@ -30,8 +30,16 @@ app.del('/subscription/:id', admin.deleteSubscription );
 app.get('/subscribe', admin.newSubscription );
 app.post('/subscribe', admin.subscribe );
 
-feedrsub.pubsubinit(function () {
-  console.log('Feedrsub initiated');
-  app.listen(config.express.port);
-  console.log('App listening on port %s', config.express.port);
-});
+function init() {
+  console.log('Feedrsub initiating...');
+  mongo.init(function (error) {
+    if (error) console.log(error);
+
+    feedrsub.pubsub.listen(config.pubsub.listen.port);
+    app.listen(config.express.port);
+
+    console.log('App listening on port %s', config.express.port);
+  });
+};
+
+init();

@@ -14,13 +14,6 @@ var pubsub = pubSubHubbub.createServer({
 });
 
 module.exports.pubsub = pubsub;
-module.exports.pubsubinit = function (callback) {
-  mongo.init(function (error) {
-    if (error) console.log(error);
-    pubsub.listen(config.pubsub.listen.port);
-  });
-  callback();
-};
 
 pubsub.on('denied', function (data) {
   console.log("Denied");

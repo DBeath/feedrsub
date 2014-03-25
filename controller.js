@@ -16,7 +16,7 @@ admin.prototype.index = function (req, res) {
 };
 
 admin.prototype.subscription = function (req, res) {
-  mongo.subscriptions.findOne(req.params.id, function (err, doc) {
+  mongo.subscriptions.findOneById(req.params.id, function (err, doc) {
     if (err) console.log(err);
     mongo.feeds.list(doc.topic, 100, function (err, docs) {
       if (err) console.log(err);
