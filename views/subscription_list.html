@@ -1,11 +1,29 @@
+<table class="table">
+<thead>
+	<tr>
+		<th>Delete</th>
+		<th>Topic</th>
+		<th>Status</th>
+		<th>Subtime</th>
+		<th>Title</th>
+	</tr>
+</thead>
+<tbody>
 {{#each subscriptions}}
-	
-	<form method="POST" action="/subscription/{{_id}}" class="form-inline">
-		
-			<p>Topic: <a href="/subscription/{{_id}}">{{topic}}</a> Status: {{status}} Subtime: {{unix_to_date subtime}} Title: {{subscriptions.title}}</p>
-		<div class="form-group">
-			<input type="hidden" name="_method" value="DELETE"/>
-			<input type="submit" class="form-control" value="Delete" />
-		</div>
-	</form>	
+	<tr>
+		<th>
+			<form method="POST" action="/subscription/{{_id}}" class="form-inline">	
+				<div class="form-group row">
+					<input type="hidden" name="_method" value="DELETE"/>
+					<input type="submit" class="form-control delete-form" value="Delete" />
+				</div>
+			</form>	
+		</th>
+		<th><a href="/subscription/{{_id}}">{{topic}}</a></th>
+		<th>{{status}}</th>
+		<th>{{unix_to_date subtime}}</th>
+		<th>{{subscriptions.title}}</th>
+	</tr>
 {{/each}}
+</tbody>
+</table>
