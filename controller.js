@@ -45,10 +45,12 @@ admin.prototype.newSubscription = function (req, res) {
 admin.prototype.subscribe = function (req, res) {
   var subs = req.param('topic').split(/[\s,]+/);
   for (var i = 0; i < subs.length; i++) {
-    mongo.subscriptions.subscribe(subs[i], function (err, result) {
-      if (err) console.log(err);
-      console.log('Subscribed to %s', subs[i]);
-    });
+    // mongo.subscriptions.subscribe(subs[i], function (err, result) {
+    //   if (err) console.log(err);
+    //   console.log('Subscribed to %s', subs[i]);
+    // });
+    console.log('Subscribing to %s', subs[i]);
+    pubsub.subscribe(subs[i], config.pubsub.hub, config.pubsub.callbackurl);
   };
   res.redirect('/');
 };
