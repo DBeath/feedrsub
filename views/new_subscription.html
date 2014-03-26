@@ -3,8 +3,11 @@
 	<title>{{title}}</title>
 </head>
 <body>
-	<form method="post">
-		<span>Topic: <input type="text" name="topic"/></span>
+	<form method="post" role="form">
+		<div class="form-group">
+			<label for="topic">Enter topics</label>
+			<textarea name="topic" rows="10", cols="50" class="form-control"></textarea>
+		</div>
 		<input type="submit" value="Subscribe"/>
 	</form>
 </body>

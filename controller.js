@@ -41,9 +41,12 @@ admin.prototype.newSubscription = function (req, res) {
 };
 
 admin.prototype.subscribe = function (req, res) {
-  mongo.subscriptions.subscribe(req.param('topic'), function (err, result) {
-    if (err) console.log(err);
-    console.log('Subscribed to %s', req.param('topic'));
-    res.redirect('/');
-  });
+  var subs = req.param('topic').split(/[\s,]+/);
+  for (var i = 0; i < subs.length; i++) {
+    mongo.subscriptions.subscribe(subs[i], function (err, result) {
+      if (err) console.log(err);
+      console.log('Subscribed to %s', subs[i]);
+    });
+  };
+  res.redirect('/');
 };
