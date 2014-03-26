@@ -20,7 +20,10 @@ admin.prototype.subscription = function (req, res) {
     if (err) console.log(err);
     mongo.feeds.list(doc.topic, 100, function (err, docs) {
       if (err) console.log(err);
-      res.render('subscription', {title: 'Feeds for ' + doc.topic, feeds: docs})
+      res.render('subscription', {
+        title: 'Feeds for ' + doc.topic, 
+        feeds: docs
+      });
     });
   });
 };

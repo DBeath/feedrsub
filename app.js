@@ -15,7 +15,7 @@ app.configure(function () {
   app.engine('html', hbs.__express);
   app.use(express.urlencoded());
   app.use(express.methodOverride());
-  app.use(express.static(__dirname + '/public'));
+  app.use(express.static(__dirname+'/public'));
   app.use(express.errorHandler());
   app.use(express.basicAuth(config.express.admin, config.express.adminpass));
 });

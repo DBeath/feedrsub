@@ -1,10 +1,23 @@
-<html>
-<head>
-	<title>{{title}}</title>
-</head>
-<body>
-	<h2>{{title}}</h1>
-	{{#each feeds}}
-		<p>ID: {{_id}} | Content: {{content}}</a></p>
-	{{/each}}
-</body>
+<h2>{{title}}</h2>
+<table class="table">
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>Published</th>
+			<th>Title</th>
+			<th>Author</th>
+			<th>Permalink</th>
+		</tr>
+	</thead>
+	<tbody>
+		{{#each feeds}}
+		<tr>
+			<th>{{_id}}</th>
+			<th>{{unix_to_date published}}</th>
+			<th>{{title}}</th>
+			<th>{{actor}}</th>
+			<th><a href="{{permalink}}">{{permalink}}</th>
+		</tr>
+		{{/each}}
+	</tbody>
+</table>
