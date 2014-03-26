@@ -26,6 +26,7 @@ hbs.registerHelper('unix_to_date', function (unixDate) {
 
 app.get('/', admin.index );
 app.get('/subscription/:id', admin.subscription );
+app.put('/subscription/:id', admin.unsubscribe );
 app.del('/subscription/:id', admin.deleteSubscription );
 app.get('/subscribe', admin.newSubscription );
 app.post('/subscribe', admin.subscribe );

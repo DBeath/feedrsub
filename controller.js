@@ -1,4 +1,6 @@
 var mongo = require('./db/mongodb.js');
+var pubsub = require('./feedrsub.js').pubsub;
+var config = require('./config.json');
 
 module.exports.adminController = function () {
   return new admin();
@@ -48,5 +50,14 @@ admin.prototype.subscribe = function (req, res) {
       console.log('Subscribed to %s', subs[i]);
     });
   };
+  res.redirect('/');
+};
+
+admin.prototype.unsubscribe = function (req, res) {
+  mongo.subscriptions.findOneById(req.params.id, function (err, doc) {
+    if (err) console.log(err);
+    console.log('Unsubscribing from '+doc.topic);
+    pubsub.unsubscribe(doc.topic, config.pubsub.hub, config.pubsub.callbackurl);
+  });
   res.redirect('/');
 };

@@ -2,6 +2,7 @@
 <thead>
 	<tr>
 		<th>Delete</th>
+		<th>Unsubscribe</th>
 		<th>Topic</th>
 		<th>Status</th>
 		<th>Subtime</th>
@@ -12,12 +13,20 @@
 {{#each subscriptions}}
 	<tr>
 		<th>
-			<form method="POST" action="/subscription/{{_id}}" class="form-inline">	
-				<div class="form-group row">
+			<form method="POST" action="/subscription/{{_id}}" role="form">	
+				<div class="form-group">
 					<input type="hidden" name="_method" value="DELETE"/>
-					<input type="submit" class="form-control delete-form" value="Delete" />
+					<button type="submit" class="btn btn-danger btn-delete btn-small" value="Delete">Delete</button>
 				</div>
 			</form>	
+		</th>
+		<th>
+			<form method="POST" action="/subscription/{{_id}}" class="">
+				<div class="form-group">
+					<input type="hidden" name="_method" value="PUT"/>
+					<button type="submit" class="btn btn-warning btn-unsubscribe btn-small" value="Unsubscribe">Unsubscribe</button>
+				</div>
+			</form>
 		</th>
 		<th><a href="/subscription/{{_id}}">{{topic}}</a></th>
 		<th>{{status}}</th>
