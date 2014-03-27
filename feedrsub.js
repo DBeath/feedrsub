@@ -21,14 +21,14 @@ pubsub.on('denied', function (data) {
 });
 
 pubsub.on('subscribe', function (data) {
-  mongo.subscriptions.subscribe(data.topic, function (err, result) {
+  mongo.feeds.subscribe(data.topic, function (err, result) {
     if (err) console.log(err);
     else console.log("Subscribed "+data.topic+" to "+data.hub+" at "+ moment().format());
   });
 });
 
 pubsub.on('unsubscribe', function (data) { 
-  mongo.subscriptions.unsubscribe(data.topic, function (err, result) {
+  mongo.feeds.unsubscribe(data.topic, function (err, result) {
     if (err) console.log(err);
     else console.log("Unsubscribed "+data.topic+" from "+data.hub);
   });
@@ -58,16 +58,16 @@ pubsub.on('feed', function (data) {
 
     var json = JSON.parse(data.feed);
 
-    mongo.subscriptions.update(json.status, function (err, result) {
+    mongo.feeds.updateStatus(json.status, function (err, result) {
       if (err) console.log(err);
     });
 
     if (json.items) {
       for (var i = 0; i < json.items.length; i++) {
         json.items[i].topic = data.headers['X-PubSubHubbub-Topic'];
-        mongo.feeds.insert(json.items[i], function (err) {
+        mongo.entries.insert(json.items[i], function (err) {
           if (err) console.log(err);
-          else console.log(moment().format()+' | Inserted feed item');
+          else console.log(moment().format()+' | Inserted entry');
         });  
       };   
     } else {
