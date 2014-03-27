@@ -25,10 +25,10 @@ hbs.registerHelper('unix_to_date', function (unixDate) {
 });
 
 app.get('/', admin.index );
-app.get('/subscription/:id', admin.subscription );
-app.put('/subscription/:id', admin.unsubscribe );
-app.del('/subscription/:id', admin.deleteSubscription );
-app.get('/subscribe', admin.newSubscription );
+app.get('/feed/:id', admin.feed );
+app.put('/feed/:id', admin.unsubscribe );
+app.del('/feed/:id', admin.deletefeed );
+app.get('/subscribe', admin.newfeed );
 app.post('/subscribe', admin.subscribe );
 
 function init() {

@@ -10,10 +10,10 @@
 	</tr>
 </thead>
 <tbody>
-{{#each subscriptions}}
+{{#each feeds}}
 	<tr>
 		<th>
-			<form method="POST" action="/subscription/{{_id}}" role="form">	
+			<form method="POST" action="/feed/{{_id}}" role="form">	
 				<div class="form-group">
 					<input type="hidden" name="_method" value="DELETE"/>
 					<button type="submit" class="btn btn-danger btn-delete btn-small" value="Delete">Delete</button>
@@ -21,17 +21,17 @@
 			</form>	
 		</th>
 		<th>
-			<form method="POST" action="/subscription/{{_id}}" class="">
+			<form method="POST" action="/feed/{{_id}}" class="">
 				<div class="form-group">
 					<input type="hidden" name="_method" value="PUT"/>
 					<button type="submit" class="btn btn-warning btn-unsubscribe btn-small" value="Unsubscribe">Unsubscribe</button>
 				</div>
 			</form>
 		</th>
-		<th><a href="/subscription/{{_id}}">{{topic}}</a></th>
+		<th><a href="/feed/{{_id}}">{{topic}}</a></th>
 		<th>{{status}}</th>
 		<th>{{unix_to_date subtime}}</th>
-		<th>{{subscriptions.title}}</th>
+		<th>{{feeds.title}}</th>
 	</tr>
 {{/each}}
 </tbody>

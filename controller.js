@@ -9,54 +9,54 @@ module.exports.adminController = function () {
 function admin () {};
 
 admin.prototype.index = function (req, res) {
-  mongo.subscriptions.listAll(function (err, docs) {
-    res.render('subscription_list', {
-      title: 'Subscriptions', 
-      subscriptions: docs
+  mongo.feeds.listAll(function (err, docs) {
+    res.render('feed_list', {
+      title: 'Feeds', 
+      feeds: docs
     });
   });
 };
 
-admin.prototype.subscription = function (req, res) {
-  mongo.subscriptions.findOneById(req.params.id, function (err, doc) {
+admin.prototype.feed = function (req, res) {
+  mongo.feeds.findOneById(req.params.id, function (err, doc) {
     if (err) console.log(err);
-    mongo.feeds.list(doc.topic, 100, function (err, docs) {
+    mongo.entries.list(doc.topic, 100, function (err, docs) {
       if (err) console.log(err);
-      res.render('subscription', {
-        title: 'Feeds for ' + doc.topic, 
-        feeds: docs
+      res.render('feed', {
+        title: 'Entries for ' + doc.topic, 
+        entries: docs
       });
     });
   });
 };
 
-admin.prototype.deleteSubscription = function (req, res) {
-  mongo.subscriptions.delete(req.params.id, function (err, num) {
+admin.prototype.deletefeed = function (req, res) {
+  mongo.feeds.delete(req.params.id, function (err, num) {
     if (err) console.log(err);
     console.log('Deleted %s', req.params.id);
     res.redirect('/');
   });
 };
 
-admin.prototype.newSubscription = function (req, res) {
-  res.render('new_subscription', {title: 'Subscribe'});
+admin.prototype.newfeed = function (req, res) {
+  res.render('new_feed', {title: 'Subscribe'});
 };
 
 admin.prototype.subscribe = function (req, res) {
   var subs = req.param('topic').split(/[\s,]+/);
   for (var i = 0; i < subs.length; i++) {
-    // mongo.subscriptions.subscribe(subs[i], function (err, result) {
-    //   if (err) console.log(err);
-    //   console.log('Subscribed to %s', subs[i]);
-    // });
+    mongo.feeds.subscribe(subs[i], function (err, result) {
+      if (err) console.log(err);
+      console.log('Subscribed to %s', subs[i]);
+    });
     console.log('Subscribing to %s', subs[i]);
-    pubsub.subscribe(subs[i], config.pubsub.hub, config.pubsub.callbackurl);
+    //pubsub.subscribe(subs[i], config.pubsub.hub, config.pubsub.callbackurl);
   };
   res.redirect('/');
 };
 
 admin.prototype.unsubscribe = function (req, res) {
-  mongo.subscriptions.findOneById(req.params.id, function (err, doc) {
+  mongo.feeds.findOneById(req.params.id, function (err, doc) {
     if (err) console.log(err);
     console.log('Unsubscribing from '+doc.topic);
     pubsub.unsubscribe(doc.topic, config.pubsub.hub, config.pubsub.callbackurl);
