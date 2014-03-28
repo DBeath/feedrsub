@@ -1,4 +1,5 @@
-<table class="table">
+<h3>{{title}}</h3>
+<table class="table table-condensed table-striped">
 <thead>
 	<tr>
 		<th>Delete</th>
@@ -14,18 +15,14 @@
 	<tr>
 		<th>
 			<form method="POST" action="/feed/{{_id}}" role="form">	
-				<div class="form-group">
-					<input type="hidden" name="_method" value="DELETE"/>
-					<button type="submit" class="btn btn-danger btn-delete btn-small" value="Delete">Delete</button>
-				</div>
+				<input type="hidden" name="_method" value="DELETE"/>
+				<button type="submit" class="btn btn-danger btn-xs" value="Delete">Delete</button>
 			</form>	
 		</th>
 		<th>
 			<form method="POST" action="/feed/{{_id}}" class="">
-				<div class="form-group">
-					<input type="hidden" name="_method" value="PUT"/>
-					<button type="submit" class="btn btn-warning btn-unsubscribe btn-small" value="Unsubscribe">Unsubscribe</button>
-				</div>
+				<input type="hidden" name="_method" value="PUT"/>
+				<button type="submit" class="btn btn-warning btn-xs" value="Unsubscribe">Unsubscribe</button>
 			</form>
 		</th>
 		<th><a href="/feed/{{_id}}">{{topic}}</a></th>
