@@ -40,7 +40,7 @@ admin.prototype.deletefeed = function (req, res) {
 };
 
 admin.prototype.newfeed = function (req, res) {
-  res.render('new_feed', {title: 'Subscribe'});
+  res.render('subscribe', {title: 'Subscribe'});
 };
 
 admin.prototype.subscribe = function (req, res) {
@@ -78,6 +78,16 @@ admin.prototype.unsubscribed_feeds = function (req, res) {
     if (err) console.log(err);
     res.render('unsubscribed_feed_list', {
       title: 'Unsubscribed Feeds',
+      feeds: docs
+    });
+  });
+};
+
+admin.prototype.subscribed_feeds = function (req, res) {
+  mongo.feeds.listByStatus('subscribed', function (err, docs) {
+    if (err) console.log(err);
+    res.render('subscribed_feed_list', {
+      title: 'Subscribed Feeds',
       feeds: docs
     });
   });

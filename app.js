@@ -26,12 +26,13 @@ hbs.registerHelper('unix_to_date', function (unixDate) {
 
 app.get('/', admin.index );
 app.get('/feed/:id', admin.feed );
-app.put('/feed/:id', admin.unsubscribe );
+app.put('/unsubscribe/:id', admin.unsubscribe );
 app.del('/feed/:id', admin.deletefeed );
 app.get('/subscribe', admin.newfeed );
 app.post('/subscribe', admin.subscribe );
 app.put('/subscribe/:id', admin.resubscribe );
 app.get('/unsubscribed', admin.unsubscribed_feeds );
+app.get('/subscribed', admin.subscribed_feeds );
 
 
 function init() {
