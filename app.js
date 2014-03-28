@@ -30,6 +30,9 @@ app.put('/feed/:id', admin.unsubscribe );
 app.del('/feed/:id', admin.deletefeed );
 app.get('/subscribe', admin.newfeed );
 app.post('/subscribe', admin.subscribe );
+app.put('/subscribe/:id', admin.resubscribe );
+app.get('/unsubscribed', admin.unsubscribed_feeds );
+
 
 function init() {
   console.log('Feedrsub initiating...');

@@ -10,6 +10,7 @@ function admin () {};
 
 admin.prototype.index = function (req, res) {
   mongo.feeds.listAll(function (err, docs) {
+    if (err) console.log(err);
     res.render('feed_list', {
       title: 'Feeds', 
       feeds: docs
@@ -55,6 +56,14 @@ admin.prototype.subscribe = function (req, res) {
   res.redirect('/');
 };
 
+admin.prototype.resubscribe = function (req, res) {
+  mongo.feeds.findOneById(req.params.id, function (err, doc) {
+    if (err) console.log(err);
+    console.log('Resubscribing to %s', doc.topic);
+    pubsub.subscribe(doc.topic , config.pubsub.hub, config.pubsub.callbackurl);
+  });
+};
+
 admin.prototype.unsubscribe = function (req, res) {
   mongo.feeds.findOneById(req.params.id, function (err, doc) {
     if (err) console.log(err);
@@ -62,4 +71,14 @@ admin.prototype.unsubscribe = function (req, res) {
     pubsub.unsubscribe(doc.topic, config.pubsub.hub, config.pubsub.callbackurl);
   });
   res.redirect('/');
+};
+
+admin.prototype.unsubscribed_feeds = function (req, res) {
+  mongo.feeds.listByStatus('unsubscribed', function (err, docs) {
+    if (err) console.log(err);
+    res.render('unsubscribed_feed_list', {
+      title: 'Unsubscribed Feeds',
+      feeds: docs
+    });
+  });
 };
