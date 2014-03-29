@@ -70,7 +70,7 @@ admin.prototype.unsubscribe = function (req, res) {
     console.log('Unsubscribing from '+doc.topic);
     pubsub.unsubscribe(doc.topic, config.pubsub.hub, config.pubsub.callbackurl);
   });
-  res.redirect('/');
+  res.redirect('/unsubscribed');
 };
 
 admin.prototype.unsubscribed_feeds = function (req, res) {

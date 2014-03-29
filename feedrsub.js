@@ -53,7 +53,7 @@ pubsub.on('listen', function () {
 });
 
 pubsub.on('feed', function (data) {
-  console.log('Received notification at %s', moment().format());
+  console.log('Received notification from %s at %s', data.topic, moment().format());
   if (data.headers['content-type'] === 'application/json') {
 
     var json = JSON.parse(data.feed);
