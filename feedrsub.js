@@ -66,7 +66,7 @@ pubsub.on('feed', function (data) {
 
     if (json.items) {
       for (var i = 0; i < json.items.length; i++) {
-        json.items[i].topic = data.headers['X-PubSubHubbub-Topic'];
+        json.items[i].topic = data.topic;
         mongo.entries.insert(json.items[i], function (err) {
           if (err) console.log(err);
           else console.log(moment().format()+' | Inserted entry');
