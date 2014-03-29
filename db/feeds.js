@@ -27,7 +27,7 @@ Feeds.prototype.subscribe = function (topic, callback) {
     }, 
     function (err) {
       if (err) callback(err);
-      callback(null, 'success');
+      callback(null, topic);
   });
 };
 

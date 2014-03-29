@@ -46,12 +46,12 @@ admin.prototype.newfeed = function (req, res) {
 admin.prototype.subscribe = function (req, res) {
   var subs = req.param('topic').split(/[\s,]+/);
   for (var i = 0; i < subs.length; i++) {
-    mongo.feeds.subscribe(subs[i], function (err, result) {
+    mongo.feeds.subscribe(subs[i], function (err, topic) {
       if (err) console.log(err);
-      console.log('Subscribed to %s', subs[i]);
+      pubsub.subscribe(topic, config.pubsub.hub, config.pubsub.callbackurl);
     });
     console.log('Subscribing to %s', subs[i]);
-    //pubsub.subscribe(subs[i], config.pubsub.hub, config.pubsub.callbackurl);
+    
   };
   res.redirect('/');
 };

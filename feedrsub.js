@@ -23,14 +23,14 @@ pubsub.on('denied', function (data) {
 pubsub.on('subscribe', function (data) {
   mongo.feeds.subscribe(data.topic, function (err, result) {
     if (err) console.log(err);
-    else console.log("Subscribed "+data.topic+" to "+data.hub+" at "+ moment().format());
+    else console.log("Subscribed "+data.topic+" at "+ moment().format());
   });
 });
 
 pubsub.on('unsubscribe', function (data) { 
   mongo.feeds.unsubscribe(data.topic, function (err, result) {
     if (err) console.log(err);
-    else console.log("Unsubscribed "+data.topic+" from "+data.hub);
+    else console.log("Unsubscribed "+data.topic+" at "+moment().format());
   });
 });
 
