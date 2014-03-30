@@ -1,6 +1,6 @@
-var mongo = require('./db/mongodb.js');
-var pubsub = require('./feedrsub.js').pubsub;
-var config = require('./config.json');
+var mongo = require('../db/mongodb.js');
+var pubsub = require('../feedrsub.js').pubsub;
+var config = require('../config.json');
 
 module.exports.adminController = function () {
   return new admin();

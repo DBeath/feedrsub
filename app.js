@@ -5,7 +5,7 @@ var config = require('./config.json');
 var hbs = require('hbs');
 var moment = require('moment');
 var ObjectID = require('mongodb').ObjectID;
-var admin = require('./controller.js').adminController();
+var admin = require('./controllers/admin.js').adminController();
 
 var app = module.exports = express();
 
