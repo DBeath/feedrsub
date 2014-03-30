@@ -1,6 +1,6 @@
 var express = require('express');
 var feedrsub = require('./feedrsub.js');
-var mongo = require('./db/mongodb.js');
+var mongo = require('./models/mongodb.js');
 var config = require('./config.json');
 var hbs = require('hbs');
 var moment = require('moment');
@@ -33,6 +33,9 @@ app.post('/subscribe', admin.subscribe );
 app.put('/subscribe/:id', admin.resubscribe );
 app.get('/unsubscribed', admin.unsubscribed_feeds );
 app.get('/subscribed', admin.subscribed_feeds );
+
+app.get('/pubsubhubbub', pubsub);
+app.post('/pubsubhubbub', pubsub);
 
 
 function init() {

@@ -2,7 +2,7 @@ var pubSubHubbub = require('pubsubhubbub');
 var crypto = require('crypto');
 var fs = require('fs');
 var config = require('./config.json');
-var mongo = require('./db/mongodb.js');
+var mongo = require('./models/mongodb.js');
 var moment = require('moment');
 
 var pubsub = pubSubHubbub.createServer({

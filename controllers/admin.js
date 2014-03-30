@@ -1,4 +1,4 @@
-var mongo = require('../db/mongodb.js');
+var mongo = require('../models/mongodb.js');
 var pubsub = require('../feedrsub.js').pubsub;
 var config = require('../config.json');
 
