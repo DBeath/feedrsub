@@ -20,7 +20,8 @@ function pubsub (options) {
     }
   };
 
-  this.pending = {};   
+  // Subscriptions pending verification
+  this.pending = [];   
 };
 
 pubsub.prototype.verification = function (req, res) {
@@ -32,11 +33,20 @@ pubsub.prototype.verification = function (req, res) {
 
   switch ( req.query['hub.mode'] ) {
     case 'denied':
-      res.send(200, req.query['hub.challenge']);
+      res.send(200);
+      break;
     case 'subscribe':
     case 'unsubscribe':
-      res.send(200, req.query['hub.challenge']);
-  }
+      var index = pending.indexOf(req.query['hub.topic']);
+      if (index > -1) {
+        res.send(200, req.query['hub.challenge']);
+      } else {
+        res.send(404);
+      };
+      break;
+    default:
+      res.send(403);    
+  };
 };
 
 pubsub.prototype.notification = function (req, res) {
@@ -83,11 +93,12 @@ pubsub.prototype.setSubscription = function (mode, topic, hub, callback) {
     if (err) console.log(err);
 
     if (res.statusCode === 202) {
+      pending.push(topic);
       callback(null, 'Accepted');
     } else {
       console.log('%s Denied', res.statusCode);
     };
-  })
+  });
 };
 
 pubsub.prototype.unsubscribe = function (req, res) {
