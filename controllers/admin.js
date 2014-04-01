@@ -1,12 +1,16 @@
 var mongo = require('../models/mongodb.js');
-var pubsub = require('../app.js').pubsub;
 var config = require('../config.json');
 
-module.exports.adminController = function () {
-  return new admin();
+var pubsub = 'this should be a pubsub object';
+
+module.exports.adminController = function (pubsub) {
+  return new admin(pubsub);
 };
 
-function admin () {};
+function admin (pubsubobj) {
+  pubsub = pubsubobj;
+  console.log(pubsub);
+};
 
 admin.prototype.index = function (req, res) {
   mongo.feeds.listAll(function (err, docs) {
@@ -65,6 +69,7 @@ admin.prototype.resubscribe = function (req, res) {
 };
 
 admin.prototype.unsubscribe = function (req, res) {
+  console.log(pubsub);
   mongo.feeds.findOneById(req.params.id, function (err, doc) {
     if (err) console.log(err);
     console.log('Unsubscribing from '+doc.topic);

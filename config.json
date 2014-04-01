@@ -1,6 +1,6 @@
 {
   "pubsub": {
-    "hub": "https://push.superfeedr.com",
+    "hub": "http://dbeath.com/test",
     "username": "login",
     "password": "password",
     "secret": "supersecret",

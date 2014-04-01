@@ -5,15 +5,18 @@ var config = require('./config.json');
 var hbs = require('hbs');
 var moment = require('moment');
 var ObjectID = require('mongodb').ObjectID;
-var admin = require('./controllers/admin.js').adminController();
 
-var pubsub = module.exports = require('./controllers/pubsub.js').pubsubController({
+var pubsub = require('./controllers/pubsub.js').pubsubController({
   secret: config.pubsub.secret,
   domain: config.pubsub.domain,
   format: config.pubsub.format,
   username: config.pubsub.username,
   password: config.pubsub.password
 });
+
+var admin = require('./controllers/admin.js').adminController(pubsub);
+
+module.exports.pubsub = pubsub;
 
 var app = module.exports = express();
 

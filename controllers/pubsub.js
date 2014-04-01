@@ -150,9 +150,9 @@ pubsub.prototype.unsubscribe = function (topic, hub) {
 
 // Sends a subscribe or unsubscribe request to the hub
 pubsub.prototype._sendSubscription = function (mode, topic, hub, callback) {
-  var uniqueCallbackUrl = callbackurl + 
-    (callbackurl.replacereplace(/^https?:\/\//i, "").match(/\//)?"":"/") +
-    (callbackurl.match(/\?/)?"&":"?") +
+  var uniqueCallbackUrl = this.callbackurl + 
+    (this.callbackurl.replace(/^https?:\/\//i, "").match(/\//)?"":"/") +
+    (this.callbackurl.match(/\?/)?"&":"?") +
     'topic=' + encodeURIComponent(topic) + 
     '&hub=' + encodeURIComponent(hub);
 
@@ -181,16 +181,19 @@ pubsub.prototype._sendSubscription = function (mode, topic, hub, callback) {
     postParams.auth = this.auth;
   };
 
-  request.post(postParams, function (err, res, body) {
+  request.post(postParams, function (err, response, body) {
     if (err) console.log(err);
 
-    if (res.statusCode === 202) {
+    if (response.statusCode === 202) {
       pending.push(topic);
       callback(null, 'Accepted');
     } else {
       callback('Subscription failed', null);
     };
   });
+};
 
-  return callback();
+pubsub.prototype.test = function (message, cb) {
+  console.log(message);
+  cb('done');
 };
