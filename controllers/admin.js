@@ -35,7 +35,7 @@ admin.prototype.deletefeed = function (req, res) {
   mongo.feeds.delete(req.params.id, function (err, num) {
     if (err) console.log(err);
     console.log('Deleted %s', req.params.id);
-    res.redirect('/');
+    res.redirect('/admin');
   });
 };
 
@@ -53,7 +53,7 @@ admin.prototype.subscribe = function (req, res) {
     console.log('Subscribing to %s', subs[i]);
     
   };
-  res.redirect('/');
+  res.redirect('/admin');
 };
 
 admin.prototype.resubscribe = function (req, res) {
