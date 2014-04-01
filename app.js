@@ -26,22 +26,23 @@ app.configure(function () {
   app.use(express.methodOverride());
   app.use(express.static(__dirname+'/public'));
   app.use(express.errorHandler());
-  app.use(express.basicAuth(config.express.admin, config.express.adminpass));
 });
+
+var auth = express.basicAuth(config.express.admin, config.express.adminpass);
 
 hbs.registerHelper('unix_to_date', function (unixDate) {
   return moment.unix(unixDate).format('DD/MM/YYYY')
 });
 
-app.get('/', admin.index );
-app.get('/feed/:id', admin.feed );
-app.put('/unsubscribe/:id', admin.unsubscribe );
-app.del('/feed/:id', admin.deletefeed );
-app.get('/subscribe', admin.newfeed );
-app.post('/subscribe', admin.subscribe );
-app.put('/subscribe/:id', admin.resubscribe );
-app.get('/unsubscribed', admin.unsubscribed_feeds );
-app.get('/subscribed', admin.subscribed_feeds );
+app.get('/admin', auth, admin.index );
+app.get('/feed/:id', auth, admin.feed );
+app.put('/unsubscribe/:id', auth, admin.unsubscribe );
+app.del('/feed/:id', auth, admin.deletefeed );
+app.get('/subscribe', auth, admin.newfeed );
+app.post('/subscribe', auth, admin.subscribe );
+app.put('/subscribe/:id', auth, admin.resubscribe );
+app.get('/unsubscribed', auth, admin.unsubscribed_feeds );
+app.get('/subscribed', auth, admin.subscribed_feeds );
 
 app.get('/pubsubhubbub', pubsub.verification );
 app.post('/pubsubhubbub', pubsub.notification );

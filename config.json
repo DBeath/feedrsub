@@ -6,8 +6,7 @@
     "secret": "supersecret",
     "callbackurl": "http://domain.com/feeds",
     "format": "json",
-    "domain": "http://domain.com",
-    "port": 3000
+    "domain": "http://domain.com"
   },
   "express": {
     "admin": "admin",
