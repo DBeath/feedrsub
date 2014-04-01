@@ -1,5 +1,5 @@
 var mongo = require('../models/mongodb.js');
-var pubsub = require('../feedrsub.js').pubsub;
+var pubsub = require('../app.js').pubsub;
 var config = require('../config.json');
 
 module.exports.adminController = function () {
@@ -48,7 +48,7 @@ admin.prototype.subscribe = function (req, res) {
   for (var i = 0; i < subs.length; i++) {
     mongo.feeds.subscribe(subs[i], function (err, topic) {
       if (err) console.log(err);
-      pubsub.subscribe(topic, config.pubsub.hub, config.pubsub.callbackurl);
+      pubsub.subscribe(topic, config.pubsub.hub);
     });
     console.log('Subscribing to %s', subs[i]);
     
@@ -60,7 +60,7 @@ admin.prototype.resubscribe = function (req, res) {
   mongo.feeds.findOneById(req.params.id, function (err, doc) {
     if (err) console.log(err);
     console.log('Resubscribing to %s', doc.topic);
-    pubsub.subscribe(doc.topic , config.pubsub.hub, config.pubsub.callbackurl);
+    pubsub.subscribe(doc.topic , config.pubsub.hub);
   });
 };
 
@@ -68,7 +68,7 @@ admin.prototype.unsubscribe = function (req, res) {
   mongo.feeds.findOneById(req.params.id, function (err, doc) {
     if (err) console.log(err);
     console.log('Unsubscribing from '+doc.topic);
-    pubsub.unsubscribe(doc.topic, config.pubsub.hub, config.pubsub.callbackurl);
+    pubsub.unsubscribe(doc.topic, config.pubsub.hub);
   });
   res.redirect('/unsubscribed');
 };
