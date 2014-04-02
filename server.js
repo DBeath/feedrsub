@@ -47,8 +47,8 @@ app.put('/subscribe/:id', auth, admin.resubscribe );
 app.get('/unsubscribed', auth, admin.unsubscribed_feeds );
 app.get('/subscribed', auth, admin.subscribed_feeds );
 
-app.get('/pubsubhubbub', pubsub.verification );
-app.post('/pubsubhubbub', pubsub.notification );
+app.get('/pubsubhubbub', pubsub.verification.bind(pubsub) );
+app.post('/pubsubhubbub', pubsub.notification.bind(pubsub) );
 
 
 // var init = module.exports.init = function (callback) {

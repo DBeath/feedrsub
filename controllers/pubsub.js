@@ -69,7 +69,7 @@ pubsub.prototype.notification = function (req, res) {
   var hub = req.query['hub'] || false;
   var signatureParts, signature, algo, hmac;
 
-  (req.headers && req.headers.link || '').
+  (req.get('link') || '').
     replace(/<([^>]+)>\s*(?:;\s*rel=['"]([^'"]+)['"])?/gi, function (o, url, rel) {
       switch((rel || '').toLowerCase()) {
         case 'self':
@@ -85,12 +85,14 @@ pubsub.prototype.notification = function (req, res) {
     return res.send(400);
   };
 
-  if (this.secret && !req.headers['x-hub-signature']) {
+  if (this.secret && !req.get('x-hub-signature')) {
     return res.send(403);
-  };
+  } else {
+    console.log('should have sent 403');
+  }
 
   if (this.secret) {
-    signatureParts = req.headers['x-hub-signature'].split('=');
+    signatureParts = req.get('x-hub-signature').split('=');
     algo = (signatureParts.shift() || '').toLowerCase();
     signature = (signatureParts.pop() || '').toLowerCase();
 
@@ -101,6 +103,10 @@ pubsub.prototype.notification = function (req, res) {
     };
   };
 
+  req.on('data', function (chunk) {
+    console.log(chunk);
+  });
+  //console.log(req);
   hmac.update(req.body);
 
   if (this.secret && hmac.digest('hex').toLowerCase() != signature) {
