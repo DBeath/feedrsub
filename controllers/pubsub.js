@@ -114,7 +114,7 @@ pubsub.prototype.notification = function (req, res) {
   if (re.test(req.headers['content-type'])) {
     var data = JSON.parse(req.body);
 
-    mongo.feeds.updateStatus(data.status, function (err, result) {
+    mongo.feeds.updateDetails(data.status, function (err, result) {
       if (err) console.log(err);
     });
 
