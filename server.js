@@ -51,20 +51,27 @@ app.get('/pubsubhubbub', pubsub.verification );
 app.post('/pubsubhubbub', pubsub.notification );
 
 
-var init = module.exports.init = function (callback) {
-  console.log('Feedrsub initiating...');
-  mongo.init(function (error) {
-    if (error) console.log(error);
+// var init = module.exports.init = function (callback) {
+//   console.log('Feedrsub initiating...');
+//   mongo.init(function (error) {
+//     if (error) console.log(error);
 
-    //feedrsub.pubsub.listen(config.pubsub.port);
-    app.listen(config.express.port);
+//     //feedrsub.pubsub.listen(config.pubsub.port);
+//     app.listen(config.express.port);
 
-    console.log('App listening on port %s', config.express.port);
-    callback();
-  });
+//     console.log('App listening on port %s', config.express.port);
+//     callback();
+//   });
   
+// };
+
+// init(function () {
+//   console.log('Finished initiation');
+// });
+
+function start() {
+  app.listen(config.express.port);
+  console.log('Server listening on port %s', config.express.port);
 };
 
-init(function () {
-  console.log('Finished initiation');
-});
+module.exports.start = start;

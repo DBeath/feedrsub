@@ -2,7 +2,7 @@ var expect = require('chai').expect;
 var request = require('request');
 
 var pubsubfile = require('../controllers/pubsub.js');
-var init = require('../app.js').init;
+var server = require('../server.js');
 
 var pubsub = pubsubfile.pubsubController({
   secret: 'MyTopSecret',
@@ -25,9 +25,7 @@ describe('pubsub', function () {
 
 describe('pubsub notification', function () {
   before(function () {
-    init(function () {
-      console.log('initiated');
-    });
+    server.start();
   });
 
   it('should return 400 - no topic', function (done) {
