@@ -2,13 +2,15 @@ var config = require('../config.json');
 var mongo = require('../models/mongodb.js');
 var request = require('request');
 var crypto = require('crypto');
+var util = require('util');
+var events = require('events');
 var moment = require('moment');
 
-module.exports.pubsubController = function (options) {
-  return new pubsub(options);
-};
+// module.exports.PubsubController = function (options) {
+//   return new Pubsub(options);
+// };
 
-function pubsub (options) {
+function Pubsub (options) {
   this.secret = options.secret || false;
   this.callbackurl = options.domain + '/pubsubhubbub';
   this.format = options.format || 'json';
@@ -25,8 +27,22 @@ function pubsub (options) {
   this.pending = [];   
 };
 
+util.inherits(Pubsub, events.EventEmitter);
+
+var pubsubController = new Pubsub({
+  secret: config.pubsub.secret,
+  domain: config.pubsub.domain,
+  format: config.pubsub.format,
+  username: config.pubsub.username,
+  password: config.pubsub.password
+});
+
+module.exports.pubsubController = pubsubController;
+
+
+
 // Handles verification of intent from hub.
-pubsub.prototype.verification = function (req, res) {
+Pubsub.prototype.verification = function (req, res) {
   var data;
   var topic = req.query['hub.topic'] || false;
   var mode = req.query['hub.mode'] || false;
@@ -64,10 +80,11 @@ pubsub.prototype.verification = function (req, res) {
 };
 
 // Called when the hub notifies the subscriber with new data.
-pubsub.prototype.notification = function (req, res) {
+Pubsub.prototype.notification = function (req, res) {
   var topic = req.query['hub.topic'] || false;
   var hub = req.query['hub'] || false;
   var signatureParts, signature, algo, hmac;
+  var bodyChunks = [];
 
   (req.get('link') || '').
     replace(/<([^>]+)>\s*(?:;\s*rel=['"]([^'"]+)['"])?/gi, function (o, url, rel) {
@@ -87,9 +104,7 @@ pubsub.prototype.notification = function (req, res) {
 
   if (this.secret && !req.get('x-hub-signature')) {
     return res.send(403);
-  } else {
-    console.log('should have sent 403');
-  }
+  };
 
   if (this.secret) {
     signatureParts = req.get('x-hub-signature').split('=');
@@ -103,59 +118,52 @@ pubsub.prototype.notification = function (req, res) {
     };
   };
 
-  req.on('data', function (chunk) {
-    console.log(chunk);
-  });
-  //console.log(req);
-  hmac.update(req.body);
-
-  if (this.secret && hmac.digest('hex').toLowerCase() != signature) {
-    return res.send(202);
-  };
-
-  console.log('Received notification from %s at %s', topic, moment().format());
-  res.send(204);
-
-  var re = new RegExp('application/json');
-  if (re.test(req.headers['content-type'])) {
-    var data = JSON.parse(req.body);
-
-    mongo.feeds.updateDetails(data.status, function (err, result) {
-      if (err) console.log(err);
-    });
-
-    if (json.items) {
-      for (var i = 0; i < json.items.length; i++) {
-        json.items[i].topic = topic;
-        mongo.entries.insert(json.items[i], function (err) {
-          if (err) console.log(err);
-          else console.log('Added entry from %s at %s', topic, moment().format());
-        });
-      };
-    } else {
-      console.log('No items in notification');
+  req.on('data', (function (chunk) {
+    if (!chunk) {
+      return;
     };
-  } else {
-    console.log('Notification was not in JSON format');
-  };
+
+    bodyChunks.push(chunk);
+
+    if (this.secret) {
+      hmac.update(chunk);
+    };
+  }).bind(this));
+
+  req.on('end', (function () {
+    // Must return 2xx code even if signature doesn't match.
+    if (this.secret && hmac.digest('hex').toLowerCase() != signature) {
+      return res.send(202);
+    };
+
+    console.log('Received notification from %s at %s', topic, moment().format());
+    res.send(204);
+
+    this.emit('feed_update', {
+      topic: topic,
+      hub: hub,
+      feed: Buffer.concat(bodyChunks),
+      headers: req.headers
+    });
+  }).bind(this));
 };
 
-pubsub.prototype.subscribe = function (topic, hub) {
-  this._sendSubscription('subscribe', topic, hub, function (err, result) {
+Pubsub.prototype.subscribe = function (topic, hub) {
+  this.sendSubscription('subscribe', topic, hub, function (err, result) {
     if (err) console.log(err);
     else console.log(result);
   });
 };
 
-pubsub.prototype.unsubscribe = function (topic, hub) {
-  this._sendSubscription('unsubscribe', topic, hub, function (err, result) {
+Pubsub.prototype.unsubscribe = function (topic, hub) {
+  this.sendSubscription('unsubscribe', topic, hub, function (err, result) {
     if (err) console.log(err);
     else console.log(result);
   });
 };
 
 // Sends a subscribe or unsubscribe request to the hub
-pubsub.prototype._sendSubscription = function (mode, topic, hub, callback) {
+Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
   var uniqueCallbackUrl = this.callbackurl + 
     (this.callbackurl.replace(/^https?:\/\//i, "").match(/\//)?"":"/") +
     (this.callbackurl.match(/\?/)?"&":"?") +
@@ -199,7 +207,28 @@ pubsub.prototype._sendSubscription = function (mode, topic, hub, callback) {
   });
 };
 
-pubsub.prototype.test = function (message, cb) {
-  console.log(message);
-  cb('done');
-};
+pubsubController.on('feed_update', function (data) {
+  console.log(data);
+  var re = new RegExp('application/json');
+  if (re.test(data.headers['content-type'])) {
+    var json = JSON.parse(data.feed);
+
+    mongo.feeds.updateDetails(json.status, function (err, result) {
+      if (err) console.log(err);
+    });
+
+    if (json.items) {
+      for (var i = 0; i < json.items.length; i++) {
+        json.items[i].topic = topic;
+        mongo.entries.insert(json.items[i], function (err) {
+          if (err) console.log(err);
+          else console.log('Added entry from %s at %s', topic, moment().format());
+        });
+      };
+    } else {
+      console.log('No items in notification');
+    };
+  } else {
+    console.log('Notification was not in JSON format');
+  };
+});

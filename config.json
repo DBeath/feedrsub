@@ -1,12 +1,12 @@
 {
   "pubsub": {
-    "hub": "http://dbeath.com/test",
+    "hub": "http://push.superfeedr.com",
     "username": "login",
     "password": "password",
     "secret": "supersecret",
-    "callbackurl": "http://domain.com/feeds",
+    "callbackurl": "http://localhost:4000/pubsubhubbub",
     "format": "json",
-    "domain": "http://domain.com"
+    "domain": "http://localhost:4000"
   },
   "express": {
     "admin": "admin",

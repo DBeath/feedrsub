@@ -6,13 +6,7 @@ var hbs = require('hbs');
 var moment = require('moment');
 var ObjectID = require('mongodb').ObjectID;
 
-var pubsub = require('./controllers/pubsub.js').pubsubController({
-  secret: config.pubsub.secret,
-  domain: config.pubsub.domain,
-  format: config.pubsub.format,
-  username: config.pubsub.username,
-  password: config.pubsub.password
-});
+var pubsub = require('./controllers/pubsub.js').pubsubController;
 
 var admin = require('./controllers/admin.js').adminController(pubsub);
 
@@ -25,10 +19,11 @@ app.configure(function () {
   app.set('view engine', 'html');
   app.engine('html', hbs.__express);
   app.use(express.urlencoded());
-  app.use(express.json());
+  //app.use(express.json());
   app.use(express.methodOverride());
   app.use(express.static(__dirname+'/public'));
   app.use(express.errorHandler());
+  app.enable('trust proxy');
 });
 
 var auth = express.basicAuth(config.express.admin, config.express.adminpass);
@@ -75,3 +70,8 @@ function start() {
 };
 
 module.exports.start = start;
+
+app.on('SIGINT', function () {
+  console.log('SIGINT received');
+  app.exit(1);
+});
