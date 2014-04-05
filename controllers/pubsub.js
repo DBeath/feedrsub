@@ -24,7 +24,7 @@ function Pubsub (options) {
   };
 
   // Array of Subscriptions pending verification
-  this.pending = [];   
+  // this.pending = [];   
 };
 
 util.inherits(Pubsub, events.EventEmitter);
@@ -61,18 +61,50 @@ Pubsub.prototype.verification = function (req, res) {
       });
       break;
     case 'subscribe':
+      mongo.feeds.findOneByTopic(topic, function (err, doc) {
+        if (err) {
+          res.send(404);
+          console.log(err);
+        };
+        if (doc.status === 'pending') {
+          res.send(200, challenge);
+          mongo.feeds.subscribe(topic, function (err, result) {
+            if (err) console.log(err);
+            console.log('Subscribed to %s at %s', topic, moment().format());
+          });
+        } else {
+          res.send(404);
+        };
+      });
+      break;
     case 'unsubscribe':
-      var index = pending.indexOf(topic);
-      if (index > -1) {
-        res.send(200, challenge);
-        mongo.feeds.subscribe(topic, function (err, result) {
-          if (err) console.log(err);
-          console.log('subscribed to %s', topic);
-        });
-        pending.slice(index);
-      } else {
-        res.send(404);
-      };
+      mongo.feeds.findOneByTopic(topic, function (err, doc) {
+        if (err) {
+          res.send(404);
+          console.log(err);
+        };
+        if (doc.status === 'pending') {
+          res.send(200, challenge);
+          mongo.feeds.unsubscribe(topic, function (err, result) {
+            if (err) console.log(err);
+            console.log('Unsubscribed from %s at %s', topic, moment().format());
+          });
+        } else {
+          res.send(404);
+        };
+      });
+
+      // var index = pending.indexOf(topic);
+      // if (index > -1) {
+      //   res.send(200, challenge);
+      //   mongo.feeds.subscribe(topic, function (err, result) {
+      //     if (err) console.log(err);
+      //     console.log('subscribed to %s', topic);
+      //   });
+      //   pending.slice(index);
+      // } else {
+      //   res.send(404);
+      // };
       break;
     default:
       res.send(403);    
@@ -199,8 +231,11 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
     if (err) console.log(err);
 
     if (response.statusCode === 202) {
-      pending.push(topic);
-      callback(null, 'Accepted');
+      // pending.push(topic);
+      mongo.feeds.updateStatus(topic, 'pending', function (err, result) {
+        if (err) console.log(err);
+        callback(null, 'Accepted');
+      });
     } else {
       callback('Subscription failed', null);
     };

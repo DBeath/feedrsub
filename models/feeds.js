@@ -120,6 +120,7 @@ Feeds.prototype.updateStatus = function (topic, status, callback) {
     }
   },
   {
+    upsert: true,
     w: 1
   },
   function (err, result) {

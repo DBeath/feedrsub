@@ -70,8 +70,3 @@ function start() {
 };
 
 module.exports.start = start;
-
-app.on('SIGINT', function () {
-  console.log('SIGINT received');
-  app.exit(1);
-});
