@@ -6,13 +6,20 @@ var hbs = require('hbs');
 var moment = require('moment');
 var ObjectID = require('mongodb').ObjectID;
 
-var pubsub = require('./controllers/pubsub.js').pubsubController;
+var app = module.exports = express();
+var server = require('http').createServer(app);
+var io = require('./controllers/socket.js').listen(server);
 
-var admin = require('./controllers/admin.js').adminController(pubsub);
-
+var pubsub = require('./controllers/pubsub.js').PubsubController(io);
+var admin = require('./controllers/admin.js').AdminController(pubsub, io);
 module.exports.pubsub = pubsub;
 
-var app = module.exports = express();
+function start() {
+  server.listen(config.express.port);
+  console.log('Server listening on port %s', config.express.port);
+};
+
+module.exports.start = start;
 
 app.configure(function () {
   app.set('views', __dirname + '/views');
@@ -63,10 +70,3 @@ app.post('/pubsubhubbub', pubsub.notification.bind(pubsub) );
 // init(function () {
 //   console.log('Finished initiation');
 // });
-
-function start() {
-  app.listen(config.express.port);
-  console.log('Server listening on port %s', config.express.port);
-};
-
-module.exports.start = start;

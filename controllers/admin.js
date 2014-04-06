@@ -1,14 +1,14 @@
 var mongo = require('../models/mongodb.js');
 var config = require('../config.json');
 
-var pubsub = 'this should be a pubsub object';
 
-module.exports.adminController = function (pubsub) {
-  return new admin(pubsub);
+module.exports.AdminController = function (pubsub, socket) {
+  return new admin(pubsub, socket);
 };
 
-function admin (pubsubobj) {
+function admin (pubsubobj, socketobj) {
   pubsub = pubsubobj;
+  socket = socketobj;
 };
 
 admin.prototype.index = function (req, res) {

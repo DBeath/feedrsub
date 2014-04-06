@@ -15,7 +15,21 @@
 		</ul>
 	</div>
 	<div class="container-fluid">
-		{{{body}}}
+		<div class="col-md-9">
+			{{{body}}}
+		</div>
+		<div class="col-md-3" id="msgbox">
+			<p>This is a test</p>
+		</div>
 	</div>
+
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		var socket = io.connect('http://localhost:4000');
+		socket.on("message", function (data) {
+			$("#msgbox").append(data.message+"<br>");
+		});
+	</script>
 </body>
 </html>

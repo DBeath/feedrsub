@@ -6,11 +6,21 @@ var util = require('util');
 var events = require('events');
 var moment = require('moment');
 
-// module.exports.PubsubController = function (options) {
-//   return new Pubsub(options);
+// var pubsubController;
+
+// module.exports.PubsubController = function (socket) {
+//   pubsubController = new Pubsub({
+//     secret: config.pubsub.secret,
+//     domain: config.pubsub.domain,
+//     format: config.pubsub.format,
+//     username: config.pubsub.username,
+//     password: config.pubsub.password
+//   }, socket);
+
+//   return pubsubController;
 // };
 
-function Pubsub (options) {
+function Pubsub (options, socket) {
   this.secret = options.secret || false;
   this.callbackurl = options.domain + '/pubsubhubbub';
   this.format = options.format || 'json';
@@ -23,6 +33,7 @@ function Pubsub (options) {
     }
   };
 
+  socket = socket;
   // Array of Subscriptions pending verification
   // this.pending = [];   
 };
@@ -35,9 +46,9 @@ var pubsubController = new Pubsub({
   format: config.pubsub.format,
   username: config.pubsub.username,
   password: config.pubsub.password
-});
+}, io);
 
-module.exports.pubsubController = pubsubController;
+module.exports.pubsubController(io) = pubsubController(io);
 
 
 
@@ -191,6 +202,7 @@ Pubsub.prototype.unsubscribe = function (topic, hub) {
   this.sendSubscription('unsubscribe', topic, hub, function (err, result) {
     if (err) console.log(err);
     else console.log(result);
+    socket.emitMessage(result);
   });
 };
 
