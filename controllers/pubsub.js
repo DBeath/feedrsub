@@ -8,17 +8,18 @@ var moment = require('moment');
 
 // var pubsubController;
 
-// module.exports.PubsubController = function (socket) {
-//   pubsubController = new Pubsub({
-//     secret: config.pubsub.secret,
-//     domain: config.pubsub.domain,
-//     format: config.pubsub.format,
-//     username: config.pubsub.username,
-//     password: config.pubsub.password
-//   }, socket);
+module.exports.PubsubController = function (socket) {
+  var pubsub = new Pubsub({
+    secret: config.pubsub.secret,
+    domain: config.pubsub.domain,
+    format: config.pubsub.format,
+    username: config.pubsub.username,
+    password: config.pubsub.password
+  }, socket);
 
-//   return pubsubController;
-// };
+  module.exports.pubsub = pubsub;
+  return pubsub;
+};
 
 function Pubsub (options, socket) {
   this.secret = options.secret || false;
@@ -33,24 +34,12 @@ function Pubsub (options, socket) {
     }
   };
 
-  socket = socket;
+  io = socket;
   // Array of Subscriptions pending verification
   // this.pending = [];   
 };
 
 util.inherits(Pubsub, events.EventEmitter);
-
-var pubsubController = new Pubsub({
-  secret: config.pubsub.secret,
-  domain: config.pubsub.domain,
-  format: config.pubsub.format,
-  username: config.pubsub.username,
-  password: config.pubsub.password
-}, io);
-
-module.exports.pubsubController(io) = pubsubController(io);
-
-
 
 // Handles verification of intent from hub.
 Pubsub.prototype.verification = function (req, res) {
@@ -253,29 +242,3 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
     };
   });
 };
-
-pubsubController.on('feed_update', function (data) {
-  console.log(data);
-  var re = new RegExp('application/json');
-  if (re.test(data.headers['content-type'])) {
-    var json = JSON.parse(data.feed);
-
-    mongo.feeds.updateDetails(json.status, function (err, result) {
-      if (err) console.log(err);
-    });
-
-    if (json.items) {
-      for (var i = 0; i < json.items.length; i++) {
-        json.items[i].topic = topic;
-        mongo.entries.insert(json.items[i], function (err) {
-          if (err) console.log(err);
-          else console.log('Added entry from %s at %s', topic, moment().format());
-        });
-      };
-    } else {
-      console.log('No items in notification');
-    };
-  } else {
-    console.log('Notification was not in JSON format');
-  };
-});

@@ -1,7 +1,9 @@
 var socketio = require('socket.io');
 
 module.exports.listen = function (app) {
-  return new SocketIO(app); 
+  io = new SocketIO(app);
+  module.exports.io = io;
+  return io; 
 };
 
 function SocketIO(app) {

@@ -19,6 +19,7 @@ admin.prototype.index = function (req, res) {
       feeds: docs
     });
   });
+  socket.emitMessage('You reached the admin page');
 };
 
 admin.prototype.feed = function (req, res) {
