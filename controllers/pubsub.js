@@ -238,7 +238,7 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
   request.post(postParams, function (err, response, body) {
     if (err) console.log(err);
 
-    if (response.statusCode === 202) {
+    if (response.statusCode === 202 || response.statusCode === 204) {
       // pending.push(topic);
       switch ( mode ) {
         case 'subscribe':

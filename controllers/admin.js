@@ -48,14 +48,11 @@ admin.prototype.newfeed = function (req, res) {
 admin.prototype.subscribe = function (req, res) {
   var subs = req.param('topic').split(/[\s,]+/);
   for (var i = 0; i < subs.length; i++) {
-    var thistopic = subs[i];
     mongo.feeds.updateStatus(subs[i], 'pending', function (err, doc) {
       if (err) console.log(err);
-      console.log('Topic to subscribe to: '+ thistopic);
+      console.log('Subscribing to %s', subs[i]);
       pubsub.subscribe(doc.topic, config.pubsub.hub);
     });
-    console.log('Subscribing to %s', subs[i]);
-    
   };
   res.redirect('/admin');
 };
