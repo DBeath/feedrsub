@@ -66,10 +66,10 @@ Pubsub.prototype.verification = function (req, res) {
         };
         if (doc.status === 'pending') {
           res.send(200, challenge);
-          mongo.feeds.subscribe(topic, function (err, result) {
-            if (err) console.log(err);
-            console.log('Subscribed to %s at %s', topic, moment().format());
-          });
+          // mongo.feeds.subscribe(topic, function (err, result) {
+          //   if (err) console.log(err);
+          //   console.log('Subscribed to %s at %s', topic, moment().format());
+          // });
         } else {
           res.send(404);
         };
@@ -83,10 +83,10 @@ Pubsub.prototype.verification = function (req, res) {
         };
         if (doc.status === 'pending') {
           res.send(200, challenge);
-          mongo.feeds.unsubscribe(topic, function (err, result) {
-            if (err) console.log(err);
-            console.log('Unsubscribed from %s at %s', topic, moment().format());
-          });
+          // mongo.feeds.unsubscribe(topic, function (err, result) {
+          //   if (err) console.log(err);
+          //   console.log('Unsubscribed from %s at %s', topic, moment().format());
+          // });
         } else {
           res.send(404);
         };
@@ -230,10 +230,24 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
 
     if (response.statusCode === 202) {
       // pending.push(topic);
-      mongo.feeds.updateStatus(topic, 'pending', function (err, result) {
-        if (err) console.log(err);
-        callback(null, 'Accepted');
-      });
+      switch ( mode ) {
+        case 'subscribe':
+          mongo.feeds.subscribe(topic, function (err, result) {
+            if (err) console.log(err);
+            callback(null, 'Subscribed');
+          });
+          break;
+        case 'unsubscribe':
+          mongo.feeds.unsubscribe(topic, function (err, result) {
+            if (err) console.log(err);
+            callback(null, 'Unsubscribed');
+          });
+          break;
+      }; 
+      // mongo.feeds.updateStatus(topic, mode, function (err, result) {
+      //   if (err) console.log(err);
+      //   callback(null, 'Accepted');
+      // });
     } else {
       callback('Subscription failed', null);
     };
