@@ -2,13 +2,12 @@ var mongo = require('../models/mongodb.js');
 var config = require('../config.json');
 
 
-module.exports.AdminController = function (pubsub, socket) {
-  return new admin(pubsub, socket);
+module.exports.AdminController = function (pubsub) {
+  return new admin(pubsub);
 };
 
-function admin (pubsubobj, socketobj) {
-  pubsub = pubsubobj;
-  socket = socketobj;
+function admin (pubsub) {
+  pubsub = pubsub;
 };
 
 admin.prototype.index = function (req, res) {
@@ -19,7 +18,6 @@ admin.prototype.index = function (req, res) {
       feeds: docs
     });
   });
-  socket.emitMessage('You reached the admin page');
 };
 
 admin.prototype.feed = function (req, res) {

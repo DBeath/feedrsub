@@ -8,20 +8,20 @@ var moment = require('moment');
 
 // var pubsubController;
 
-module.exports.PubsubController = function (socket) {
+module.exports.PubsubController = function () {
   var pubsub = new Pubsub({
     secret: config.pubsub.secret,
     domain: config.pubsub.domain,
     format: config.pubsub.format,
     username: config.pubsub.username,
     password: config.pubsub.password
-  }, socket);
+  });
 
   module.exports.pubsub = pubsub;
   return pubsub;
 };
 
-function Pubsub (options, socket) {
+function Pubsub (options) {
   this.secret = options.secret || false;
   this.callbackurl = options.domain + '/pubsubhubbub';
   this.format = options.format || 'json';
@@ -33,8 +33,6 @@ function Pubsub (options, socket) {
       'sendImmediately': true
     }
   };
-
-  io = socket;
   // Array of Subscriptions pending verification
   // this.pending = [];   
 };
