@@ -249,6 +249,7 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
       //   callback(null, 'Accepted');
       // });
     } else {
+      console.log(body);
       callback('Subscription failed', null);
     };
   });
