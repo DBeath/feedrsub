@@ -6,8 +6,8 @@ module.exports.AdminController = function (pubsub) {
   return new admin(pubsub);
 };
 
-function admin (pubsub) {
-  pubsub = pubsub;
+function admin (pubsubobj) {
+  pubsub = pubsubobj;
 };
 
 admin.prototype.index = function (req, res) {

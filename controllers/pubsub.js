@@ -189,7 +189,6 @@ Pubsub.prototype.unsubscribe = function (topic, hub) {
   this.sendSubscription('unsubscribe', topic, hub, function (err, result) {
     if (err) console.log(err);
     else console.log(result);
-    socket.emitMessage(result);
   });
 };
 
