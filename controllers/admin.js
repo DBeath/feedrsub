@@ -48,9 +48,11 @@ admin.prototype.newfeed = function (req, res) {
 admin.prototype.subscribe = function (req, res) {
   var subs = req.param('topic').split(/[\s,]+/);
   for (var i = 0; i < subs.length; i++) {
-    mongo.feeds.updateStatus(subs[i], 'pending', function (err, topic) {
+    var thistopic = subs[i];
+    mongo.feeds.updateStatus(subs[i], 'pending', function (err, doc) {
       if (err) console.log(err);
-      pubsub.subscribe(topic, config.pubsub.hub);
+      console.log('Topic to subscribe to: '+ thistopic);
+      pubsub.subscribe(doc.topic, config.pubsub.hub);
     });
     console.log('Subscribing to %s', subs[i]);
     
@@ -59,7 +61,7 @@ admin.prototype.subscribe = function (req, res) {
 };
 
 admin.prototype.resubscribe = function (req, res) {
-  mongo.feeds.findOneById(req.params.id, function (err, doc) {
+  mongo.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
     if (err) console.log(err);
     console.log('Resubscribing to %s', doc.topic);
     pubsub.subscribe(doc.topic , config.pubsub.hub);
@@ -67,13 +69,18 @@ admin.prototype.resubscribe = function (req, res) {
 };
 
 admin.prototype.unsubscribe = function (req, res) {
-  mongo.feeds.findOneById(req.params.id, function (err, doc) {
+  // mongo.feeds.findOneById(req.params.id, function (err, doc) {
+  //   if (err) console.log(err);
+  //   mongo.feeds.updateStatus(doc.topic, 'pending', function (err, result) {
+  //     if (err) console.log(err);
+  //     console.log('Unsubscribing from '+doc.topic);
+  //     pubsub.unsubscribe(doc.topic, config.pubsub.hub);
+  //   });
+  // });
+  mongo.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
     if (err) console.log(err);
-    mongo.feeds.updateStatus(doc.topic, 'pending', function (err, result) {
-      if (err) console.log(err);
-      console.log('Unsubscribing from '+doc.topic);
-      pubsub.unsubscribe(doc.topic, config.pubsub.hub);
-    });
+    console.log('Unsubscribing from %s', doc.topic);
+    pubsub.unsubscribe(doc.topic, config.pubsub.hub);
   });
   res.redirect('/unsubscribed');
 };

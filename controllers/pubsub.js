@@ -143,7 +143,8 @@ Pubsub.prototype.notification = function (req, res) {
 
     try {
       hmac = crypto.createHmac(algo, crypto.createHmac('sha1', this.secret).update(topic).digest('hex'));
-    } catch(E) {
+    } catch (e) {
+      console.log(e);
       return res.send(403);
     };
   };
@@ -156,7 +157,11 @@ Pubsub.prototype.notification = function (req, res) {
     bodyChunks.push(chunk);
 
     if (this.secret) {
-      hmac.update(chunk);
+      try {
+        hmac.update(chunk);
+      } catch (e) {
+        console.log(e);
+      };
     };
   }).bind(this));
 
@@ -208,7 +213,12 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
   };
 
   if (this.secret) {
-    form['hub.secret'] = crypto.createHmac("sha1", this.secret).update(topic).digest("hex");
+    console.log(topic);
+    try {
+      form['hub.secret'] = crypto.createHmac("sha1", this.secret).update(topic).digest("hex");
+    } catch (e) {
+      return console.log(e);
+    };
   };
 
   if (this.format === 'json' || this.format === 'JSON') {

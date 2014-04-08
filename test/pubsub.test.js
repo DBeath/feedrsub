@@ -2,10 +2,8 @@ var expect = require('chai').expect;
 var request = require('request');
 var crypto = require('crypto');
 
-var pubsubfile = require('../controllers/pubsub.js');
+var pubsub = require('../controllers/pubsub.js').PubsubController();
 var server = require('../server.js');
-
-var pubsub = pubsubfile.pubsubController;
 
 var topic = 'http://test.com';
 var response_body = JSON.stringify({foo: 'bar'});

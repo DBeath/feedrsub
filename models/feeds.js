@@ -111,20 +111,36 @@ Feeds.prototype.updateDetails = function (status, callback) {
 };
 
 Feeds.prototype.updateStatus = function (topic, status, callback) {
-  this.collection.update({
+  this.collection.findAndModify({
     topic: topic
   },
+  [[topic,'asc']],
   {
     $set: {
       status: status
     }
   },
   {
-    upsert: true,
-    w: 1
+    upsert: true
   },
-  function (err, result) {
+  function (err, doc) {
     if (err) callback(err);
-    callback(null, result);
+    callback(null, doc);
+  });
+};
+
+Feeds.prototype.updateStatusById = function (id, status, callback) {
+  this.collection.findAndModify({
+    _id: ObjectID.createFromHexString(id)
+  },
+  [['_id', 'asc']],
+  {
+    $set: {
+      status: status
+    }
+  },
+  function (err, doc) {
+    if (err) callback(err);
+    callback(null, doc);
   });
 };
