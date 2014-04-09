@@ -2,15 +2,13 @@ var expect = require('chai').expect;
 var request = require('request');
 var crypto = require('crypto');
 
-var pubsub = require('../controllers/pubsub.js').PubsubController();
+var pubsub = require('../controllers/pubsub.js').pubsub;
 var server = require('../server.js');
 
 var topic = 'http://test.com';
 var response_body = JSON.stringify({foo: 'bar'});
 var encrypted_secret = crypto.createHmac("sha1", pubsub.secret).update(topic).digest("hex");
 var hub_encryption = crypto.createHmac('sha1', encrypted_secret).update(response_body).digest('hex');
-
-
 
 describe('pubsub', function () {
   it('should exist', function () {

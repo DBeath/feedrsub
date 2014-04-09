@@ -9,7 +9,7 @@ var ObjectID = require('mongodb').ObjectID;
 var app = module.exports = express();
 var server = require('http').createServer(app);
 
-var pubsub = require('./controllers/pubsub.js').PubsubController();
+var pubsub = require('./controllers/pubsub.js').pubsub;
 var admin = require('./controllers/admin.js').AdminController(pubsub);
 module.exports.pubsub = pubsub;
 
