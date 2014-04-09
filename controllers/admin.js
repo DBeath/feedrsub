@@ -50,11 +50,11 @@ admin.prototype.subscribe = function (req, res) {
   for (var i = 0; i < subs.length; i++) {
     mongo.feeds.updateStatus(subs[i], 'pending', function (err, doc) {
       if (err) console.log(err);
-      console.log('Subscribing to %s', subs[i]);
+      console.log('Subscribing to %s', doc.topic);
       pubsub.subscribe(doc.topic, config.pubsub.hub);
     });
   };
-  res.redirect('/admin');
+  res.redirect('/subscribed');
 };
 
 admin.prototype.resubscribe = function (req, res) {
@@ -63,6 +63,7 @@ admin.prototype.resubscribe = function (req, res) {
     console.log('Resubscribing to %s', doc.topic);
     pubsub.subscribe(doc.topic , config.pubsub.hub);
   });
+  res.redirect('/subscribed');
 };
 
 admin.prototype.unsubscribe = function (req, res) {
@@ -97,6 +98,16 @@ admin.prototype.subscribed_feeds = function (req, res) {
     if (err) console.log(err);
     res.render('subscribed_feed_list', {
       title: 'Subscribed Feeds',
+      feeds: docs
+    });
+  });
+};
+
+admin.prototype.pending_feeds = function (req, res) {
+  mongo.feeds.listByStatus('pending', function (err, docs) {
+    if (err) console.log(err);
+    res.render('pending_feed_list', {
+      title: 'Feeds pending subscription/unsubscription',
       feeds: docs
     });
   });

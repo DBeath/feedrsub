@@ -48,6 +48,14 @@ hbs.registerHelper('unix_to_date', function (unixDate) {
   return moment.unix(unixDate).format('DD/MM/YYYY')
 });
 
+hbs.registerHelper('pendingSubscribe', function (feed) {
+  if (feed.subtime > feed.unsubtime) {
+    return true;
+  } else {
+    return false;
+  };
+});
+
 app.get('/admin', auth, admin.index );
 app.get('/feed/:id', auth, admin.feed );
 app.put('/unsubscribe/:id', auth, admin.unsubscribe );
@@ -57,6 +65,7 @@ app.post('/subscribe', auth, admin.subscribe );
 app.put('/subscribe/:id', auth, admin.resubscribe );
 app.get('/unsubscribed', auth, admin.unsubscribed_feeds );
 app.get('/subscribed', auth, admin.subscribed_feeds );
+app.get('/pending', auth, admin.pending_feeds );
 
 app.get('/pubsubhubbub', pubsub.verification.bind(pubsub) );
 app.post('/pubsubhubbub', pubsub.notification.bind(pubsub) );
