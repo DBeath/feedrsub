@@ -1,5 +1,4 @@
 var express = require('express');
-var feedrsub = require('./feedrsub.js');
 var mongo = require('./models/mongodb.js');
 var config = require('./config.json');
 var hbs = require('hbs');
@@ -14,9 +13,6 @@ var admin = require('./controllers/admin.js').AdminController(pubsub);
 module.exports.pubsub = pubsub;
 
 function start(done) {
-  // server.listen(config.express.port);
-  // console.log('Server listening on port %s', config.express.port);
-
   console.log('Starting feedrsub...');
   console.log('Connecting to database...');
   mongo.init(function (err) {
@@ -56,7 +52,7 @@ hbs.registerHelper('pendingSubscribe', function (feed) {
   };
 });
 
-app.get('/admin', auth, admin.index );
+app.get('/', auth, admin.index );
 app.get('/feed/:id', auth, admin.feed );
 app.put('/unsubscribe/:id', auth, admin.unsubscribe );
 app.del('/feed/:id', auth, admin.deletefeed );
@@ -69,22 +65,3 @@ app.get('/pending', auth, admin.pending_feeds );
 
 app.get('/pubsubhubbub', pubsub.verification.bind(pubsub) );
 app.post('/pubsubhubbub', pubsub.notification.bind(pubsub) );
-
-
-// var init = module.exports.init = function (callback) {
-//   console.log('Feedrsub initiating...');
-//   mongo.init(function (error) {
-//     if (error) console.log(error);
-
-//     //feedrsub.pubsub.listen(config.pubsub.port);
-//     app.listen(config.express.port);
-
-//     console.log('App listening on port %s', config.express.port);
-//     callback();
-//   });
-  
-// };
-
-// init(function () {
-//   console.log('Finished initiation');
-// });

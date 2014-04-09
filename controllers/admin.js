@@ -67,14 +67,6 @@ admin.prototype.resubscribe = function (req, res) {
 };
 
 admin.prototype.unsubscribe = function (req, res) {
-  // mongo.feeds.findOneById(req.params.id, function (err, doc) {
-  //   if (err) console.log(err);
-  //   mongo.feeds.updateStatus(doc.topic, 'pending', function (err, result) {
-  //     if (err) console.log(err);
-  //     console.log('Unsubscribing from '+doc.topic);
-  //     pubsub.unsubscribe(doc.topic, config.pubsub.hub);
-  //   });
-  // });
   mongo.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
     if (err) console.log(err);
     console.log('Unsubscribing from %s', doc.topic);
