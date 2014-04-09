@@ -13,9 +13,6 @@ module.exports.createController = function (options) {
 function Pubsub (options) {
   events.EventEmitter.call(this);
 
-  options = options || {};
-  console.log(options);
-
   this.secret = options.secret || false;
   this.callbackurl = options.domain + '/pubsubhubbub';
   this.format = options.format || 'json';
@@ -27,8 +24,6 @@ function Pubsub (options) {
       'sendImmediately': true
     }
   };
-  // Array of Subscriptions pending verification
-  // this.pending = [];   
 };
 
 util.inherits(Pubsub, events.EventEmitter);

@@ -15,14 +15,16 @@ var pubsub = pubsubController.createController({
 module.exports.pubsub = pubsub;
 
 pubsub.on('feed_update', function (data) {
-  console.log(data);
+  //console.log(data);
   var re = new RegExp('application/json');
   if (re.test(data.headers['content-type'])) {
     var json = JSON.parse(data.feed);
 
-    mongo.feeds.updateDetails(json.status, function (err, result) {
-      if (err) console.log(err);
-    });
+    if (json.status) {
+      mongo.feeds.updateDetails(json.status, function (err, result) {
+        if (err) console.log(err);
+      });
+    };
 
     if (json.items) {
       for (var i = 0; i < json.items.length; i++) {

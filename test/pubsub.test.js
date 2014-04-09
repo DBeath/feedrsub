@@ -22,8 +22,10 @@ describe('pubsub', function () {
 });
 
 describe('pubsub notification', function () {
-  before(function () {
-    server.start();
+  before(function (done) {
+    server.start(function () {
+      done();
+    });
   });
 
   it('should return 400 - no topic', function (done) {

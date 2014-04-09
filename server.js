@@ -13,9 +13,19 @@ var pubsub = require('./controllers/pubsub.js').pubsub;
 var admin = require('./controllers/admin.js').AdminController(pubsub);
 module.exports.pubsub = pubsub;
 
-function start() {
-  server.listen(config.express.port);
-  console.log('Server listening on port %s', config.express.port);
+function start(done) {
+  // server.listen(config.express.port);
+  // console.log('Server listening on port %s', config.express.port);
+
+  console.log('Starting feedrsub...');
+  console.log('Connecting to database...');
+  mongo.init(function (err) {
+    if (err) console.log(err);
+    console.log('Connected to database. Starting server...');
+    server.listen(config.express.port);
+    console.log('Server listening on port %s', config.express.port);
+    done();
+  });
 };
 
 module.exports.start = start;
