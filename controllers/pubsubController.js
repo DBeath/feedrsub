@@ -203,7 +203,6 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
   };
 
   if (this.secret) {
-    console.log(topic);
     try {
       form['hub.secret'] = crypto.createHmac("sha1", this.secret).update(topic).digest("hex");
     } catch (e) {

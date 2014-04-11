@@ -15,11 +15,12 @@ module.exports.pubsub = pubsub;
 function start(done) {
   console.log('Starting feedrsub...');
   console.log('Connecting to database...');
-  mongo.init(function (err) {
+  mongo.init(function (err, result) {
     if (err) {
       console.log(err);
       process.exit(1);
     };
+    console.log(result);
     console.log('Connected to database. Starting server...');
     server.listen(config.express.port);
     console.log('Server listening on port %s', config.express.port);
@@ -55,7 +56,7 @@ hbs.registerHelper('pendingSubscribe', function (feed) {
   };
 });
 
-app.get('/', auth, admin.index );
+app.get('/admin', auth, admin.index );
 app.get('/feed/:id', auth, admin.feed );
 app.put('/unsubscribe/:id', auth, admin.unsubscribe );
 app.del('/feed/:id', auth, admin.deletefeed );

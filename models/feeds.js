@@ -121,7 +121,8 @@ Feeds.prototype.updateStatus = function (topic, status, callback) {
     }
   },
   {
-    upsert: true
+    upsert: true,
+    new: true
   },
   function (err, doc) {
     if (err) callback(err);
@@ -138,6 +139,9 @@ Feeds.prototype.updateStatusById = function (id, status, callback) {
     $set: {
       status: status
     }
+  },
+  {
+    new: true
   },
   function (err, doc) {
     if (err) callback(err);
