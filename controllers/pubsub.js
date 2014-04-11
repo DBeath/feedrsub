@@ -18,7 +18,12 @@ pubsub.on('feed_update', function (data) {
   //console.log(data);
   var re = new RegExp('application/json');
   if (re.test(data.headers['content-type'])) {
-    var json = JSON.parse(data.feed);
+
+    try {
+      var json = JSON.parse(data.feed);
+    } catch (e) {
+      return console.log(e);
+    };
 
     if (json.status) {
       mongo.feeds.updateDetails(json.status, function (err, result) {
@@ -32,7 +37,6 @@ pubsub.on('feed_update', function (data) {
         mongo.entries.insert(json.items[i], function (err) {
           if (err) console.log(err);
           else {
-            //var message = ('Added entry from %s at %s', topic, moment().format());
             console.log('Added entry from %s at %s', topic, moment().format());
             //io.emitMessage(message);
           };
