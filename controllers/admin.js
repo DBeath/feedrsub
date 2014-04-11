@@ -1,12 +1,14 @@
 var mongo = require('../models/mongodb.js');
-var pubsub = require('../feedrsub.js').pubsub;
 var config = require('../config.json');
 
-module.exports.adminController = function () {
-  return new admin();
+
+module.exports.AdminController = function (pubsub) {
+  return new admin(pubsub);
 };
 
-function admin () {};
+function admin (pubsubobj) {
+  pubsub = pubsubobj;
+};
 
 admin.prototype.index = function (req, res) {
   mongo.feeds.listAll(function (err, docs) {
@@ -35,7 +37,7 @@ admin.prototype.deletefeed = function (req, res) {
   mongo.feeds.delete(req.params.id, function (err, num) {
     if (err) console.log(err);
     console.log('Deleted %s', req.params.id);
-    res.redirect('/');
+    res.redirect('/admin');
   });
 };
 
@@ -46,29 +48,29 @@ admin.prototype.newfeed = function (req, res) {
 admin.prototype.subscribe = function (req, res) {
   var subs = req.param('topic').split(/[\s,]+/);
   for (var i = 0; i < subs.length; i++) {
-    mongo.feeds.subscribe(subs[i], function (err, topic) {
+    mongo.feeds.updateStatus(subs[i], 'pending', function (err, doc) {
       if (err) console.log(err);
-      pubsub.subscribe(topic, config.pubsub.hub, config.pubsub.callbackurl);
+      console.log('Subscribing to %s', doc.topic);
+      pubsub.subscribe(doc.topic, config.pubsub.hub);
     });
-    console.log('Subscribing to %s', subs[i]);
-    
   };
-  res.redirect('/');
+  res.redirect('/subscribed');
 };
 
 admin.prototype.resubscribe = function (req, res) {
-  mongo.feeds.findOneById(req.params.id, function (err, doc) {
+  mongo.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
     if (err) console.log(err);
     console.log('Resubscribing to %s', doc.topic);
-    pubsub.subscribe(doc.topic , config.pubsub.hub, config.pubsub.callbackurl);
+    pubsub.subscribe(doc.topic , config.pubsub.hub);
   });
+  res.redirect('/subscribed');
 };
 
 admin.prototype.unsubscribe = function (req, res) {
-  mongo.feeds.findOneById(req.params.id, function (err, doc) {
+  mongo.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
     if (err) console.log(err);
-    console.log('Unsubscribing from '+doc.topic);
-    pubsub.unsubscribe(doc.topic, config.pubsub.hub, config.pubsub.callbackurl);
+    console.log('Unsubscribing from %s', doc.topic);
+    pubsub.unsubscribe(doc.topic, config.pubsub.hub);
   });
   res.redirect('/unsubscribed');
 };
@@ -88,6 +90,16 @@ admin.prototype.subscribed_feeds = function (req, res) {
     if (err) console.log(err);
     res.render('subscribed_feed_list', {
       title: 'Subscribed Feeds',
+      feeds: docs
+    });
+  });
+};
+
+admin.prototype.pending_feeds = function (req, res) {
+  mongo.feeds.listByStatus('pending', function (err, docs) {
+    if (err) console.log(err);
+    res.render('pending_feed_list', {
+      title: 'Feeds pending subscription/unsubscription',
       feeds: docs
     });
   });

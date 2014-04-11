@@ -19,8 +19,7 @@
     "hbs": "*",
     "request": "*",
     "mongodb": "*",
-    "moment": "*",
-    "pubsubhubbub": "git+https://git@github.com/DBeath/pubsubhubbub.git#master"
+    "moment": "*"
   },
   "devDependencies": {
     "mocha": "*",
