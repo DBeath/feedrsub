@@ -19,7 +19,8 @@
     "hbs": "*",
     "request": "*",
     "mongodb": "*",
-    "moment": "*"
+    "moment": "*",
+    "validator": "*"
   },
   "devDependencies": {
     "mocha": "*",

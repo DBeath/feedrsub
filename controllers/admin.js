@@ -1,5 +1,6 @@
 var mongo = require('../models/mongodb.js');
 var config = require('../config.json');
+var validator = require('validator');
 
 
 module.exports.AdminController = function (pubsub) {
@@ -49,11 +50,15 @@ admin.prototype.subscribe = function (req, res) {
   var subs = req.param('topic').split(/[\s,]+/);
   for (var i = 0; i < subs.length; i++) {
     console.log(subs[i]);
-    mongo.feeds.updateStatus(subs[i], 'pending', function (err, doc) {
-      if (err) console.log(err);
-      console.log('Subscribing to %s', doc.topic);
-      pubsub.subscribe(doc.topic, config.pubsub.hub);
-    });
+    if ( validator.isURL(subs[i]) ) {
+      mongo.feeds.updateStatus(subs[i], 'pending', function (err, doc) {
+        if (err) console.log(err);
+        console.log('Subscribing to %s', doc.topic);
+        pubsub.subscribe(doc.topic, config.pubsub.hub);
+      });
+    } else {
+      console.log('%s is not a valid URL', subs[i]);
+    };
   };
   res.redirect('/subscribed');
 };
