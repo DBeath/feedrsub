@@ -11,14 +11,15 @@ function Feeds (db) {
   module.exports.FeedsCollection = this.collection;
 };
 
-Feeds.prototype.subscribe = function (topic, callback) {
+Feeds.prototype.subscribe = function (topic, secret, callback) {
   this.collection.update({
       topic: topic
     },
     {
       $set:{
         status: 'subscribed',
-        subtime: moment().unix()
+        subtime: moment().unix(),
+        secret: secret
       }
     }, 
     { 

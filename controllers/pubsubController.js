@@ -44,26 +44,10 @@ Pubsub.prototype.verification = function (req, res) {
       res.send(200);
       mongo.feeds.unsubscribe(topic, function (err, result) {
         if (err) console.log(err);
-        console.log('unsubscribed from %s', topic);
+        console.log('Unsubscribed from %s', topic);
       });
       break;
     case 'subscribe':
-      mongo.feeds.findOneByTopic(topic, function (err, doc) {
-        if (err) {
-          res.send(404);
-          console.log(err);
-        };
-        if (doc.status === 'pending') {
-          res.send(200, challenge);
-          // mongo.feeds.subscribe(topic, function (err, result) {
-          //   if (err) console.log(err);
-          //   console.log('Subscribed to %s at %s', topic, moment().format());
-          // });
-        } else {
-          res.send(404);
-        };
-      });
-      break;
     case 'unsubscribe':
       mongo.feeds.findOneByTopic(topic, function (err, doc) {
         if (err) {
@@ -72,26 +56,10 @@ Pubsub.prototype.verification = function (req, res) {
         };
         if (doc.status === 'pending') {
           res.send(200, challenge);
-          // mongo.feeds.unsubscribe(topic, function (err, result) {
-          //   if (err) console.log(err);
-          //   console.log('Unsubscribed from %s at %s', topic, moment().format());
-          // });
         } else {
           res.send(404);
         };
       });
-
-      // var index = pending.indexOf(topic);
-      // if (index > -1) {
-      //   res.send(200, challenge);
-      //   mongo.feeds.subscribe(topic, function (err, result) {
-      //     if (err) console.log(err);
-      //     console.log('subscribed to %s', topic);
-      //   });
-      //   pending.slice(index);
-      // } else {
-      //   res.send(404);
-      // };
       break;
     default:
       res.send(403);    
@@ -121,56 +89,65 @@ Pubsub.prototype.notification = function (req, res) {
     return res.send(400);
   };
 
-  if (this.secret && !req.get('x-hub-signature')) {
-    return res.send(403);
-  };
+  mongo.feeds.findOneByTopic(topic, (function (err, doc) {
+    if (err) {
+      console.log(err);
+      return res.send(400);
+    };
 
-  if (this.secret) {
-    signatureParts = req.get('x-hub-signature').split('=');
-    algo = (signatureParts.shift() || '').toLowerCase();
-    signature = (signatureParts.pop() || '').toLowerCase();
-
-    try {
-      hmac = crypto.createHmac(algo, crypto.createHmac('sha1', this.secret).update(topic).digest('hex'));
-    } catch (e) {
-      console.log(e);
+    if (doc.secret && !req.get('x-hub-signature')) {
       return res.send(403);
     };
-  };
 
-  req.on('data', (function (chunk) {
-    if (!chunk) {
-      return;
-    };
+    if (doc.secret) {
+      signatureParts = req.get('x-hub-signature').split('=');
+      algo = (signatureParts.shift() || '').toLowerCase();
+      signature = (signatureParts.pop() || '').toLowerCase();
 
-    bodyChunks.push(chunk);
-
-    if (this.secret) {
       try {
-        hmac.update(chunk);
+        hmac = crypto.createHmac(algo, doc.secret);
       } catch (e) {
         console.log(e);
+        return res.send(403);
       };
     };
+
+    req.on('data', (function (chunk) {
+      if (!chunk) {
+        return;
+      };
+
+      bodyChunks.push(chunk);
+
+      if (doc.secret) {
+        try {
+          hmac.update(chunk);
+        } catch (e) {
+          console.log(e);
+          return res.send(403);
+        };
+      };
+    }).bind(this)); 
+
+    req.on('end', (function () {
+      // Must return 2xx code even if signature doesn't match.
+      if (doc.secret && hmac.digest('hex').toLowerCase() != signature) {
+        return res.send(202);
+      };
+
+      console.log('Received notification from %s at %s', topic, moment().format());
+      res.send(204);
+
+      this.emit('feed_update', {
+        topic: topic,
+        hub: hub,
+        feed: Buffer.concat(bodyChunks),
+        headers: req.headers
+      });
+    }).bind(this)); 
+
   }).bind(this));
 
-  req.on('end', (function () {
-    // Must return 2xx code even if signature doesn't match.
-    if (this.secret && hmac.digest('hex').toLowerCase() != signature) {
-      return res.send(202);
-    };
-
-    console.log('Received notification from %s at %s', topic, moment().format());
-    res.send(204);
-
-    this.emit('feed_update', {
-      topic: topic,
-      hub: hub,
-      feed: Buffer.concat(bodyChunks),
-      headers: req.headers
-    });
-
-  }).bind(this));
 };
 
 Pubsub.prototype.subscribe = function (topic, hub) {
@@ -204,9 +181,10 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
 
   if (this.secret) {
     try {
-      form['hub.secret'] = crypto.createHmac("sha1", this.secret).update(topic).digest("hex");
-    } catch (e) {
-      return console.log(e);
+      var feedSecret = crypto.createHmac("sha1", this.secret).update(topic).digest("hex");
+      form['hub.secret'] = feedSecret;
+    } catch (err) {
+      return callback(err, null);
     };
   };
 
@@ -231,25 +209,21 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
       // pending.push(topic);
       switch ( mode ) {
         case 'subscribe':
-          mongo.feeds.subscribe(topic, function (err, result) {
-            if (err) console.log(err);
-            callback(null, 'Subscribed');
+          mongo.feeds.subscribe(topic, feedSecret, function (err, result) {
+            if (err) return callback(err, null);
+            return callback(null, 'Subscribed');
           });
           break;
         case 'unsubscribe':
           mongo.feeds.unsubscribe(topic, function (err, result) {
-            if (err) console.log(err);
-            callback(null, 'Unsubscribed');
+            if (err) return callback(err, null);
+            return callback(null, 'Unsubscribed');
           });
           break;
       }; 
-      // mongo.feeds.updateStatus(topic, mode, function (err, result) {
-      //   if (err) console.log(err);
-      //   callback(null, 'Accepted');
-      // });
     } else {
-      console.log(body);
-      callback('Subscription failed', null);
+      var message = 'Subscription failed because: ' + body;
+      return callback(message, null);
     };
   });
 };

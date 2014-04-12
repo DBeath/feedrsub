@@ -49,7 +49,6 @@ admin.prototype.newfeed = function (req, res) {
 admin.prototype.subscribe = function (req, res) {
   var subs = req.param('topic').split(/[\s,]+/);
   for (var i = 0; i < subs.length; i++) {
-    console.log(subs[i]);
     if ( validator.isURL(subs[i]) ) {
       mongo.feeds.updateStatus(subs[i], 'pending', function (err, doc) {
         if (err) console.log(err);
