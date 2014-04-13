@@ -1,5 +1,6 @@
 var mongo = require('../models/mongodb.js');
 var config = require('../config.json');
+var validator = require('validator');
 
 
 module.exports.AdminController = function (pubsub) {
@@ -48,31 +49,65 @@ admin.prototype.newfeed = function (req, res) {
 admin.prototype.subscribe = function (req, res) {
   var subs = req.param('topic').split(/[\s,]+/);
   for (var i = 0; i < subs.length; i++) {
-    mongo.feeds.updateStatus(subs[i], 'pending', function (err, doc) {
-      if (err) console.log(err);
-      console.log('Subscribing to %s', doc.topic);
-      pubsub.subscribe(doc.topic, config.pubsub.hub);
-    });
+    if ( validator.isURL(subs[i]) ) {
+      mongo.feeds.updateStatus(subs[i], 'pending', function (err, doc) {
+        if (err) {
+          console.log(err);
+          req.flash('err', 'Database update failed');
+          return res.redirect('/subscribed');
+        };
+        console.log('Subscribing to %s', doc.topic);
+        pubsub.subscribe(doc.topic, config.pubsub.hub, function (err, result) {
+          if (err) console.log(err);
+          else console.log(result);
+        });
+      });
+    } else {
+      console.log('%s is not a valid URL', subs[i]);
+    };
   };
   res.redirect('/subscribed');
 };
 
 admin.prototype.resubscribe = function (req, res) {
   mongo.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
-    if (err) console.log(err);
+    if (err) {
+      console.log(err);
+      req.flash('error', 'Database update failed');
+      return res.redirect('/subscribed');
+    }
     console.log('Resubscribing to %s', doc.topic);
-    pubsub.subscribe(doc.topic , config.pubsub.hub);
+    pubsub.subscribe(doc.topic, config.pubsub.hub, function (err, result) {
+      if (err) {
+        console.log(err);
+        req.flash('error', err);
+        return res.redirect('/subscribed');
+      };
+      req.flash('info', 'Subscription successful');
+      res.redirect('/subscribed');
+    });
   });
-  res.redirect('/subscribed');
 };
 
 admin.prototype.unsubscribe = function (req, res) {
   mongo.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
-    if (err) console.log(err);
+    if (err) {
+      console.log(err);
+      req.flash('error', err);
+      return res.redirect('/unsubscribed');
+    };
     console.log('Unsubscribing from %s', doc.topic);
-    pubsub.unsubscribe(doc.topic, config.pubsub.hub);
+    pubsub.unsubscribe(doc.topic, config.pubsub.hub, function (err, result) {
+      if (err) {
+        console.log(err);
+        req.flash('error', err);
+        return res.redirect('/unsubscribed');
+      };
+      var message = 'Unsubscribed from ' + doc.topic;
+      req.flash('info', message);
+      res.redirect('/unsubscribed');
+    });
   });
-  res.redirect('/unsubscribed');
 };
 
 admin.prototype.unsubscribed_feeds = function (req, res) {
@@ -80,7 +115,9 @@ admin.prototype.unsubscribed_feeds = function (req, res) {
     if (err) console.log(err);
     res.render('unsubscribed_feed_list', {
       title: 'Unsubscribed Feeds',
-      feeds: docs
+      feeds: docs,
+      error: req.flash('error'),
+      message: req.flash('info')
     });
   });
 };
@@ -90,7 +127,9 @@ admin.prototype.subscribed_feeds = function (req, res) {
     if (err) console.log(err);
     res.render('subscribed_feed_list', {
       title: 'Subscribed Feeds',
-      feeds: docs
+      feeds: docs,
+      error: req.flash('error'),
+      message: req.flash('info')
     });
   });
 };

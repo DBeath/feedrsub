@@ -4,6 +4,7 @@ var crypto = require('crypto');
 
 var pubsub = require('../controllers/pubsub.js').pubsub;
 var server = require('../server.js');
+var mongo = require('../models/mongodb.js');
 
 var topic = 'http://test.com';
 var response_body = JSON.stringify({foo: 'bar'});
@@ -24,7 +25,9 @@ describe('pubsub', function () {
 describe('pubsub notification', function () {
   before(function (done) {
     server.start(function () {
-      done();
+      mongo.feeds.subscribe(topic, encrypted_secret, function () {
+        done();
+      });
     });
   });
 
@@ -91,6 +94,8 @@ describe('pubsub notification', function () {
     pubsub.on('feed_update', function (data) {
       eventFired = true;
       expect(data.topic).to.equal('http://test.com');
+      expect(data.feed).to.exist;
+      expect(data.headers['content-type']).to.equal('application/json');
     });
 
     setTimeout(function () {

@@ -8,7 +8,7 @@
 <body>
 	<div class="menu">
 		<ul class="nav nav-pills">
-			<li><a href="/">Home</a></li>
+			<li><a href="/admin">Home</a></li>
 			<li><a href="/subscribe">Subscribe</a></li>
 			<li><a href="/unsubscribed">Unsubscribed</a></li>
 			<li><a href="/subscribed">Subscribed</a></li>
@@ -16,18 +16,19 @@
 		</ul>
 	</div>
 	<div class="container-fluid">
+		{{#if error}}
+			<div class="alert alert-danger">
+				<p>{{error}}</p>
+			</div>
+		{{/if}}
+		{{#if message}}
+			<div class="alert alert-success">
+				<p>{{message}}</p>
+			</div>
+		{{/if}}
 		<div class="col-md-12">
 			{{{body}}}
 		</div>
 	</div>
-
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-	<script src="/socket.io/socket.io.js"></script>
-	<script>
-		var socket = io.connect('http://localhost:4000');
-		socket.on("message", function (data) {
-			$("#msgbox").append(data.message+"<br>");
-		});
-	</script>
 </body>
 </html>

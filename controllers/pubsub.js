@@ -1,5 +1,5 @@
 var pubsubController = require('./pubsubController.js');
-var io = require('./socket.js').io;
+// var io = require('./socket.js').io;
 var mongo = require('../models/mongodb.js');
 var moment = require('moment');
 var config = require('../config.json');
@@ -15,7 +15,6 @@ var pubsub = pubsubController.createController({
 module.exports.pubsub = pubsub;
 
 pubsub.on('feed_update', function (data) {
-  //console.log(data);
   var re = new RegExp('application/json');
   if (re.test(data.headers['content-type'])) {
 
@@ -33,12 +32,11 @@ pubsub.on('feed_update', function (data) {
 
     if (json.items) {
       for (var i = 0; i < json.items.length; i++) {
-        json.items[i].topic = topic;
+        json.items[i].topic = data.topic;
         mongo.entries.insert(json.items[i], function (err) {
           if (err) console.log(err);
           else {
             console.log('Added entry from %s at %s', topic, moment().format());
-            //io.emitMessage(message);
           };
         });
       };
