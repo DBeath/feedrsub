@@ -211,7 +211,7 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
     };
 
     request.post(postParams, function (err, response, body) {
-      if (err) console.log(err);
+      if (err) return callback(err);
 
       if (response.statusCode === 202 || response.statusCode === 204) {
         switch ( mode ) {

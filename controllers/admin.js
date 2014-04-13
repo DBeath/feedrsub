@@ -51,9 +51,16 @@ admin.prototype.subscribe = function (req, res) {
   for (var i = 0; i < subs.length; i++) {
     if ( validator.isURL(subs[i]) ) {
       mongo.feeds.updateStatus(subs[i], 'pending', function (err, doc) {
-        if (err) console.log(err);
+        if (err) {
+          console.log(err);
+          req.flash('err', 'Database update failed');
+          return res.redirect('/subscribed');
+        };
         console.log('Subscribing to %s', doc.topic);
-        pubsub.subscribe(doc.topic, config.pubsub.hub);
+        pubsub.subscribe(doc.topic, config.pubsub.hub, function (err, result) {
+          if (err) console.log(err);
+          else console.log(result);
+        });
       });
     } else {
       console.log('%s is not a valid URL', subs[i]);
@@ -84,7 +91,11 @@ admin.prototype.resubscribe = function (req, res) {
 
 admin.prototype.unsubscribe = function (req, res) {
   mongo.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
-    if (err) console.log(err);
+    if (err) {
+      console.log(err);
+      req.flash('error', err);
+      return res.redirect('/unsubscribed');
+    };
     console.log('Unsubscribing from %s', doc.topic);
     pubsub.unsubscribe(doc.topic, config.pubsub.hub, function (err, result) {
       if (err) {
