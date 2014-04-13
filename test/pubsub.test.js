@@ -94,6 +94,8 @@ describe('pubsub notification', function () {
     pubsub.on('feed_update', function (data) {
       eventFired = true;
       expect(data.topic).to.equal('http://test.com');
+      expect(data.feed).to.exist;
+      expect(data.headers['content-type']).to.equal('application/json');
     });
 
     setTimeout(function () {

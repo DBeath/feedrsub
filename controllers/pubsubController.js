@@ -150,17 +150,17 @@ Pubsub.prototype.notification = function (req, res) {
 
 };
 
-Pubsub.prototype.subscribe = function (topic, hub) {
+Pubsub.prototype.subscribe = function (topic, hub, callback) {
   this.sendSubscription('subscribe', topic, hub, function (err, result) {
-    if (err) console.log(err);
-    else console.log(result);
+    if (err) return callback(err);
+    return callback(null, result);
   });
 };
 
-Pubsub.prototype.unsubscribe = function (topic, hub) {
+Pubsub.prototype.unsubscribe = function (topic, hub, callback) {
   this.sendSubscription('unsubscribe', topic, hub, function (err, result) {
-    if (err) console.log(err);
-    else console.log(result);
+    if (err) return callback(err);
+    return callback(null, result);
   });
 };
 
@@ -185,7 +185,7 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
 
   mongo.feeds.findOneByTopic(topic, (function (err, doc) {
     if (err) {
-      return callback(err, null);
+      return callback(err);
     };
 
     if (doc.secret) {
@@ -195,7 +195,7 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
         try {
           form['hub.secret'] = crypto.createHmac("sha1", this.secret).update(topic).digest("hex");
         } catch (err) {
-          return callback(err, null);
+          return callback(err);
         };
       };
     };
@@ -217,20 +217,20 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
         switch ( mode ) {
           case 'subscribe':
             mongo.feeds.subscribe(topic, feedSecret, function (err, result) {
-              if (err) return callback(err, null);
+              if (err) return callback(err);
               return callback(null, 'Subscribed');
             });
             break;
           case 'unsubscribe':
             mongo.feeds.unsubscribe(topic, function (err, result) {
-              if (err) return callback(err, null);
+              if (err) return callback(err);
               return callback(null, 'Unsubscribed');
             });
             break;
         }; 
       } else {
         var message = 'Subscription failed because: ' + body;
-        return callback(message, null);
+        return callback(message);
       };
     });
   }).bind(this));

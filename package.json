@@ -20,7 +20,8 @@
     "request": "*",
     "mongodb": "*",
     "moment": "*",
-    "validator": "*"
+    "validator": "*",
+    "connect-flash": "*"
   },
   "devDependencies": {
     "mocha": "*",

@@ -4,6 +4,7 @@ var config = require('./config.json');
 var hbs = require('hbs');
 var moment = require('moment');
 var ObjectID = require('mongodb').ObjectID;
+var flash = require('connect-flash');
 
 var app = module.exports = express();
 var server = require('http').createServer(app);
@@ -39,6 +40,9 @@ app.configure(function () {
   app.use(express.methodOverride());
   app.use(express.static(__dirname+'/public'));
   app.use(express.errorHandler());
+  app.use(express.cookieParser('cookiemonster'));
+  app.use(express.session({ cookie: { maxAge: 60000 }}));
+  app.use(flash());
   app.enable('trust proxy');
 });
 
