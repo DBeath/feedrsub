@@ -179,51 +179,103 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
     'hub.verify': 'sync'
   };
 
-  if (this.secret) {
-    try {
-      var feedSecret = crypto.createHmac("sha1", this.secret).update(topic).digest("hex");
-      form['hub.secret'] = feedSecret;
-    } catch (err) {
-      return callback(err, null);
-    };
-  };
-
   if (this.format === 'json' || this.format === 'JSON') {
     form['format'] = 'json';
   };
 
-  var postParams = {
-    url: hub,
-    form: form,
-    encoding: 'utf-8'
-  };
-
-  if (this.auth) {
-    postParams.auth = this.auth;
-  };
-
-  request.post(postParams, function (err, response, body) {
-    if (err) console.log(err);
-
-    if (response.statusCode === 202 || response.statusCode === 204) {
-      // pending.push(topic);
-      switch ( mode ) {
-        case 'subscribe':
-          mongo.feeds.subscribe(topic, feedSecret, function (err, result) {
-            if (err) return callback(err, null);
-            return callback(null, 'Subscribed');
-          });
-          break;
-        case 'unsubscribe':
-          mongo.feeds.unsubscribe(topic, function (err, result) {
-            if (err) return callback(err, null);
-            return callback(null, 'Unsubscribed');
-          });
-          break;
-      }; 
-    } else {
-      var message = 'Subscription failed because: ' + body;
-      return callback(message, null);
+  mongo.feeds.findOneByTopic(topic, (function (err, doc) {
+    if (err) {
+      return callback(err, null);
     };
-  });
+
+    if (doc.secret) {
+      form['hub.secret'] = doc.secret;
+    } else {
+      if (this.secret && mode === 'subscribe') {
+        try {
+          form['hub.secret'] = crypto.createHmac("sha1", this.secret).update(topic).digest("hex");
+        } catch (err) {
+          return callback(err, null);
+        };
+      };
+    };
+
+    var postParams = {
+      url: hub,
+      form: form,
+      encoding: 'utf-8'
+    };
+
+    if (this.auth) {
+      postParams.auth = this.auth;
+    };
+
+    request.post(postParams, function (err, response, body) {
+      if (err) console.log(err);
+
+      if (response.statusCode === 202 || response.statusCode === 204) {
+        switch ( mode ) {
+          case 'subscribe':
+            mongo.feeds.subscribe(topic, feedSecret, function (err, result) {
+              if (err) return callback(err, null);
+              return callback(null, 'Subscribed');
+            });
+            break;
+          case 'unsubscribe':
+            mongo.feeds.unsubscribe(topic, function (err, result) {
+              if (err) return callback(err, null);
+              return callback(null, 'Unsubscribed');
+            });
+            break;
+        }; 
+      } else {
+        var message = 'Subscription failed because: ' + body;
+        return callback(message, null);
+      };
+    });
+  }).bind(this));
+
+  // if (this.secret) {
+  //   try {
+  //     var feedSecret = crypto.createHmac("sha1", this.secret).update(topic).digest("hex");
+  //     form['hub.secret'] = feedSecret;
+  //   } catch (err) {
+  //     return callback(err, null);
+  //   };
+  // };
+
+  // var postParams = {
+  //   url: hub,
+  //   form: form,
+  //   encoding: 'utf-8'
+  // };
+
+  // if (this.auth) {
+  //   postParams.auth = this.auth;
+  // };
+
+  // request.post(postParams, function (err, response, body) {
+  //   if (err) console.log(err);
+
+  //   if (response.statusCode === 202 || response.statusCode === 204) {
+  //     // pending.push(topic);
+  //     switch ( mode ) {
+  //       case 'subscribe':
+  //         mongo.feeds.subscribe(topic, feedSecret, function (err, result) {
+  //           if (err) return callback(err, null);
+  //           return callback(null, 'Subscribed');
+  //         });
+  //         break;
+  //       case 'unsubscribe':
+  //         mongo.feeds.unsubscribe(topic, function (err, result) {
+  //           if (err) return callback(err, null);
+  //           return callback(null, 'Unsubscribed');
+  //         });
+  //         break;
+  //     }; 
+  //   } else {
+  //     var message = 'Subscription failed because: ' + body;
+  //     return callback(message, null);
+  //   };
+  // });
 };
