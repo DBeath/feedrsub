@@ -1,6 +1,7 @@
 var mongo = require('../models/mongodb.js');
 var config = require('../config.json');
 var validator = require('validator');
+var async = require('async');
 
 
 module.exports.AdminController = function (pubsub) {
@@ -12,11 +13,43 @@ function admin (pubsubobj) {
 };
 
 admin.prototype.index = function (req, res) {
-  mongo.feeds.listAll(function (err, docs) {
-    if (err) console.log(err);
-    res.render('feed_list', {
-      title: 'Feeds', 
-      feeds: docs
+  // mongo.feeds.listAll(function (err, docs) {
+  //   if (err) console.log(err);
+  //   res.render('feed_list', {
+  //     title: 'Feeds', 
+  //     feeds: docs
+  //   });
+  // });
+  var feedCount, subscribedCount, unsubscribedCount;
+
+  async.parallel([
+    function (callback) {
+      mongo.feeds.collection.count(function (err, result, callback) {
+        if (err) console.log(err);
+        feedCount = result;
+        callback(null, result);
+      });
+    },
+    function (callback) {
+      mongo.feeds.collection.count({status: 'subscribed'}, function (err, result, callback) {
+        if (err) console.log(err);
+        subscribedCount = result;
+        callback(null, result);
+      });
+    },
+    function (callback) {
+      mongo.feeds.collection.count({status: 'unsubscribed'}, function (err, result, callback) {
+        if (err) console.log(err);
+        unsubscribedCount = result;
+        callback(null, result);
+      });
+    }
+  ], function () {
+    res.render('admin_page', {
+      title: 'Admin',
+      feedCount: feedCount,
+      subscribedCount: subscribedCount,
+      unsubscribedCount: unsubscribedCount
     });
   });
 };
