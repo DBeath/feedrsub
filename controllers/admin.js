@@ -20,28 +20,35 @@ admin.prototype.index = function (req, res) {
   //     feeds: docs
   //   });
   // });
-  var feedCount, subscribedCount, unsubscribedCount;
+  var feedCount, subscribedCount, unsubscribedCount, pendingCount;
 
   async.parallel([
     function (callback) {
-      mongo.feeds.collection.count(function (err, result, callback) {
-        if (err) console.log(err);
+      mongo.feeds.collection.count(function (err, result) {
+        if (err) return console.log(err);
         feedCount = result;
-        callback(null, result);
+        callback();
       });
     },
     function (callback) {
-      mongo.feeds.collection.count({status: 'subscribed'}, function (err, result, callback) {
-        if (err) console.log(err);
+      mongo.feeds.collection.count({status: 'subscribed'}, function (err, result) {
+        if (err) return console.log(err);
         subscribedCount = result;
-        callback(null, result);
+        callback();
       });
     },
     function (callback) {
-      mongo.feeds.collection.count({status: 'unsubscribed'}, function (err, result, callback) {
-        if (err) console.log(err);
+      mongo.feeds.collection.count({status: 'unsubscribed'}, function (err, result) {
+        if (err) return console.log(err);
         unsubscribedCount = result;
-        callback(null, result);
+        callback();
+      });
+    },
+    function (callback) {
+      mongo.feeds.collection.count({status: 'pending'}, function (err, result) {
+        if (err) return console.log(err);
+        pendingCount = result;
+        callback();
       });
     }
   ], function () {
@@ -49,7 +56,8 @@ admin.prototype.index = function (req, res) {
       title: 'Admin',
       feedCount: feedCount,
       subscribedCount: subscribedCount,
-      unsubscribedCount: unsubscribedCount
+      unsubscribedCount: unsubscribedCount,
+      pendingCount: pendingCount
     });
   });
 };
