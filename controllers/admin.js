@@ -2,6 +2,7 @@ var mongo = require('../models/mongodb.js');
 var config = require('../config.json');
 var validator = require('validator');
 var async = require('async');
+var moment = require('moment');
 
 
 module.exports.AdminController = function (pubsub) {
@@ -43,6 +44,13 @@ admin.prototype.index = function (req, res) {
         if (err) return callback(err);
         return callback(null, result);
       });
+    },
+    entriesInLastDay: function (callback) {
+      var dayAgo = moment().subtract('d', 1).unix();
+      mongo.entries.collection.count({published: { $gt: dayAgo}}, function (err, result) {
+        if (err) return callback(err);
+        return callback(null, result);
+      });
     }
   }, function (err, results) {
     if (err) {
@@ -55,7 +63,10 @@ admin.prototype.index = function (req, res) {
       subscribedCount: results.subscribedCount,
       unsubscribedCount: results.unsubscribedCount,
       pendingCount: results.pendingCount,
-      entriesCount: results.entriesCount
+      entriesCount: results.entriesCount,
+      entriesInLastDay: results.entriesInLastDay,
+      error: req.flash('error'),
+      message: req.flash('info')
     });
   });
 };
@@ -128,27 +139,6 @@ admin.prototype.subscribe = function (req, res) {
     req.flash('info', 'Successfully subscribed');
     return res.redirect('/subscribed');
   });
-
-
-  // for (var i = 0; i < subs.length; i++) {
-  //   if ( validator.isURL(subs[i]) ) {
-  //     mongo.feeds.updateStatus(subs[i], 'pending', function (err, doc) {
-  //       if (err) {
-  //         console.log(err);
-  //         req.flash('err', 'Database update failed');
-  //         return res.redirect('/subscribed');
-  //       };
-  //       console.log('Subscribing to %s', doc.topic);
-  //       pubsub.subscribe(doc.topic, config.pubsub.hub, function (err, result) {
-  //         if (err) console.log(err);
-  //         else console.log(result);
-  //       });
-  //     });
-  //   } else {
-  //     console.log('%s is not a valid URL', subs[i]);
-  //   };
-  // };
-  // res.redirect('/subscribed');
 };
 
 admin.prototype.resubscribe = function (req, res) {
@@ -157,13 +147,13 @@ admin.prototype.resubscribe = function (req, res) {
       console.log(err);
       req.flash('error', 'Database update failed');
       return res.redirect('/subscribed');
-    }
+    };
     console.log('Resubscribing to %s', doc.topic);
     pubsub.subscribe(doc.topic, config.pubsub.hub, function (err, result) {
       if (err) {
         console.log(err);
         req.flash('error', err);
-        return res.redirect('/subscribed');
+        return res.redirect('/pending');
       };
       req.flash('info', 'Subscription successful');
       return res.redirect('/subscribed');
@@ -183,7 +173,7 @@ admin.prototype.unsubscribe = function (req, res) {
       if (err) {
         console.log(err);
         req.flash('error', err);
-        return res.redirect('/unsubscribed');
+        return res.redirect('/pending');
       };
       var message = 'Unsubscribed from ' + doc.topic;
       req.flash('info', message);
@@ -273,7 +263,9 @@ admin.prototype.pending_feeds = function (req, res) {
     return res.render('pending_feed_list', {
       title: 'Feeds pending subscription/unsubscription',
       feeds: results.docs,
-      count: results.count
+      count: results.count,
+      error: req.flash('error'),
+      message: req.flash('info')
     });
   });
 };
