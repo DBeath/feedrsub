@@ -14,6 +14,8 @@ function admin (pubsubobj) {
 };
 
 admin.prototype.index = function (req, res) {
+  var dayAgo = moment().subtract('d', 1).unix();
+  var weekAgo = moment().subtract('d', 7).unix();
   async.parallel({
     feedCount: function (callback) {
       mongo.feeds.collection.count(function (err, result) {
@@ -46,8 +48,19 @@ admin.prototype.index = function (req, res) {
       });
     },
     entriesInLastDay: function (callback) {
-      var dayAgo = moment().subtract('d', 1).unix();
       mongo.entries.collection.count({published: { $gt: dayAgo}}, function (err, result) {
+        if (err) return callback(err);
+        return callback(null, result);
+      });
+    },
+    entriesInLastWeek: function (callback) {
+      mongo.entries.collection.count({published: {$gt: weekAgo}}, function (err, result) {
+        if (err) return callback(err);
+        return callback(null, result);
+      });
+    },
+    feedsAddedInLastWeek: function (callback) {
+      mongo.feeds.collection.count({subtime: {$gt: weekAgo}}, function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
@@ -59,12 +72,7 @@ admin.prototype.index = function (req, res) {
     };
     return res.render('admin_page', {
       title: 'Admin',
-      feedCount: results.feedCount,
-      subscribedCount: results.subscribedCount,
-      unsubscribedCount: results.unsubscribedCount,
-      pendingCount: results.pendingCount,
-      entriesCount: results.entriesCount,
-      entriesInLastDay: results.entriesInLastDay,
+      results: results,
       error: req.flash('error'),
       message: req.flash('info')
     });
@@ -73,7 +81,13 @@ admin.prototype.index = function (req, res) {
 
 admin.prototype.feed = function (req, res) {
   mongo.feeds.findOneById(req.params.id, function (err, doc) {
-    if (err) console.log(err);
+    if (err) {
+      console.log(err);
+      req.flash('error', err);
+      return res.redirect('/admin');
+    };
+    var dayAgo = moment().subtract('d', 1).unix();
+    var weekAgo = moment().subtract('d', 7).unix();
     async.parallel({
       entries: function (callback) {
         mongo.entries.list(doc.topic, 100, function (err, docs) {
@@ -81,21 +95,33 @@ admin.prototype.feed = function (req, res) {
           return callback(null, docs);
         });
       },
-      count: function (callback) {
+      entriesCount: function (callback) {
         mongo.entries.collection.count({topic: doc.topic}, function (err, result) {
+          if (err) return callback(err);
+          return callback(null, result);
+        });
+      },
+      entriesInLastDay: function (callback) {
+        mongo.entries.collection.count({topic: doc.topic, published: dayAgo}, function (err, result) {
+          if (err) return callback(err);
+          return callback(null, result);
+        });
+      },
+      entriesInLastWeek: function (callback) {
+        mongo.entries.collection.count({topic: doc.topic, published: weekAgo}, function (err, result) {
           if (err) return callback(err);
           return callback(null, result);
         });
       }
     }, function (err, results) {
       if (err) {
+        console.log(err);
         req.flash('error', err);
         return res.redirect('/admin');
       };
       return res.render('feed', {
         title: 'Entries for ' + doc.topic,
-        entries: results.entries,
-        entriesCount: results.count 
+        results: results
       });
     });
   });
