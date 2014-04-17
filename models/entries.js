@@ -15,6 +15,7 @@ Entries.prototype.insert = function (item, callback) {
   this.collection.insert(item, {w:1}, function (err) {
     if (err) callback(err);
     console.log(moment().format()+' | Inserted entry');
+    callback(null);
   }); 
 };
 

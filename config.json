@@ -12,5 +12,6 @@
     "admin": "admin",
     "adminpass": "password",
     "port": 4000
-  }
+  },
+  "connstring": "mongodb://localhost:27017/feedrsub"
 }

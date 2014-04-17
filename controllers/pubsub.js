@@ -24,7 +24,7 @@ pubsub.on('feed_update', function (data) {
     };
 
     if (json.status) {
-      mongo.feeds.updateDetails(json.status, function (err, result) {
+      mongo.feeds.updateDetails(data.topic, json.status, function (err, result) {
         if (err) return console.log(err);
         console.log('Updated status of %s', data.topic);
       });
@@ -39,7 +39,7 @@ pubsub.on('feed_update', function (data) {
         };
         mongo.entries.insert(item, function (err) {
           if (err) return console.log(err);
-          console.log('Added entry from %s at %s', topic, moment().format());
+          return console.log('Added entry from %s at %s', data.topic, moment().format());
         });
       });
 
