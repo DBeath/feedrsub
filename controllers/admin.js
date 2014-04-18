@@ -153,8 +153,8 @@ admin.prototype.subscribe = function (req, res) {
         console.log('Subscribing to %s', doc.topic);
         pubsub.subscribe(doc.topic, config.pubsub.hub, function (err, result) {
           if (err) return callback(err);
-          var message = result + ' to ' + doc.topic + ' at ' + moment().format();
-          return callback(null, message);
+          console.log('%s to %s at %s', result, doc.topic, moment().format());
+          return callback(null);
         });
       });
     };
@@ -164,9 +164,6 @@ admin.prototype.subscribe = function (req, res) {
       req.flash('error', err);
       return res.redirect('/subscribed');
     };
-    results.forEach(function (result, index, array) {
-      console.log(result);
-    });
     req.flash('info', 'Successfully subscribed');
     return res.redirect('/subscribed');
   });
