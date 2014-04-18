@@ -1,4 +1,7 @@
 <h3>{{title}}</h3>
+<p>Entries: {{results.entriesCount}}</p>
+<p>Entries in Last Day: {{results.entriesInLastDay}}</p>
+<p>Entries in Last Week: {{results.entriesInLastWeek}}</p>
 <table class="table table-condensed table-striped">
 	<thead>
 		<tr>
@@ -10,13 +13,13 @@
 		</tr>
 	</thead>
 	<tbody>
-		{{#each entries}}
+		{{#each results.entries}}
 		<tr>
-			<th>{{_id}}</th>
-			<th>{{unix_to_date published}}</th>
-			<th>{{title}}</th>
-			<th>{{actor.displayName}}</th>
-			<th><a href="{{permalinkUrl}}">{{permalinkUrl}}</th>
+			<td>{{_id}}</td>
+			<td>{{unix_to_date published}}</td>
+			<td>{{title}}</td>
+			<td>{{actor.displayName}}</td>
+			<td><a href="{{permalinkUrl}}">{{permalinkUrl}}</td>
 		</tr>
 		{{/each}}
 	</tbody>

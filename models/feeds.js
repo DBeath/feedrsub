@@ -86,9 +86,9 @@ Feeds.prototype.delete = function (id, callback) {
   });
 };
 
-Feeds.prototype.updateDetails = function (status, callback) {
+Feeds.prototype.updateDetails = function (topic, status, callback) {
   this.collection.update({
-      topic: status.feed
+      topic: topic
     },
     {
       $set: {

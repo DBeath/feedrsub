@@ -14,22 +14,26 @@
 <tbody>
 {{#each feeds}}
 	<tr>
-		<th>
+		<td>
 			<form method="POST" action="/feed/{{_id}}" role="form">	
 				<input type="hidden" name="_method" value="DELETE"/>
-				<button type="submit" class="btn btn-danger btn-xs" value="Delete">Delete</button>
+				<button type="submit" class="btn btn-danger btn-xs" value="Delete">
+					<span class="glyphicon glyphicon-trash"></span> Delete
+				</button>
 			</form>	
-		</th>
-		<th>
+		</td>
+		<td>
 			<form method="GET" action="/feed/{{_id}}">
-				<button type="submit" class="btn btn-info btn-xs" value="Entries">Entries</button>
+				<button type="submit" class="btn btn-info btn-xs" value="Entries">
+				<span class="glyphicon glyphicon-list"></span> Entries
+				</button>
 			</form>
-		</th>
-		<th><a href="{{topic}}">{{topic}}</a></th>
-		<th>{{status}}</th>
-		<th>{{unix_to_date subtime}}</th>
-		<th>{{unix_to_date unsubtime}}</th>
-		<th>{{feeds.title}}</th>
+		</td>
+		<td><a href="{{topic}}">{{topic}}</a></td>
+		<td>{{status}}</td>
+		<td>{{unix_to_date subtime}}</td>
+		<td>{{unix_to_date unsubtime}}</td>
+		<td>{{feeds.title}}</td>
 	</tr>
 {{/each}}
 </tbody>

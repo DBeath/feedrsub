@@ -1,5 +1,4 @@
 var pubsubController = require('./pubsubController.js');
-// var io = require('./socket.js').io;
 var mongo = require('../models/mongodb.js');
 var moment = require('moment');
 var config = require('../config.json');
@@ -25,21 +24,37 @@ pubsub.on('feed_update', function (data) {
     };
 
     if (json.status) {
-      mongo.feeds.updateDetails(json.status, function (err, result) {
-        if (err) console.log(err);
+      mongo.feeds.updateDetails(data.topic, json.status, function (err, result) {
+        if (err) return console.log(err);
+        console.log('Updated status of %s', data.topic);
       });
     };
 
     if (json.items) {
-      for (var i = 0; i < json.items.length; i++) {
-        json.items[i].topic = data.topic;
-        mongo.entries.insert(json.items[i], function (err) {
-          if (err) console.log(err);
-          else {
-            console.log('Added entry from %s at %s', topic, moment().format());
-          };
+
+      json.items.forEach(function (item, index, array) {
+        item.topic = data.topic;
+        if (!item.published) {
+          item.published = moment().unix();
+        };
+        mongo.entries.insert(item, function (err) {
+          if (err) return console.log(err);
+          return console.log('Added entry from %s at %s', data.topic, moment().format());
         });
-      };
+      });
+
+      // for (var i = 0; i < json.items.length; i++) {
+      //   json.items[i].topic = data.topic;
+      //   if (!json.items[i].published) {
+      //     json.items[i].published = moment().unix();
+      //   };
+      //   mongo.entries.insert(json.items[i], function (err) {
+      //     if (err) console.log(err);
+      //     else {
+      //       console.log('Added entry from %s at %s', topic, moment().format());
+      //     };
+      //   });
+      // };
     } else {
       console.log('No items in notification');
     };
