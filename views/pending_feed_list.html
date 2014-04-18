@@ -17,33 +17,41 @@
 <tbody>
 {{#each feeds}}
 	<tr>
-		<th>
+		<td>
 			<form method="POST" action="/feed/{{_id}}" role="form">	
 				<input type="hidden" name="_method" value="DELETE"/>
-				<button type="submit" class="btn btn-danger btn-xs" value="Delete">Delete</button>
+				<button type="submit" class="btn btn-danger btn-xs" value="Delete">
+					Delete
+				</button>
 			</form>	
-		</th>
-		<th>
+		</td>
+		<td>
 			<form method="POST" action="/unsubscribe/{{_id}}" class="">
 				<input type="hidden" name="_method" value="PUT"/>
-				<button type="submit" class="btn btn-warning btn-xs" value="Unsubscribe">Unsubscribe</button>
+				<button type="submit" class="btn btn-warning btn-xs" value="Unsubscribe">
+					Unsubscribe
+				</button>
 			</form>
-		</th>
-		<th>
+		</td>
+		<td>
 			<form method="POST" action="/subscribe/{{_id}}" class="">
 				<input type="hidden" name="_method" value="PUT"/>
-				<button type="submit" class="btn btn-warning btn-xs" value="Subscribe">Subscribe</button>
+				<button type="submit" class="btn btn-warning btn-xs" value="Subscribe">
+					Subscribe
+				</button>
 			</form>
-		</th>
-		<th>
+		</td>
+		<td>
 			<form method="GET" action="/feed/{{_id}}">
-				<button type="submit" class="btn btn-info btn-xs" value="Entries">Entries</button>
+				<button type="submit" class="btn btn-info btn-xs" value="Entries">
+					Entries
+				</button>
 			</form>
-		</th>
-		<th><a href="{{topic}}">{{topic}}</a></th>
-		<th>{{status}}</th>
-		<th>{{unix_to_date subtime}}</th>
-		<th>{{feeds.title}}</th>
+		</td>
+		<td><a href="{{topic}}">{{topic}}</a></td>
+		<td>{{status}}</td>
+		<td>{{unix_to_date subtime}}</td>
+		<td>{{feeds.title}}</td>
 	</tr>
 {{/each}}
 </tbody>
