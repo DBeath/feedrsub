@@ -21,7 +21,8 @@
     "mongodb": "*",
     "moment": "*",
     "validator": "*",
-    "connect-flash": "*"
+    "connect-flash": "*",
+    "async": "*"
   },
   "devDependencies": {
     "mocha": "*",
