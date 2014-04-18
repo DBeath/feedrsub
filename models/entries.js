@@ -19,9 +19,13 @@ Entries.prototype.insert = function (item, callback) {
 };
 
 Entries.prototype.list = function (topic, limit, callback) {
-  this.collection.find({topic: topic}).limit(limit).toArray(function (err, docs) {
-    if (err) return callback(err);
-    return callback(null, docs);
+  this.collection.find({topic: topic})
+    .limit(limit)
+    .sort([['published', -1]])
+    .toArray(
+      function (err, docs) {
+        if (err) return callback(err);
+        return callback(null, docs);
   });
 };
 

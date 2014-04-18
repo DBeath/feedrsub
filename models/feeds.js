@@ -59,7 +59,7 @@ Feeds.prototype.listAll = function (callback) {
 };
 
 Feeds.prototype.listByStatus = function (status, callback) {
-  this.collection.find({status: status}).toArray(function (err, docs) {
+  this.collection.find({status: status}).sort([['title', 1]]).toArray(function (err, docs) {
     if (err) callback(err);
     callback(null, docs);
   });

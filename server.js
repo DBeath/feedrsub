@@ -49,15 +49,7 @@ app.configure(function () {
 var auth = express.basicAuth(config.express.admin, config.express.adminpass);
 
 hbs.registerHelper('unix_to_date', function (unixDate) {
-  return moment.unix(unixDate).format('DD/MM/YYYY HH:mm:ss')
-});
-
-hbs.registerHelper('pendingSubscribe', function (feed) {
-  if (feed.subtime > feed.unsubtime) {
-    return true;
-  } else {
-    return false;
-  };
+  return moment.unix(unixDate).format('DD/MM/YYYY HH:mm:ss');
 });
 
 app.get('/admin', auth, admin.index );
