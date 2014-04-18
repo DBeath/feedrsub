@@ -172,6 +172,8 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
     'topic=' + encodeURIComponent(topic) + 
     '&hub=' + encodeURIComponent(hub);
 
+  var feedSecret = null;
+
   var form = {
     'hub.callback': uniqueCallbackUrl,
     'hub.mode': mode,
@@ -193,7 +195,8 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
     } else {
       if (this.secret && mode === 'subscribe') {
         try {
-          form['hub.secret'] = crypto.createHmac("sha1", this.secret).update(topic).digest("hex");
+          feedSecret = crypto.createHmac("sha1", this.secret).update(topic).digest("hex");
+          form['hub.secret'] = feedSecret;
         } catch (err) {
           return callback(err);
         };

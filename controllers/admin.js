@@ -153,16 +153,20 @@ admin.prototype.subscribe = function (req, res) {
         console.log('Subscribing to %s', doc.topic);
         pubsub.subscribe(doc.topic, config.pubsub.hub, function (err, result) {
           if (err) return callback(err);
-          return callback(result);
+          var message = result + ' to ' + doc.topic + ' at ' + moment().format();
+          return callback(null, message);
         });
       });
     };
-  }, function (err) {
+  }, function (err, results) {
     if (err) {
       console.log(err);
       req.flash('error', err);
       return res.redirect('/subscribed');
     };
+    results.forEach(function (result, index, array) {
+      console.log(result);
+    });
     req.flash('info', 'Successfully subscribed');
     return res.redirect('/subscribed');
   });
@@ -182,6 +186,7 @@ admin.prototype.resubscribe = function (req, res) {
         req.flash('error', err);
         return res.redirect('/pending');
       };
+      console.log('%s to %s at %s', result, doc.topic, moment().format());
       req.flash('info', 'Subscription successful');
       return res.redirect('/subscribed');
     });
@@ -202,7 +207,7 @@ admin.prototype.unsubscribe = function (req, res) {
         req.flash('error', err);
         return res.redirect('/pending');
       };
-      var message = 'Unsubscribed from ' + doc.topic;
+      console.log('%s from %s at %s', result, doc.topic, moment().format());
       req.flash('info', message);
       return res.redirect('/unsubscribed');
     });
