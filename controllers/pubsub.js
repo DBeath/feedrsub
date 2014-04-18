@@ -24,6 +24,10 @@ pubsub.on('feed_update', function (data) {
     };
 
     if (json.status) {
+      if (json.title) {
+        json.status.title = json.title;
+      };
+      
       db.feeds.updateDetails(data.topic, json.status, function (err, result) {
         if (err) return console.log(err);
         console.log('Updated status of %s', data.topic);

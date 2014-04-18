@@ -187,7 +187,8 @@ admin.prototype.resubscribe = function (req, res) {
         return res.redirect('/pending');
       };
       console.log('%s to %s at %s', result, doc.topic, moment().format());
-      req.flash('info', 'Subscription successful');
+      var message = 'Resubscribed to ' + doc.topic;
+      req.flash('info', message);
       return res.redirect('/subscribed');
     });
   });
@@ -208,6 +209,7 @@ admin.prototype.unsubscribe = function (req, res) {
         return res.redirect('/pending');
       };
       console.log('%s from %s at %s', result, doc.topic, moment().format());
+      var message = 'Unsubscribed from ' + doc.topic;
       req.flash('info', message);
       return res.redirect('/unsubscribed');
     });
