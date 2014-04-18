@@ -67,6 +67,7 @@ admin.prototype.index = function (req, res) {
     }
   }, function (err, results) {
     if (err) {
+      console.error(err);
       req.flash('error', err);
       return next(err);
     };
@@ -82,7 +83,7 @@ admin.prototype.index = function (req, res) {
 admin.prototype.feed = function (req, res) {
   mongo.feeds.findOneById(req.params.id, function (err, doc) {
     if (err) {
-      console.log(err);
+      console.error(err);
       req.flash('error', err);
       return res.redirect('/admin');
     };
@@ -96,26 +97,26 @@ admin.prototype.feed = function (req, res) {
         });
       },
       entriesCount: function (callback) {
-        mongo.entries.collection.count({topic: doc.topic}, function (err, result) {
+        mongo.entries.countAll(doc.topic, function (err, result) {
           if (err) return callback(err);
           return callback(null, result);
         });
       },
       entriesInLastDay: function (callback) {
-        mongo.entries.collection.count({topic: doc.topic, published: dayAgo}, function (err, result) {
+        mongo.entries.countRecent(doc.topic, dayAgo, function (err, result) {
           if (err) return callback(err);
           return callback(null, result);
         });
       },
       entriesInLastWeek: function (callback) {
-        mongo.entries.collection.count({topic: doc.topic, published: weekAgo}, function (err, result) {
+        mongo.entries.count(doc.topic, weekAgo, function (err, result) {
           if (err) return callback(err);
           return callback(null, result);
         });
       }
     }, function (err, results) {
       if (err) {
-        console.log(err);
+        console.error(err);
         req.flash('error', err);
         return res.redirect('/admin');
       };
@@ -129,7 +130,7 @@ admin.prototype.feed = function (req, res) {
 
 admin.prototype.deletefeed = function (req, res) {
   mongo.feeds.delete(req.params.id, function (err, num) {
-    if (err) console.log(err);
+    if (err) console.error(err);
     console.log('Deleted %s', req.params.id);
     return res.redirect('/admin');
   });
@@ -170,14 +171,14 @@ admin.prototype.subscribe = function (req, res) {
 admin.prototype.resubscribe = function (req, res) {
   mongo.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
     if (err) {
-      console.log(err);
+      console.error(err);
       req.flash('error', 'Database update failed');
       return res.redirect('/subscribed');
     };
     console.log('Resubscribing to %s', doc.topic);
     pubsub.subscribe(doc.topic, config.pubsub.hub, function (err, result) {
       if (err) {
-        console.log(err);
+        console.error(err);
         req.flash('error', err);
         return res.redirect('/pending');
       };
@@ -190,14 +191,14 @@ admin.prototype.resubscribe = function (req, res) {
 admin.prototype.unsubscribe = function (req, res) {
   mongo.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
     if (err) {
-      console.log(err);
+      console.error(err);
       req.flash('error', err);
       return res.redirect('/unsubscribed');
     };
     console.log('Unsubscribing from %s', doc.topic);
     pubsub.unsubscribe(doc.topic, config.pubsub.hub, function (err, result) {
       if (err) {
-        console.log(err);
+        console.error(err);
         req.flash('error', err);
         return res.redirect('/pending');
       };

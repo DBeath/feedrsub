@@ -13,15 +13,32 @@ function Entries (db) {
 
 Entries.prototype.insert = function (item, callback) {
   this.collection.insert(item, {w:1}, function (err) {
-    if (err) callback(err);
-    console.log(moment().format()+' | Inserted entry');
-    callback(null);
+    if (err) return callback(err);
+    return callback(null);
   }); 
 };
 
 Entries.prototype.list = function (topic, limit, callback) {
   this.collection.find({topic: topic}).limit(limit).toArray(function (err, docs) {
-    if (err) callback(err);
-    callback(null, docs);
+    if (err) return callback(err);
+    return callback(null, docs);
+  });
+};
+
+Entries.prototype.countAll = function (topic, callback) {
+  this.collection.count({topic: topic}, function (err, result) {
+    if (err) return callback(err);
+    return callback(null, result);
+  });
+};
+
+Entries.prototype.countRecent = function (topic, time, callback) {
+  this.collection.count({
+    topic: topic,
+    published: {$gt: time}
+  },
+  function (err, result) {
+    if (err) return callback(err);
+    return callback(null, result);
   });
 };
