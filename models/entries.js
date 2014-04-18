@@ -25,14 +25,34 @@ Entries.prototype.list = function (topic, limit, callback) {
   });
 };
 
-Entries.prototype.countAll = function (topic, callback) {
-  this.collection.count({topic: topic}, function (err, result) {
+Entries.prototype.countAll = function (callback) {
+  this.collection.count(function (err, result) {
     if (err) return callback(err);
     return callback(null, result);
   });
 };
 
-Entries.prototype.countRecent = function (topic, time, callback) {
+Entries.prototype.countAllByTopic = function (topic, callback) {
+  this.collection.count({
+    topic: topic
+  },
+  function (err, result) {
+    if (err) return callback(err);
+    return callback(null, result);
+  });
+};
+
+Entries.prototype.countRecent = function (time, callback) {
+  this.collection.count({
+    published: {$gt: time}
+  },
+  function (err, result) {
+    if (err) return callback(err);
+    return callback(null, result);
+  });
+};
+
+Entries.prototype.countRecentByTopic = function (topic, time, callback) {
   this.collection.count({
     topic: topic,
     published: {$gt: time}

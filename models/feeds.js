@@ -149,3 +149,30 @@ Feeds.prototype.updateStatusById = function (id, status, callback) {
     callback(null, doc);
   });
 };
+
+Feeds.prototype.countAll = function (callback) {
+  this.collection.count(function (err, result) {
+    if (err) return callback(err);
+    return callback(null, result);
+  });
+};
+
+Feeds.prototype.countByStatus = function (status, callback) {
+  this.collection.count({
+    status: status
+  },
+  function (err, result) {
+    if (err) return callback(err);
+    return callback(null, result);
+  });
+};
+
+Feeds.prototype.countRecent = function (time, callback) {
+  this.collection.count({
+    subtime: {$gt: time}
+  },
+  function (err, result) {
+    if (err) return callback(err);
+    return callback(null, result);
+  });
+};

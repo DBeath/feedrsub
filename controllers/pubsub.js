@@ -1,5 +1,5 @@
 var pubsubController = require('./pubsubController.js');
-var mongo = require('../models/mongodb.js');
+var db = require('../models/mongodb.js');
 var moment = require('moment');
 var config = require('../config.json');
 
@@ -24,7 +24,7 @@ pubsub.on('feed_update', function (data) {
     };
 
     if (json.status) {
-      mongo.feeds.updateDetails(data.topic, json.status, function (err, result) {
+      db.feeds.updateDetails(data.topic, json.status, function (err, result) {
         if (err) return console.log(err);
         console.log('Updated status of %s', data.topic);
       });
@@ -37,7 +37,7 @@ pubsub.on('feed_update', function (data) {
         if (!item.published) {
           item.published = moment().unix();
         };
-        mongo.entries.insert(item, function (err) {
+        db.entries.insert(item, function (err) {
           if (err) return console.log(err);
           return console.log('Added entry from %s at %s', data.topic, moment().format());
         });
@@ -48,7 +48,7 @@ pubsub.on('feed_update', function (data) {
       //   if (!json.items[i].published) {
       //     json.items[i].published = moment().unix();
       //   };
-      //   mongo.entries.insert(json.items[i], function (err) {
+      //   db.entries.insert(json.items[i], function (err) {
       //     if (err) console.log(err);
       //     else {
       //       console.log('Added entry from %s at %s', topic, moment().format());

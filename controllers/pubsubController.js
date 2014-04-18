@@ -1,5 +1,5 @@
 var config = require('../config.json');
-var mongo = require('../models/mongodb.js');
+var db = require('../models/mongodb.js');
 var request = require('request');
 var crypto = require('crypto');
 var util = require('util');
@@ -42,14 +42,14 @@ Pubsub.prototype.verification = function (req, res) {
   switch ( mode ) {
     case 'denied':
       res.send(200);
-      mongo.feeds.unsubscribe(topic, function (err, result) {
+      db.feeds.unsubscribe(topic, function (err, result) {
         if (err) console.log(err);
         console.log('Unsubscribed from %s', topic);
       });
       break;
     case 'subscribe':
     case 'unsubscribe':
-      mongo.feeds.findOneByTopic(topic, function (err, doc) {
+      db.feeds.findOneByTopic(topic, function (err, doc) {
         if (err) {
           res.send(404);
           console.log(err);
@@ -89,7 +89,7 @@ Pubsub.prototype.notification = function (req, res) {
     return res.send(400);
   };
 
-  mongo.feeds.findOneByTopic(topic, (function (err, doc) {
+  db.feeds.findOneByTopic(topic, (function (err, doc) {
     if (err) {
       console.log(err);
       return res.send(400);
@@ -183,7 +183,7 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
     form['format'] = 'json';
   };
 
-  mongo.feeds.findOneByTopic(topic, (function (err, doc) {
+  db.feeds.findOneByTopic(topic, (function (err, doc) {
     if (err) {
       return callback(err);
     };
@@ -216,13 +216,13 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
       if (response.statusCode === 202 || response.statusCode === 204) {
         switch ( mode ) {
           case 'subscribe':
-            mongo.feeds.subscribe(topic, feedSecret, function (err, result) {
+            db.feeds.subscribe(topic, feedSecret, function (err, result) {
               if (err) return callback(err);
               return callback(null, 'Subscribed');
             });
             break;
           case 'unsubscribe':
-            mongo.feeds.unsubscribe(topic, function (err, result) {
+            db.feeds.unsubscribe(topic, function (err, result) {
               if (err) return callback(err);
               return callback(null, 'Unsubscribed');
             });
@@ -261,13 +261,13 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
   //     // pending.push(topic);
   //     switch ( mode ) {
   //       case 'subscribe':
-  //         mongo.feeds.subscribe(topic, feedSecret, function (err, result) {
+  //         db.feeds.subscribe(topic, feedSecret, function (err, result) {
   //           if (err) return callback(err, null);
   //           return callback(null, 'Subscribed');
   //         });
   //         break;
   //       case 'unsubscribe':
-  //         mongo.feeds.unsubscribe(topic, function (err, result) {
+  //         db.feeds.unsubscribe(topic, function (err, result) {
   //           if (err) return callback(err, null);
   //           return callback(null, 'Unsubscribed');
   //         });

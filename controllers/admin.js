@@ -1,4 +1,4 @@
-var mongo = require('../models/mongodb.js');
+var db = require('../models/mongodb.js');
 var config = require('../config.json');
 var validator = require('validator');
 var async = require('async');
@@ -18,49 +18,49 @@ admin.prototype.index = function (req, res) {
   var weekAgo = moment().subtract('d', 7).unix();
   async.parallel({
     feedCount: function (callback) {
-      mongo.feeds.collection.count(function (err, result) {
+      db.feeds.countAll(function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
     },
     subscribedCount: function (callback) {
-      mongo.feeds.collection.count({status: 'subscribed'}, function (err, result) {
+      db.feeds.countByStatus('subscribed', function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
     },
     unsubscribedCount: function (callback) {
-      mongo.feeds.collection.count({status: 'unsubscribed'}, function (err, result) {
+      db.feeds.countByStatus('unsubscribed', function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
     },
     pendingCount: function (callback) {
-      mongo.feeds.collection.count({status: 'pending'}, function (err, result) {
+      db.feeds.countByStatus('pending', function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
     },
     entriesCount: function (callback) {
-      mongo.entries.collection.count(function (err, result) {
+      db.entries.countAll(function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
     },
     entriesInLastDay: function (callback) {
-      mongo.entries.collection.count({published: { $gt: dayAgo}}, function (err, result) {
+      db.entries.countRecent(dayAgo, function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
     },
     entriesInLastWeek: function (callback) {
-      mongo.entries.collection.count({published: {$gt: weekAgo}}, function (err, result) {
+      db.entries.countRecent(weekAgo, function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
     },
     feedsAddedInLastWeek: function (callback) {
-      mongo.feeds.collection.count({subtime: {$gt: weekAgo}}, function (err, result) {
+      db.feeds.countRecent(weekAgo, function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
@@ -81,7 +81,7 @@ admin.prototype.index = function (req, res) {
 };
 
 admin.prototype.feed = function (req, res) {
-  mongo.feeds.findOneById(req.params.id, function (err, doc) {
+  db.feeds.findOneById(req.params.id, function (err, doc) {
     if (err) {
       console.error(err);
       req.flash('error', err);
@@ -91,25 +91,25 @@ admin.prototype.feed = function (req, res) {
     var weekAgo = moment().subtract('d', 7).unix();
     async.parallel({
       entries: function (callback) {
-        mongo.entries.list(doc.topic, 100, function (err, docs) {
+        db.entries.list(doc.topic, 100, function (err, docs) {
           if (err) return callback(err);
           return callback(null, docs);
         });
       },
       entriesCount: function (callback) {
-        mongo.entries.countAll(doc.topic, function (err, result) {
+        db.entries.countAllByTopic(doc.topic, function (err, result) {
           if (err) return callback(err);
           return callback(null, result);
         });
       },
       entriesInLastDay: function (callback) {
-        mongo.entries.countRecent(doc.topic, dayAgo, function (err, result) {
+        db.entries.countRecentByTopic(doc.topic, dayAgo, function (err, result) {
           if (err) return callback(err);
           return callback(null, result);
         });
       },
       entriesInLastWeek: function (callback) {
-        mongo.entries.count(doc.topic, weekAgo, function (err, result) {
+        db.entries.countRecentByTopic(doc.topic, weekAgo, function (err, result) {
           if (err) return callback(err);
           return callback(null, result);
         });
@@ -129,7 +129,7 @@ admin.prototype.feed = function (req, res) {
 };
 
 admin.prototype.deletefeed = function (req, res) {
-  mongo.feeds.delete(req.params.id, function (err, num) {
+  db.feeds.delete(req.params.id, function (err, num) {
     if (err) console.error(err);
     console.log('Deleted %s', req.params.id);
     return res.redirect('/admin');
@@ -148,7 +148,7 @@ admin.prototype.subscribe = function (req, res) {
       var message = sub + ' is not a valid URL';
       return callback(message);
     } else {
-      mongo.feeds.updateStatus(sub, 'pending', function (err, doc) {
+      db.feeds.updateStatus(sub, 'pending', function (err, doc) {
         if (err) return callback(err);
         console.log('Subscribing to %s', doc.topic);
         pubsub.subscribe(doc.topic, config.pubsub.hub, function (err, result) {
@@ -169,7 +169,7 @@ admin.prototype.subscribe = function (req, res) {
 };
 
 admin.prototype.resubscribe = function (req, res) {
-  mongo.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
+  db.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
     if (err) {
       console.error(err);
       req.flash('error', 'Database update failed');
@@ -189,7 +189,7 @@ admin.prototype.resubscribe = function (req, res) {
 };
 
 admin.prototype.unsubscribe = function (req, res) {
-  mongo.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
+  db.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
     if (err) {
       console.error(err);
       req.flash('error', err);
@@ -212,13 +212,13 @@ admin.prototype.unsubscribe = function (req, res) {
 admin.prototype.unsubscribed_feeds = function (req, res) {
   async.parallel({
     docs: function (callback) {
-      mongo.feeds.listByStatus('unsubscribed', function (err, docs) {
+      db.feeds.listByStatus('unsubscribed', function (err, docs) {
         if (err) return callback(err);
         return callback(null, docs);
       });
     },
     count: function (callback) {
-      mongo.feeds.collection.count({status: 'unsubscribed'}, function (err, result) {
+      db.feeds.countByStatus('unsubscribed', function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
@@ -241,19 +241,20 @@ admin.prototype.unsubscribed_feeds = function (req, res) {
 admin.prototype.subscribed_feeds = function (req, res) {
   async.parallel({
     docs: function (callback) {
-      mongo.feeds.listByStatus('subscribed', function (err, docs) {
+      db.feeds.listByStatus('subscribed', function (err, docs) {
         if (err) return callback(err);
         return callback(null, docs);
       });
     },
     count: function (callback) {
-      mongo.feeds.collection.count({status: 'subscribed'}, function (err, result) {
+      db.feeds.countByStatus('subscribed', function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
     }
   }, function (err, results) {
     if (err) {
+      console.error(err);
       req.flash('error', err);
       return next(err);
     };
@@ -270,20 +271,20 @@ admin.prototype.subscribed_feeds = function (req, res) {
 admin.prototype.pending_feeds = function (req, res) {
   async.parallel({
     docs: function (callback) {
-      mongo.feeds.listByStatus('pending', function (err, docs) {
+      db.feeds.listByStatus('pending', function (err, docs) {
         if (err) return callback(err);
         return callback(null, docs);
       });
     },
     count: function (callback) {
-      mongo.feeds.collection.count({status: 'pending'}, function (err, result) {
+      db.feeds.countByStatus('pending', function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
     }
   }, function (err, results) {
     if (err) {
-      console.log(err);
+      console.error(err);
       req.flash('error', err);
       return res.redirect('/admin');
     };
