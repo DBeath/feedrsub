@@ -237,48 +237,4 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
       };
     });
   }).bind(this));
-
-  // if (this.secret) {
-  //   try {
-  //     var feedSecret = crypto.createHmac("sha1", this.secret).update(topic).digest("hex");
-  //     form['hub.secret'] = feedSecret;
-  //   } catch (err) {
-  //     return callback(err, null);
-  //   };
-  // };
-
-  // var postParams = {
-  //   url: hub,
-  //   form: form,
-  //   encoding: 'utf-8'
-  // };
-
-  // if (this.auth) {
-  //   postParams.auth = this.auth;
-  // };
-
-  // request.post(postParams, function (err, response, body) {
-  //   if (err) console.log(err);
-
-  //   if (response.statusCode === 202 || response.statusCode === 204) {
-  //     // pending.push(topic);
-  //     switch ( mode ) {
-  //       case 'subscribe':
-  //         db.feeds.subscribe(topic, feedSecret, function (err, result) {
-  //           if (err) return callback(err, null);
-  //           return callback(null, 'Subscribed');
-  //         });
-  //         break;
-  //       case 'unsubscribe':
-  //         db.feeds.unsubscribe(topic, function (err, result) {
-  //           if (err) return callback(err, null);
-  //           return callback(null, 'Unsubscribed');
-  //         });
-  //         break;
-  //     }; 
-  //   } else {
-  //     var message = 'Subscription failed because: ' + body;
-  //     return callback(message, null);
-  //   };
-  // });
 };

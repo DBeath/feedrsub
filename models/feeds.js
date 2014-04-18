@@ -99,7 +99,9 @@ Feeds.prototype.updateDetails = function (topic, status, callback) {
         code: status.code,
         nextFetch: status.nextFetch,
         http: status.http,
-        eclsm: status.entriesCountSinceLastMaintenance
+        eclsm: status.entriesCountSinceLastMaintenance,
+        permalinkUrl: status.permalinkUrl,
+        updated: status.updated
       }
     },
     {

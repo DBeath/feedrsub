@@ -24,11 +24,12 @@ pubsub.on('feed_update', function (data) {
     };
 
     if (json.status) {
-      if (json.title) {
-        json.status.title = json.title;
-      };
-      
-      db.feeds.updateDetails(data.topic, json.status, function (err, result) {
+      var status = json.status;
+      status.title = json.title;
+      status.permalinkUrl = json.permalinkUrl;
+      status.updated = json.updated;
+
+      db.feeds.updateDetails(data.topic, status, function (err, result) {
         if (err) return console.log(err);
         console.log('Updated status of %s', data.topic);
       });
@@ -47,18 +48,6 @@ pubsub.on('feed_update', function (data) {
         });
       });
 
-      // for (var i = 0; i < json.items.length; i++) {
-      //   json.items[i].topic = data.topic;
-      //   if (!json.items[i].published) {
-      //     json.items[i].published = moment().unix();
-      //   };
-      //   db.entries.insert(json.items[i], function (err) {
-      //     if (err) console.log(err);
-      //     else {
-      //       console.log('Added entry from %s at %s', topic, moment().format());
-      //     };
-      //   });
-      // };
     } else {
       console.log('No items in notification');
     };
