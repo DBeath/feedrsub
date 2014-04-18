@@ -120,8 +120,9 @@ admin.prototype.feed = function (req, res) {
         req.flash('error', err);
         return res.redirect('/admin');
       };
+      var title = doc.title || doc.topic;
       return res.render('feed', {
-        title: 'Entries for ' + doc.topic,
+        title: 'Entries for ' + title,
         results: results
       });
     });
