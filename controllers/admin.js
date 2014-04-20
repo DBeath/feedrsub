@@ -13,6 +13,7 @@ function admin (pubsubobj) {
   pubsub = pubsubobj;
 };
 
+// The main Admin page. Contains statistics on feed and entry counts.
 admin.prototype.index = function (req, res) {
   var dayAgo = moment().subtract('d', 1).unix();
   var weekAgo = moment().subtract('d', 7).unix();
@@ -80,6 +81,7 @@ admin.prototype.index = function (req, res) {
   });
 };
 
+// Renders a page containing a list of entries by feed.
 admin.prototype.feed = function (req, res) {
   db.feeds.findOneById(req.params.id, function (err, doc) {
     if (err) {
@@ -129,6 +131,7 @@ admin.prototype.feed = function (req, res) {
   });
 };
 
+// Deletes a feed.
 admin.prototype.deletefeed = function (req, res) {
   db.feeds.delete(req.params.id, function (err, num) {
     if (err) console.error(err);
@@ -137,10 +140,14 @@ admin.prototype.deletefeed = function (req, res) {
   });
 };
 
+// Renders the feed subscription page.
 admin.prototype.newfeed = function (req, res) {
   return res.render('subscribe', {title: 'Subscribe'});
 };
 
+// Subscribes to a list of feeds.
+// Requires a 'topic' parameter in the body, containing a list of feeds
+// to subscribe to separated by newline, space, tab, or comma characters.
 admin.prototype.subscribe = function (req, res) {
   var subs = req.param('topic').split(/[\s,]+/);
 
@@ -170,6 +177,7 @@ admin.prototype.subscribe = function (req, res) {
   });
 };
 
+// Sends a subscription request for an already existing feed.
 admin.prototype.resubscribe = function (req, res) {
   db.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
     if (err) {
@@ -192,6 +200,7 @@ admin.prototype.resubscribe = function (req, res) {
   });
 };
 
+// Sends an unsubscribe request for a feed.
 admin.prototype.unsubscribe = function (req, res) {
   db.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
     if (err) {
@@ -214,6 +223,7 @@ admin.prototype.unsubscribe = function (req, res) {
   });
 };
 
+// Renders a page containing a list of all feeds with the 'unsubscribed' status.
 admin.prototype.unsubscribed_feeds = function (req, res) {
   async.parallel({
     docs: function (callback) {
@@ -243,6 +253,7 @@ admin.prototype.unsubscribed_feeds = function (req, res) {
   });
 };
 
+// Renders a page containing a list of feeds with the 'subscribed' status.
 admin.prototype.subscribed_feeds = function (req, res) {
   async.parallel({
     docs: function (callback) {
@@ -273,6 +284,7 @@ admin.prototype.subscribed_feeds = function (req, res) {
   });
 };
 
+// Renders a page containing a list of feeds with the 'pending' status.
 admin.prototype.pending_feeds = function (req, res) {
   async.parallel({
     docs: function (callback) {
