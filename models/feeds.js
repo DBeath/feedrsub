@@ -27,8 +27,8 @@ Feeds.prototype.subscribe = function (topic, secret, callback) {
       w: 1 
     }, 
     function (err) {
-      if (err) callback(err);
-      callback(null, topic);
+      if (err) return callback(err);
+      return callback(null, topic);
   });
 };
 
@@ -46,29 +46,29 @@ Feeds.prototype.unsubscribe = function (topic, callback) {
       w: 1
     }, 
     function (err, result) {
-      if (err) callback(err);
-      callback(null, result);
+      if (err) return callback(err);
+      return callback(null, result);
   });
 };
 
 Feeds.prototype.listAll = function (callback) {
   this.collection.find().toArray(function (err, docs) {
-    if (err) callback(err);
-    callback(null, docs);
+    if (err) return callback(err);
+    return callback(null, docs);
   });
 };
 
 Feeds.prototype.listByStatus = function (status, callback) {
   this.collection.find({status: status}).sort([['title', 1]]).toArray(function (err, docs) {
-    if (err) callback(err);
-    callback(null, docs);
+    if (err) return callback(err);
+    return callback(null, docs);
   });
 };
 
 Feeds.prototype.findOneById = function (id, callback) {
   this.collection.findOne({_id: ObjectID.createFromHexString(id)}, function (err, doc) {
-    if (err) callback(err);
-    callback(null, doc);
+    if (err) return callback(err);
+    return callback(null, doc);
   });
 };
 
@@ -81,8 +81,8 @@ Feeds.prototype.findOneByTopic = function (topic, callback) {
 
 Feeds.prototype.delete = function (id, callback) {
   this.collection.remove({_id: ObjectID.createFromHexString(id)}, {w:1}, function (err, num) {
-    if (err) callback(err);
-    callback(null, num);
+    if (err) return callback(err);
+    return callback(null, num);
   });
 };
 
@@ -108,8 +108,8 @@ Feeds.prototype.updateDetails = function (topic, status, callback) {
       w: 1
     },
     function (err, result) {
-      if (err) callback(err);
-      callback(null, result);
+      if (err) return callback(err);
+      return callback(null, result);
   });
 };
 
@@ -128,8 +128,8 @@ Feeds.prototype.updateStatus = function (topic, status, callback) {
     new: true
   },
   function (err, doc) {
-    if (err) callback(err);
-    callback(null, doc);
+    if (err) return callback(err);
+    return callback(null, doc);
   });
 };
 
@@ -147,8 +147,8 @@ Feeds.prototype.updateStatusById = function (id, status, callback) {
     new: true
   },
   function (err, doc) {
-    if (err) callback(err);
-    callback(null, doc);
+    if (err) return callback(err);
+    return callback(null, doc);
   });
 };
 

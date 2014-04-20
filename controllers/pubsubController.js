@@ -47,8 +47,8 @@ Pubsub.prototype.verification = function (req, res) {
     case 'denied':
       res.send(200);
       db.feeds.unsubscribe(topic, function (err, result) {
-        if (err) console.log(err);
-        console.log('Unsubscribed from %s', topic);
+        if (err) return console.log(err);
+        return console.log('Unsubscribed from %s', topic);
       });
       break;
     // If subscribing or unsubscribing check that topic is pending, then echo challenge.
@@ -56,18 +56,18 @@ Pubsub.prototype.verification = function (req, res) {
     case 'unsubscribe':
       db.feeds.findOneByTopic(topic, function (err, doc) {
         if (err) {
-          res.send(404);
-          console.log(err);
+          console.error(err);
+          return res.send(404);;
         };
         if (doc.status === 'pending') {
-          res.send(200, challenge);
+          return res.send(200, challenge);
         } else {
-          res.send(404);
+          return res.send(404);
         };
       });
       break;
     default:
-      res.send(403);    
+      return res.send(403);    
   };
 };
 

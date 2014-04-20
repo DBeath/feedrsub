@@ -25,7 +25,7 @@ function start(done) {
     console.log('Connected to database. Starting server...');
     server.listen(config.express.port);
     console.log('Server listening on port %s', config.express.port);
-    done();
+    return done();
   });
 };
 

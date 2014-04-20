@@ -8,13 +8,13 @@ module.exports.init = function (callback) {
   var connString = config.express.connString || "mongodb://localhost:27017/feedrsub";
 
   MongoClient.connect(connString, function (err, database) {
-    if (err) callback(err);
+    if (err) return callback(err);
     var db = database;
 
     module.exports.entries = Entries.createCollection(db);
     module.exports.feeds = Feeds.createCollection(db);
     module.exports.errors = new mongodb.Collection(db, 'errors');
     var message = 'Connected to ' + connString;
-    callback(null, message);
+    return callback(null, message);
   });
 };
