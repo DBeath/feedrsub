@@ -10,6 +10,9 @@ module.exports.createController = function (options) {
   return new Pubsub(options);
 };
 
+// Pubsub class to control pubsubhubbub subscriptions.
+// Conforms to pubsubhubbub v0.4 specification.
+// https://pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.4.html
 function Pubsub (options) {
   events.EventEmitter.call(this);
 
@@ -40,6 +43,7 @@ Pubsub.prototype.verification = function (req, res) {
   };
 
   switch ( mode ) {
+    // If sent denied then unsubscribe from topic.
     case 'denied':
       res.send(200);
       db.feeds.unsubscribe(topic, function (err, result) {
@@ -47,6 +51,7 @@ Pubsub.prototype.verification = function (req, res) {
         console.log('Unsubscribed from %s', topic);
       });
       break;
+    // If subscribing or unsubscribing check that topic is pending, then echo challenge.
     case 'subscribe':
     case 'unsubscribe':
       db.feeds.findOneByTopic(topic, function (err, doc) {
