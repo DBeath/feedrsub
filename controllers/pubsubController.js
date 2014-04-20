@@ -58,7 +58,7 @@ Pubsub.prototype.verification = function (req, res) {
       db.feeds.findOneByTopic(topic, function (err, doc) {
         if (err) {
           console.error(err);
-          return res.send(403);;
+          return res.send(403);
         };
         if (doc.status === 'pending') {
           if (lease_seconds && mode === 'subscribe') {

@@ -1,7 +1,7 @@
 feedrsub
 ========
 
-Node.js subscriber and admin page for [Superfeedr](http://superfeedr.com/).
+Node.js subscriber and admin page for [Superfeedr](http://superfeedr.com/) subscriptions.
 
 ## Installation
 Install node.js and mongodb.
