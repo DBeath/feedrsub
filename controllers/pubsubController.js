@@ -37,6 +37,7 @@ Pubsub.prototype.verification = function (req, res) {
   var topic = req.query['hub.topic'] || false;
   var mode = req.query['hub.mode'] || false;
   var challenge = req.query['hub.challenge'] || false;
+  var lease_seconds = req.query['lease_seconds'] || false;
 
   if ( !topic || !mode || !challenge) {
     return res.send(400);
@@ -57,10 +58,20 @@ Pubsub.prototype.verification = function (req, res) {
       db.feeds.findOneByTopic(topic, function (err, doc) {
         if (err) {
           console.error(err);
-          return res.send(404);;
+          return res.send(403);;
         };
         if (doc.status === 'pending') {
-          return res.send(200, challenge);
+          if (lease_seconds && mode === 'subscribe') {
+            db.feeds.updateLeaseSeconds(topic, lease_seconds, function (err, result) {
+              if (err) {
+                console.error(err);
+                return res.send(403);
+              };
+              return res.send(200, challenge);
+            });
+          } else {
+            return res.send(200, challenge);
+          };
         } else {
           return res.send(404);
         };

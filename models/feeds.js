@@ -122,6 +122,22 @@ Feeds.prototype.updateDetails = function (topic, status, callback) {
   });
 };
 
+// Updates the time until the feed lease runs out.
+Feeds.prototype.updateLeaseSeconds = function (topic, seconds, callback) {
+  this.collection.update({
+    topic: topic
+  },
+  {
+    $set: {
+      leaseSeconds: seconds
+    }
+  },
+  function (err, result) {
+    if (err) return callback(err);
+    return callback(null, result);
+  });
+};
+
 // Updates the subscription status of a feed.
 Feeds.prototype.updateStatus = function (topic, status, callback) {
   this.collection.findAndModify({

@@ -31,7 +31,6 @@ pubsub.on('feed_update', function (data) {
     if (json.status) {
       var status = json.status;
       status.title = json.title;
-      console.log(status.title);
       status.permalinkUrl = json.permalinkUrl;
       status.updated = json.updated;
 
@@ -56,7 +55,6 @@ pubsub.on('feed_update', function (data) {
         // Item must have unique Id (seperate from database id).
         if (!item.id) {
           item.id = item.permalinkUrl || data.topic+'/'+item.title+'/'+item.published;
-          console.log(item.id);
         };
 
         // Adds entry item if Id doesn't exist, update entry item if it does.
