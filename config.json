@@ -4,14 +4,13 @@
     "username": "login",
     "password": "password",
     "secret": "supersecret",
-    "callbackurl": "http://localhost:4000/pubsubhubbub",
     "format": "json",
     "domain": "http://localhost:4000"
   },
   "express": {
     "admin": "admin",
     "adminpass": "password",
-    "port": 4000
-  },
-  "connstring": "mongodb://localhost:27017/feedrsub"
+    "port": 4000,
+    "connstring": "mongodb://localhost:27017/feedrsub"
+  }
 }

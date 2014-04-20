@@ -42,7 +42,7 @@ pubsub.on('feed_update', function (data) {
         if (!item.published) {
           item.published = moment().unix();
         };
-        db.entries.insert(item, function (err) {
+        db.entries.update(item.id, item, function (err) {
           if (err) return console.log(err);
           return console.log('Added entry from %s at %s', data.topic, moment().format());
         });

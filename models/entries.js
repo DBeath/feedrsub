@@ -18,6 +18,21 @@ Entries.prototype.insert = function (item, callback) {
   }); 
 };
 
+Entries.prototype.update = function (id, doc, callback) {
+  this.collection.update({
+    id: id
+  },
+  doc,
+  {
+    upsert:true,
+    w: 1
+  },
+  function (err, result) {
+    if (err) return callback(err);
+    return callback(null, result);
+  });
+};
+
 Entries.prototype.list = function (topic, limit, callback) {
   this.collection.find({topic: topic})
     .limit(limit)

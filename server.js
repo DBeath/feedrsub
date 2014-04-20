@@ -53,15 +53,18 @@ hbs.registerHelper('unix_to_date', function (unixDate) {
 });
 
 app.get('/admin', auth, admin.index );
-app.get('/feed/:id', auth, admin.feed );
-app.put('/unsubscribe/:id', auth, admin.unsubscribe );
-app.del('/feed/:id', auth, admin.deletefeed );
-app.get('/subscribe', auth, admin.newfeed );
-app.post('/subscribe', auth, admin.subscribe );
-app.put('/subscribe/:id', auth, admin.resubscribe );
 app.get('/unsubscribed', auth, admin.unsubscribed_feeds );
 app.get('/subscribed', auth, admin.subscribed_feeds );
 app.get('/pending', auth, admin.pending_feeds );
+
+app.get('/subscribe', auth, admin.newfeed );
+app.post('/subscribe', auth, admin.subscribe );
+app.put('/subscribe/:id', auth, admin.resubscribe );
+
+app.put('/unsubscribe/:id', auth, admin.unsubscribe );
+
+app.get('/feed/:id', auth, admin.feed );
+app.del('/feed/:id', auth, admin.deletefeed );
 
 app.get('/pubsubhubbub', pubsub.verification.bind(pubsub) );
 app.post('/pubsubhubbub', pubsub.notification.bind(pubsub) );
