@@ -16,8 +16,8 @@ var itemStatus = 'Test';
 var item2Title = 'This is the second item';
 var response_body = JSON.stringify(
   {
+    "title": topicTitle,
     "status": {
-      "title": topicTitle,
       "lastFetch": thisNow,
       "http": 200
     },
@@ -117,6 +117,20 @@ describe('pubsub notification', function () {
     });
   });
 
+  it('should return 403 - not subscribed to topic', function (done) {
+    var options = {
+      url: 'http://localhost:4000/pubsubhubbub',
+      headers: {
+        'link': '<http://test.com/feed>; rel="self", <http://pubsubhubbub.appspot.com/>; rel="hub"',
+      }
+    };
+
+    request.post(options, function (err, res, body) {
+      expect(res.statusCode).to.equal(403);
+      done();
+    });
+  });
+
   it('should return 403 - no X-Hub-Signature', function (done) {
     var options = {
       url: 'http://localhost:4000/pubsubhubbub',
@@ -160,14 +174,14 @@ describe('pubsub notification', function () {
     var eventFired = false;
 
     request.post(options, function (err, res, body) {
-      expect(res.statusCode).to.equal(204);
+      expect(res.statusCode, 'response statusCode').to.equal(204);
     });
 
     pubsub.on('feed_update', function (data) {
       eventFired = true;
-      expect(data.topic).to.equal(topic);
-      expect(data.feed).to.exist;
-      expect(data.headers['content-type']).to.equal('application/json');
+      expect(data.topic, 'data topic').to.equal(topic);
+      expect(data.feed, 'data feed').to.exist;
+      expect(data.headers['content-type'], 'data content-type header').to.equal('application/json');
     });
 
     setTimeout(function () {
@@ -175,31 +189,31 @@ describe('pubsub notification', function () {
       async.series({
         feed: function (callback) {
           mongo.feeds.findOneByTopic(topic, function (err, doc) {
-            if (err) callback(err);
-            expect(doc.topic).to.equal(topic);
-            expect(doc.title).to.equal(topicTitle);
-            expect(doc.lastFetch).to.equal(thisNow);
-            expect(doc.http).to.equal(200);
+            if (err) return callback(err);
+            expect(doc.topic, 'feed topic').to.equal(topic);
+            expect(doc.title, 'feed title').to.equal(topicTitle);
+            expect(doc.lastFetch, 'feed lastFetch').to.equal(thisNow);
+            expect(doc.http, 'feed http').to.equal(200);
             callback(null);
           });
         },
         entry1: function (callback) {
           mongo.entries.collection.findOne({title: itemTitle}, function (err, doc) {
-            if (err) callback(err);
-            expect(doc.topic).to.equal(topic);
-            expect(doc.title).to.equal(itemTitle);
-            expect(doc.published).to.equal(thisNow);
-            expect(doc.status).to.equal(itemStatus);
+            if (err) return callback(err);
+            expect(doc.topic, 'doc1 topic').to.equal(topic);
+            expect(doc.title, 'doc1 title').to.equal(itemTitle);
+            expect(doc.published, 'doc1 published').to.equal(thisNow);
+            expect(doc.status, 'doc1 status').to.equal(itemStatus);
             callback(null);
           });
         },
         entry2: function (callback) {
           mongo.entries.collection.findOne({title: item2Title}, function (err, doc) {
-            if (err) callback(err);
-            expect(doc.topic).to.equal(topic);
-            expect(doc.title).to.equal(item2Title);
-            expect(doc.published).to.exist;
-            expect(doc.status).to.equal(itemStatus);
+            if (err) return callback(err);
+            expect(doc.topic, 'doc2 topic').to.equal(topic);
+            expect(doc.title, 'doc2 title').to.equal(item2Title);
+            expect(doc.published, 'doc2 published').to.exist;
+            expect(doc.status, 'doc2 status').to.equal(itemStatus);
             callback(null);
           });
         }

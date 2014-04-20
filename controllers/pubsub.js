@@ -13,8 +13,11 @@ var pubsub = pubsubController.createController({
 
 module.exports.pubsub = pubsub;
 
+// Adds notifications to database and updates feed details.
 pubsub.on('feed_update', function (data) {
   var re = new RegExp('application/json');
+
+  // Data must currently be in JSON format.
   if (re.test(data.headers['content-type'])) {
 
     try {
@@ -23,9 +26,11 @@ pubsub.on('feed_update', function (data) {
       return console.log(e);
     };
 
+    // If data contains feed status update then update feed.
     if (json.status) {
       var status = json.status;
       status.title = json.title;
+      console.log(status.title);
       status.permalinkUrl = json.permalinkUrl;
       status.updated = json.updated;
 
@@ -35,13 +40,25 @@ pubsub.on('feed_update', function (data) {
       });
     };
 
+    // If data contains items add them to database.
     if (json.items) {
 
       json.items.forEach(function (item, index, array) {
+        // Associate item with feed.
         item.topic = data.topic;
+
+        // Item must have published date.
         if (!item.published) {
           item.published = moment().unix();
         };
+
+        // Item must have unique Id (seperate from database id).
+        if (!item.id) {
+          item.id = item.permalinkUrl || data.topic+'/'+item.title+'/'+item.published;
+          console.log(item.id);
+        };
+
+        // Adds entry item if Id doesn't exist, update entry item if it does.
         db.entries.update(item.id, item, function (err) {
           if (err) return console.log(err);
           return console.log('Added entry from %s at %s', data.topic, moment().format());

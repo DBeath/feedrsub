@@ -73,6 +73,7 @@ Pubsub.prototype.notification = function (req, res) {
   var signatureParts, signature, algo, hmac;
   var bodyChunks = [];
 
+  // Replace topic and hub values with values from url.
   (req.get('link') || '').
     replace(/<([^>]+)>\s*(?:;\s*rel=['"]([^'"]+)['"])?/gi, function (o, url, rel) {
       switch((rel || '').toLowerCase()) {
@@ -85,20 +86,32 @@ Pubsub.prototype.notification = function (req, res) {
       };
     });
 
+  // Must have topic.
   if (!topic) {
+    console.log('Notification did not contain topic');
     return res.send(400);
   };
 
+  // Topic must be in the database, else discard notification. 
   db.feeds.findOneByTopic(topic, (function (err, doc) {
     if (err) {
       console.log(err);
-      return res.send(400);
-    };
-
-    if (doc.secret && !req.get('x-hub-signature')) {
       return res.send(403);
     };
 
+    // Send 403 if topic is not in database.
+    if (!doc) {
+      console.log('Not subscribed to %s', topic);
+      return res.send(403);
+    };
+
+    // Send 403 if notification should have secret but does not.
+    if (doc.secret && !req.get('x-hub-signature')) {
+      console.log('Notification did not contain secret signature');
+      return res.send(403);
+    };
+
+    // Create HMAC for secret.
     if (doc.secret) {
       signatureParts = req.get('x-hub-signature').split('=');
       algo = (signatureParts.shift() || '').toLowerCase();
@@ -112,6 +125,7 @@ Pubsub.prototype.notification = function (req, res) {
       };
     };
 
+    // Read data.
     req.on('data', (function (chunk) {
       if (!chunk) {
         return;
@@ -119,6 +133,7 @@ Pubsub.prototype.notification = function (req, res) {
 
       bodyChunks.push(chunk);
 
+      // Update HMAC on data read.
       if (doc.secret) {
         try {
           hmac.update(chunk);
@@ -129,15 +144,19 @@ Pubsub.prototype.notification = function (req, res) {
       };
     }).bind(this)); 
 
+    // Emit event once data finished reading.
     req.on('end', (function () {
+
       // Must return 2xx code even if signature doesn't match.
       if (doc.secret && hmac.digest('hex').toLowerCase() != signature) {
         return res.send(202);
       };
 
+      // Send acknowledgement of valid notification.
       console.log('Received notification from %s at %s', topic, moment().format());
       res.send(204);
 
+      // Emit notification event.
       this.emit('feed_update', {
         topic: topic,
         hub: hub,
@@ -147,7 +166,6 @@ Pubsub.prototype.notification = function (req, res) {
     }).bind(this)); 
 
   }).bind(this));
-
 };
 
 Pubsub.prototype.subscribe = function (topic, hub, callback) {
@@ -185,13 +203,14 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
     form['format'] = 'json';
   };
 
-  db.feeds.findOneByTopic(topic, (function (err, doc) {
+  db.feeds.findOneByTopic(topic, (function (err, feed) {
     if (err) {
       return callback(err);
     };
 
-    if (doc.secret) {
-      form['hub.secret'] = doc.secret;
+    // If feed already has a secret then use that, else create one if config has secret.
+    if (feed.secret) {
+      form['hub.secret'] = feed.secret;
     } else {
       if (this.secret && mode === 'subscribe') {
         try {
@@ -213,9 +232,11 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
       postParams.auth = this.auth;
     };
 
+    // Send request
     request.post(postParams, function (err, response, body) {
       if (err) return callback(err);
 
+      // If successful then move feed out of 'pending' status and update subtime/unsubtime.
       if (response.statusCode === 202 || response.statusCode === 204) {
         switch ( mode ) {
           case 'subscribe':

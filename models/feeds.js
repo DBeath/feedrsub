@@ -74,8 +74,8 @@ Feeds.prototype.findOneById = function (id, callback) {
 
 Feeds.prototype.findOneByTopic = function (topic, callback) {
   this.collection.findOne({topic: topic}, function (err, doc) {
-    if (err) callback(err);
-    callback(null, doc);
+    if (err) return callback(err);
+    return callback(null, doc);
   });
 };
 
