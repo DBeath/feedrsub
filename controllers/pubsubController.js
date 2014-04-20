@@ -195,7 +195,7 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
     'topic=' + encodeURIComponent(topic) + 
     '&hub=' + encodeURIComponent(hub);
 
-  var feedSecret = null;
+  var feedSecret = false;
 
   var form = {
     'hub.callback': uniqueCallbackUrl,

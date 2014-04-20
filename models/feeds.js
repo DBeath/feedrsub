@@ -6,11 +6,13 @@ module.exports.createCollection = function (db) {
   return new Feeds(db);
 };
 
+// The Feeds object. Creates or opens a collection called 'feeds'.
 function Feeds (db) {
   this.collection = new mongodb.Collection(db, 'feeds');
   module.exports.FeedsCollection = this.collection;
 };
 
+// Sets a feed as 'subscribed' and adds the given secret.
 Feeds.prototype.subscribe = function (topic, secret, callback) {
   this.collection.update({
       topic: topic
@@ -32,6 +34,7 @@ Feeds.prototype.subscribe = function (topic, secret, callback) {
   });
 };
 
+// Sets a feed as 'unsubscribed'.
 Feeds.prototype.unsubscribe = function (topic, callback) {
   this.collection.update({ 
       topic: topic
@@ -51,6 +54,7 @@ Feeds.prototype.unsubscribe = function (topic, callback) {
   });
 };
 
+// Returns a list of all feeds.
 Feeds.prototype.listAll = function (callback) {
   this.collection.find().toArray(function (err, docs) {
     if (err) return callback(err);
@@ -58,6 +62,7 @@ Feeds.prototype.listAll = function (callback) {
   });
 };
 
+// Returns a list of feeds by status.
 Feeds.prototype.listByStatus = function (status, callback) {
   this.collection.find({status: status}).sort([['title', 1]]).toArray(function (err, docs) {
     if (err) return callback(err);
@@ -65,6 +70,7 @@ Feeds.prototype.listByStatus = function (status, callback) {
   });
 };
 
+// Returns a feed given a MongoDB Object Id.
 Feeds.prototype.findOneById = function (id, callback) {
   this.collection.findOne({_id: ObjectID.createFromHexString(id)}, function (err, doc) {
     if (err) return callback(err);
@@ -72,6 +78,7 @@ Feeds.prototype.findOneById = function (id, callback) {
   });
 };
 
+// Returns a feed given a topic.
 Feeds.prototype.findOneByTopic = function (topic, callback) {
   this.collection.findOne({topic: topic}, function (err, doc) {
     if (err) return callback(err);
@@ -79,6 +86,7 @@ Feeds.prototype.findOneByTopic = function (topic, callback) {
   });
 };
 
+// Deletes a feed given a MongoDB Object Id.
 Feeds.prototype.delete = function (id, callback) {
   this.collection.remove({_id: ObjectID.createFromHexString(id)}, {w:1}, function (err, num) {
     if (err) return callback(err);
@@ -86,6 +94,7 @@ Feeds.prototype.delete = function (id, callback) {
   });
 };
 
+// Updates the details of a feed given a Superfeedr feed status.
 Feeds.prototype.updateDetails = function (topic, status, callback) {
   this.collection.update({
       topic: topic
@@ -113,6 +122,7 @@ Feeds.prototype.updateDetails = function (topic, status, callback) {
   });
 };
 
+// Updates the subscription status of a feed.
 Feeds.prototype.updateStatus = function (topic, status, callback) {
   this.collection.findAndModify({
     topic: topic
@@ -133,6 +143,7 @@ Feeds.prototype.updateStatus = function (topic, status, callback) {
   });
 };
 
+// Updates the subscription status of a feed given a MongoDB Object Id.
 Feeds.prototype.updateStatusById = function (id, status, callback) {
   this.collection.findAndModify({
     _id: ObjectID.createFromHexString(id)
@@ -152,6 +163,7 @@ Feeds.prototype.updateStatusById = function (id, status, callback) {
   });
 };
 
+// Returns a count of all feeds.
 Feeds.prototype.countAll = function (callback) {
   this.collection.count(function (err, result) {
     if (err) return callback(err);
@@ -159,6 +171,7 @@ Feeds.prototype.countAll = function (callback) {
   });
 };
 
+// Returns a count of feeds by status.
 Feeds.prototype.countByStatus = function (status, callback) {
   this.collection.count({
     status: status
@@ -169,6 +182,7 @@ Feeds.prototype.countByStatus = function (status, callback) {
   });
 };
 
+// Returns a count of feeds subscribed to more recently than the given time.
 Feeds.prototype.countRecent = function (time, callback) {
   this.collection.count({
     subtime: {$gt: time}
