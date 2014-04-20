@@ -1,7 +1,7 @@
 feedrsub
 ========
 
-Node.js subscriber for [Superfeedr](http://superfeedr.com/).
+Node.js subscriber and admin page for [Superfeedr](http://superfeedr.com/).
 
 ## Installation
 Install node.js and mongodb.
@@ -18,24 +18,55 @@ Navigate to the folder and install the required modules from the package.
 
 Edit the _config.json_ file with your settings for Superfeedr, and the login settings for the admin page.
 
+## Config settings
+
+**Pubsub**
+* **hub** The URL of the pubsubhubbub hub you are subscribing to.
+* **username** (optional) Your username for the hub.
+* **password** (optional) Your password for the hub.
+* **secret** (optional) A secret value for HMAC signatures.
+* **format** (optional) The format to receive notifications in. Currently only accepts JSON.
+* **domain** The FQDN where you are hosting this app.
+
+**Express**
+* **admin** The username for admin login.
+* **password** The password for admin login.
+* **port** The port this app will listen on.
+* **connString** The connection string for MongoDB. Defaults to ```mongodb://localhost:27017/feedrsub```.
+
+#### Webservers
 If you're running feedrsub behind a webserver, then you'll need to configure it to pass requests to the appropriate port.
 
 nginx example:
 
-	
 	server {
-		listen 80;
-		server_name example.com 
+	  listen 80;
+	  server_name example.com 
 
-		location / {
+	  location / {
             proxy_pass http://localhost:4000;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection 'upgrade';
             proxy_set_header Host $host;
             proxy_cache_bypass $http_upgrade;
-        }
+          }
 	}
+
+## Main Routes
+**Note** this is not currently a fully functional api.
+
+**Require Authentication**
+* ```GET /admin``` The main admin page.
+* ```GET /subscribed``` A list of current subscriptions.
+* ```GET /unsubscribed``` A list of unsubscribed feeds.
+* ```GET /pending``` A list of pending subscriptions and unsubscriptions.
+* ```GET /subscribe``` The subscribe page.
+* ```POST /subscribe``` Subscribes to feeds. Reads the ```topic:``` parameter of the body, followed by a list of feed URLs separated by newlines, tabs, spaces, or commas.
+
+**No authentication**
+* ```GET /pubsubhubbub``` The URL the hub will call to receive verification of a subscription request.
+* ```POST /pubsubhubbub``` The URL the hub will post feed update notifications to.
 
 ## Usage
 To start the app, run ```node index.js```
