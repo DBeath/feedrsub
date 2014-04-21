@@ -1,10 +1,10 @@
 {
   "name": "feedrsub",
   "version": "0.1.0",
-  "description": "Node.js subscriber for Superfeedr",
-  "main": "app.js",
+  "description": "Express.js subscriber application for Superfeedr",
+  "main": "index.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "node index.js",
     "test": "make test"
   },
   "homepage": "http://github.com/DBeath/feedrsub",

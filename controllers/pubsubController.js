@@ -275,3 +275,40 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
     });
   }).bind(this));
 };
+
+Pubsub.prototype.retrieve = function (options, callback) {
+  var topic = options.topic || false;
+  var count = options.count || 10;
+  var before = options.before || null;
+  var after = options.after || null;
+  var feedSecret = false;
+
+  if (!topic) {
+    console.error('No topic specified');
+    return callback('No topic specified');
+  };
+
+  var form = {
+    'hub.mode': 'retrieve',
+    'hub.topic': topic,
+    'count': count,
+    'before': before,
+    'after': after
+  };
+
+  if (this.format === 'json' || this.format === 'JSON') {
+    form['format'] = 'json';
+  };
+
+  db.feeds.findOneByTopic(topic, (function (err, feed) {
+    if (err) {
+      return callback(err);
+    };
+
+    if (feed.secret) {
+      form['hub.secret'] = feed.secret;
+    };
+
+    
+  }).bind(this));
+}
