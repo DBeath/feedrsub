@@ -276,6 +276,13 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
   }).bind(this));
 };
 
+// Retreive entries from a feed. 
+// 
+// options.topic {url} (required): the feed url.
+// options.count {int} (optional): how many entries to retrieve.
+// options.before {id} (optional): only retrieve entries published before this one.
+// options.after {id} (optional): only retrieve entries published after this one.
+// options.hub {url} (optional): the hub to retrieve the entries from.
 Pubsub.prototype.retrieve = function (options, callback) {
   var topic = options.topic || false;
   var count = options.count || 10;
@@ -301,6 +308,7 @@ Pubsub.prototype.retrieve = function (options, callback) {
     form['format'] = 'json';
   };
 
+  // Only attempt retrieval if subscribed to feed.
   db.feeds.findOneByTopic(topic, (function (err, feed) {
     if (err) {
       return callback(err);
@@ -331,15 +339,18 @@ Pubsub.prototype.retrieve = function (options, callback) {
     });
 
     req.on('end', (function () {
+      // 404 response means not subscribed or feed not added.
       if (res.statusCode === 404) {
         return callback('404 - Not subscribed to feed');
       };
 
+      // 422 has reason for failure in body.
       if (res.statusCode === 422) {
         return callback(Buffer.concat(bodyChunks));
       };
 
-      if (res.statusCode != 202) {
+      // Catch any other responses.
+      if (res.statusCode != 200) {
         return callback('Error - Did not receive 202');
       };
 
