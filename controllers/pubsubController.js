@@ -282,9 +282,10 @@ Pubsub.prototype.retrieve = function (options, callback) {
   var before = options.before || null;
   var after = options.after || null;
   var feedSecret = false;
+  var hub = options.hub || config.pubsub.hub;
+  var bodyChunks = [];
 
   if (!topic) {
-    console.error('No topic specified');
     return callback('No topic specified');
   };
 
@@ -309,6 +310,47 @@ Pubsub.prototype.retrieve = function (options, callback) {
       form['hub.secret'] = feed.secret;
     };
 
-    
+    var postParams = {
+      url: hub,
+      form: form,
+      encoding: 'utf-8'
+    };
+
+    if (this.auth) {
+      postParams.auth = this.auth;
+    };
+
+    var req = request.post(postParams);
+
+    req.on('data', function (chunk) {
+      if (!chunk) {
+        return;
+      };
+
+      bodyChunks.push(chunk);
+    });
+
+    req.on('end', (function () {
+      if (res.statusCode === 404) {
+        return callback('404 - Not subscribed to feed');
+      };
+
+      if (res.statusCode === 422) {
+        return callback(Buffer.concat(bodyChunks));
+      };
+
+      if (res.statusCode != 202) {
+        return callback('Error - Did not receive 202');
+      };
+
+      // Emit notification event.
+      this.emit('feed_update', {
+        topic: topic,
+        hub: hub,
+        feed: Buffer.concat(bodyChunks),
+        headers: res.headers
+      });
+    }).bind(this));
+
   }).bind(this));
 }

@@ -185,7 +185,7 @@ describe('pubsub notification', function () {
     });
 
     setTimeout(function () {
-      expect(eventFired).to.equal(true);
+      expect(eventFired, 'event fired').to.equal(true);
       async.series({
         feed: function (callback) {
           mongo.feeds.findOneByTopic(topic, function (err, doc) {
