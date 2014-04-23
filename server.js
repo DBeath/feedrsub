@@ -4,7 +4,14 @@ var config = require('./config.json');
 var hbs = require('hbs');
 var moment = require('moment');
 var ObjectID = require('mongodb').ObjectID;
+
 var flash = require('connect-flash');
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
+var bodyParser = require('body-parser');
+var methodOverride = require('method-override');
+var errorhandler = require('errorhandler');
+var basicAuth = require('basic-auth');
 
 var app = module.exports = express();
 var server = require('http').createServer(app);
@@ -13,40 +20,33 @@ var pubsub = require('./controllers/pubsub.js').pubsub;
 var admin = require('./controllers/admin.js').AdminController(pubsub);
 module.exports.pubsub = pubsub;
 
-function start(done) {
-  console.log('Starting feedrsub...');
-  console.log('Connecting to database...');
-  mongo.init(function (err, result) {
-    if (err) {
-      console.log(err);
-      process.exit(1);
-    };
-    console.log(result);
-    console.log('Connected to database. Starting server...');
-    server.listen(config.express.port);
-    console.log('Server listening on port %s', config.express.port);
-    return done();
-  });
+app.set('views', __dirname + '/views');
+app.set('view engine', 'html');
+app.engine('html', hbs.__express);
+app.use(bodyParser.urlencoded());
+app.use(methodOverride());
+app.use(express.static(__dirname+'/public'));
+app.use(require('errorhandler')());
+app.use(cookieParser('cookiemonster'));
+app.use(session({ cookie: { secure: true }}));
+app.use(flash());
+app.use(errorhandler());
+app.enable('trust proxy');
+
+//var auth = express.basicAuth(config.express.admin, config.express.adminpass);
+var auth = function (req, res, next) {
+  function unauthorized(res) {
+    res.set('WWW-Authenticate', 'Basic realm=secure');
+    res.send(401);
+  };
+  var user = basicAuth(req);
+  if (!user) {
+    return unauthorized(res);
+  };
+  if (user.name === config.express.admin && user.pass === config.express.adminpass) {
+    return next();
+  };
 };
-
-module.exports.start = start;
-
-app.configure(function () {
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'html');
-  app.engine('html', hbs.__express);
-  app.use(express.urlencoded());
-  //app.use(express.json());
-  app.use(express.methodOverride());
-  app.use(express.static(__dirname+'/public'));
-  app.use(express.errorHandler());
-  app.use(express.cookieParser('cookiemonster'));
-  app.use(express.session({ cookie: { maxAge: 60000 }}));
-  app.use(flash());
-  app.enable('trust proxy');
-});
-
-var auth = express.basicAuth(config.express.admin, config.express.adminpass);
 
 hbs.registerHelper('unix_to_date', function (unixDate) {
   return moment.unix(unixDate).format('DD/MM/YYYY HH:mm:ss');
@@ -68,3 +68,21 @@ app.del('/feed/:id', auth, admin.deletefeed );
 
 app.get('/pubsubhubbub', pubsub.verification.bind(pubsub) );
 app.post('/pubsubhubbub', pubsub.notification.bind(pubsub) );
+
+function start(done) {
+  console.log('Starting feedrsub...');
+  console.log('Connecting to database...');
+  mongo.init(function (err, result) {
+    if (err) {
+      console.log(err);
+      process.exit(1);
+    };
+    console.log(result);
+    console.log('Connected to database. Starting server...');
+    server.listen(config.express.port);
+    console.log('Server listening on port %s', config.express.port);
+    return done();
+  });
+};
+
+module.exports.start = start;
