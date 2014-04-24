@@ -14,9 +14,10 @@ var errorhandler = require('errorhandler');
 var basicAuth = require('basic-auth');
 
 var app = module.exports = express();
+var server = null;
 
 var pubsub = require('./controllers/pubsub.js').pubsub;
-var admin = require('./controllers/admin.js').AdminController(pubsub);
+var admin = require('./controllers/admin.js').AdminController();
 module.exports.pubsub = pubsub;
 
 app.set('views', __dirname + '/views');
@@ -85,10 +86,17 @@ function start(done) {
     };
     console.log(result);
     console.log('Connected to database. Starting server...');
-    app.listen(config.express.port);
+    server = app.listen(config.express.port);
     console.log('Server listening on port %s', config.express.port);
     return done();
   });
 };
 
+function close(done) {
+  server.close(function () {
+    return done();
+  });
+};
+
 module.exports.start = start;
+module.exports.close = close;

@@ -55,6 +55,12 @@ describe('authorization', function () {
     });
   });
 
+  after(function (done) {
+    server.close(function () {
+      done();
+    });
+  });
+
   it('should return 401 - unauthorized', function (done) {
     request.get('http://localhost:4000/admin', function (err, response, body) {
       expect(response.statusCode).to.equal(401);
@@ -142,7 +148,9 @@ describe('pubsub notification', function () {
       }
     }, function (err, results) {
       if (err) throw err;
-      done();
+      server.close(function () {
+        done();
+      });
     });
   });
 

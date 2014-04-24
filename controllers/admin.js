@@ -3,15 +3,14 @@ var config = require('../config.json');
 var validator = require('validator');
 var async = require('async');
 var moment = require('moment');
+var pubsub = require('./pubsub.js').pubsub;
 
 
-module.exports.AdminController = function (pubsub) {
-  return new admin(pubsub);
+module.exports.AdminController = function () {
+  return new admin();
 };
 
-function admin (pubsubobj) {
-  pubsub = pubsubobj;
-};
+function admin () {};
 
 // The main Admin page. Contains statistics on feed and entry counts.
 admin.prototype.index = function (req, res) {
