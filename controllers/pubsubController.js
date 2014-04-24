@@ -207,6 +207,7 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
     'topic=' + encodeURIComponent(topic) + 
     '&hub=' + encodeURIComponent(hub);
 
+  var bodyChunks = [];
   var feedSecret = false;
 
   var form = {
@@ -218,6 +219,10 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
 
   if (this.format === 'json' || this.format === 'JSON') {
     form['format'] = 'json';
+  };
+
+  if (this.retrieve && mode === 'subscribe') {
+    form['retrieve'] = 'true';
   };
 
   db.feeds.findOneByTopic(topic, (function (err, feed) {
@@ -249,12 +254,23 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
       postParams.auth = this.auth;
     };
 
-    // Send request
-    request.post(postParams, function (err, response, body) {
-      if (err) return callback(err);
+    var req = request.post(postParams);
 
-      // If successful then move feed out of 'pending' status and update subtime/unsubtime.
-      if (response.statusCode === 202 || response.statusCode === 204) {
+    req.on('error', function (err) {
+      return callback(err);
+    });
+
+    req.on('data', function (chunk) {
+      if (!chunk) {
+        return;
+      };
+
+      bodyChunks.push(chunk);
+    });
+
+    req.on('end', function () {
+      // Subscription was successful
+      if (res.statusCode === 202 || res.statusCode === 204 || res.statusCode === 200) {
         switch ( mode ) {
           case 'subscribe':
             db.feeds.subscribe(topic, feedSecret, function (err, result) {
@@ -268,12 +284,51 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
               return callback(null, 'Unsubscribed');
             });
             break;
-        }; 
+        };
+        // Subscription contains feed body
+        if (res.statusCode === 200) {
+          // Emit notification event.
+          this.emit('feed_update', {
+            topic: topic,
+            hub: hub,
+            feed: Buffer.concat(bodyChunks),
+            headers: res.headers
+          });
+        };
+      // Subscription failed, reason in body
+      } else if (res.statusCode === 422) {
+        return callback('Subscription failed: %s', Buffer.concat(bodyChunks));
+      // Subscription failed with other code
       } else {
-        var message = 'Subscription failed because: ' + body;
-        return callback(message);
+        return callback('Subscription failed with code %s', res.statusCode);
       };
     });
+
+    // // Send request
+    // request.post(postParams, function (err, response, body) {
+    //   if (err) return callback(err);
+
+    //   // If successful then move feed out of 'pending' status and update subtime/unsubtime.
+    //   if (response.statusCode === 202 || response.statusCode === 204) {
+    //     switch ( mode ) {
+    //       case 'subscribe':
+    //         db.feeds.subscribe(topic, feedSecret, function (err, result) {
+    //           if (err) return callback(err);
+    //           return callback(null, 'Subscribed');
+    //         });
+    //         break;
+    //       case 'unsubscribe':
+    //         db.feeds.unsubscribe(topic, function (err, result) {
+    //           if (err) return callback(err);
+    //           return callback(null, 'Unsubscribed');
+    //         });
+    //         break;
+    //     }; 
+    //   } else {
+    //     var message = 'Subscription failed because: ' + body;
+    //     return callback(message);
+    //   };
+    // });
   }).bind(this));
 };
 
