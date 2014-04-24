@@ -14,7 +14,6 @@ var errorhandler = require('errorhandler');
 var basicAuth = require('basic-auth');
 
 var app = module.exports = express();
-var server = require('http').createServer(app);
 
 var pubsub = require('./controllers/pubsub.js').pubsub;
 var admin = require('./controllers/admin.js').AdminController(pubsub);
@@ -71,6 +70,11 @@ app.del('/feed/:id', auth, admin.deletefeed );
 app.get('/pubsubhubbub', pubsub.verification.bind(pubsub) );
 app.post('/pubsubhubbub', pubsub.notification.bind(pubsub) );
 
+// assume 404 since no middleware responded
+app.use(function (req, res, next) {
+  res.status(404).render(404, { url: req.originalUrl });
+});
+
 function start(done) {
   console.log('Starting feedrsub...');
   console.log('Connecting to database...');
@@ -81,7 +85,7 @@ function start(done) {
     };
     console.log(result);
     console.log('Connected to database. Starting server...');
-    server.listen(config.express.port);
+    app.listen(config.express.port);
     console.log('Server listening on port %s', config.express.port);
     return done();
   });
