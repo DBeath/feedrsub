@@ -9,7 +9,8 @@ var pubsub = pubsubController.createController({
   domain: config.pubsub.domain,
   format: config.pubsub.format,
   username: config.pubsub.username,
-  password: config.pubsub.password
+  password: config.pubsub.password,
+  retrieve: config.pubsub.retrieve
 });
 
 module.exports.pubsub = pubsub;

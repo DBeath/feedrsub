@@ -5,6 +5,7 @@
     "password": "password",
     "secret": "supersecret",
     "format": "json",
+    "retrieve": "true",
     "domain": "http://localhost:4000"
   },
   "express": {
