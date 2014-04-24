@@ -26,6 +26,7 @@ Edit the _config.json_ file with your settings for Superfeedr, and the login set
 * **password** (optional) Your password for the hub.
 * **secret** (optional) A secret value for HMAC signatures.
 * **format** (optional) The format to receive notifications in. Currently only accepts JSON.
+* **retrieve** (optional) Retrieve the current representation of the feed upon subscription.
 * **domain** The FQDN where you are hosting this app.
 
 **Express**
