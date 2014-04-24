@@ -19,6 +19,7 @@ function Pubsub (options) {
   this.secret = options.secret || false;
   this.callbackurl = options.domain + '/pubsubhubbub';
   this.format = options.format || 'json';
+  this.retrieve = options.retrieve || false;
 
   if (options.username) {
     this.auth = {
@@ -329,6 +330,10 @@ Pubsub.prototype.retrieve = function (options, callback) {
     };
 
     var req = request.post(postParams);
+
+    req.on('error', function (err) {
+      return callback(err);
+    });
 
     req.on('data', function (chunk) {
       if (!chunk) {
