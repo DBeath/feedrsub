@@ -48,6 +48,49 @@ describe('pubsub', function () {
   });
 });
 
+describe('authorization', function () {
+  before(function (done) {
+    server.start(function () {
+      done();
+    });
+  });
+
+  it('should return 401 - unauthorized', function (done) {
+    request.get('http://localhost:4000/admin', function (err, response, body) {
+      expect(response.statusCode).to.equal(401);
+      done();
+    });
+  });
+
+  it('should return 200 - authorized', function (done) {
+    var postParams = {
+      url: 'http://localhost:4000/admin',
+      auth: {
+        user: 'admin',
+        pass: 'password'
+      }
+    }
+    request.get(postParams, function (err, response, body) {
+      expect(response.statusCode).to.equal(200);
+      done();
+    });
+  });
+
+  it('should return 401 - incorrect authorization', function (done) {
+    var postParams = {
+      url: 'http://localhost:4000/admin',
+      auth: {
+        user: 'administrator',
+        pass: 'password1'
+      }
+    }
+    request.get(postParams, function (err, response, body) {
+      expect(response.statusCode).to.equal(401);
+      done();
+    });
+  });
+});
+
 describe('pubsub notification', function () {
   before(function (done) {
     server.start(function () {

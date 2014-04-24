@@ -37,14 +37,16 @@ app.enable('trust proxy');
 var auth = function (req, res, next) {
   function unauthorized(res) {
     res.set('WWW-Authenticate', 'Basic realm=secure');
-    res.send(401);
+    return res.send(401);
   };
   var user = basicAuth(req);
   if (!user) {
-    return unauthorized(res);
+    unauthorized(res);
   };
   if (user.name === config.express.admin && user.pass === config.express.adminpass) {
     return next();
+  } else {
+    unauthorized(res);
   };
 };
 
