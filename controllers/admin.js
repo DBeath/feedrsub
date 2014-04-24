@@ -3,15 +3,14 @@ var config = require('../config.json');
 var validator = require('validator');
 var async = require('async');
 var moment = require('moment');
+var pubsub = require('./pubsub.js').pubsub;
 
 
-module.exports.AdminController = function (pubsub) {
-  return new admin(pubsub);
+module.exports.AdminController = function () {
+  return new admin();
 };
 
-function admin (pubsubobj) {
-  pubsub = pubsubobj;
-};
+function admin () {};
 
 // The main Admin page. Contains statistics on feed and entry counts.
 admin.prototype.index = function (req, res) {
@@ -170,10 +169,10 @@ admin.prototype.subscribe = function (req, res) {
     if (err) {
       console.log(err);
       req.flash('error', err);
-      return res.redirect('/subscribed');
+      return res.redirect('/admin/subscribed');
     };
     req.flash('info', 'Successfully subscribed');
-    return res.redirect('/subscribed');
+    return res.redirect('/admin/subscribed');
   });
 };
 
@@ -183,19 +182,19 @@ admin.prototype.resubscribe = function (req, res) {
     if (err) {
       console.error(err);
       req.flash('error', 'Database update failed');
-      return res.redirect('/subscribed');
+      return res.redirect('/admin/subscribed');
     };
     console.log('Resubscribing to %s', doc.topic);
     pubsub.subscribe(doc.topic, config.pubsub.hub, function (err, result) {
       if (err) {
         console.error(err);
         req.flash('error', err);
-        return res.redirect('/pending');
+        return res.redirect('/admin/pending');
       };
       console.log('%s to %s at %s', result, doc.topic, moment().format());
       var message = 'Resubscribed to ' + doc.topic;
       req.flash('info', message);
-      return res.redirect('/subscribed');
+      return res.redirect('/admin/subscribed');
     });
   });
 };
@@ -206,19 +205,19 @@ admin.prototype.unsubscribe = function (req, res) {
     if (err) {
       console.error(err);
       req.flash('error', err);
-      return res.redirect('/unsubscribed');
+      return res.redirect('/admin/unsubscribed');
     };
     console.log('Unsubscribing from %s', doc.topic);
     pubsub.unsubscribe(doc.topic, config.pubsub.hub, function (err, result) {
       if (err) {
         console.error(err);
         req.flash('error', err);
-        return res.redirect('/pending');
+        return res.redirect('/admin/pending');
       };
       console.log('%s from %s at %s', result, doc.topic, moment().format());
       var message = 'Unsubscribed from ' + doc.topic;
       req.flash('info', message);
-      return res.redirect('/unsubscribed');
+      return res.redirect('/admin/unsubscribed');
     });
   });
 };

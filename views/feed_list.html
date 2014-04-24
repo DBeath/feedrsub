@@ -15,7 +15,7 @@
 {{#each feeds}}
 	<tr>
 		<td>
-			<form method="POST" action="/feed/{{_id}}" role="form">	
+			<form method="POST" action="/admin/feed/{{_id}}" role="form">	
 				<input type="hidden" name="_method" value="DELETE"/>
 				<button type="submit" class="btn btn-danger btn-xs" value="Delete">
 					<span class="glyphicon glyphicon-trash"></span> Delete
@@ -23,7 +23,7 @@
 			</form>	
 		</td>
 		<td>
-			<form method="GET" action="/feed/{{_id}}">
+			<form method="GET" action="/admin/feed/{{_id}}">
 				<button type="submit" class="btn btn-info btn-xs" value="Entries">
 				<span class="glyphicon glyphicon-list"></span> Entries
 				</button>

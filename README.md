@@ -58,11 +58,11 @@ nginx example:
 
 **Require Authentication**
 * ```GET /admin``` The main admin page.
-* ```GET /subscribed``` A list of current subscriptions.
-* ```GET /unsubscribed``` A list of unsubscribed feeds.
-* ```GET /pending``` A list of pending subscriptions and unsubscriptions.
-* ```GET /subscribe``` The subscribe page.
-* ```POST /subscribe``` Subscribes to feeds. Reads the ```topic:``` parameter of the body, followed by a list of feed URLs separated by newlines, tabs, spaces, or commas.
+* ```GET /admin/subscribed``` A list of current subscriptions.
+* ```GET /admin/unsubscribed``` A list of unsubscribed feeds.
+* ```GET /admin/pending``` A list of pending subscriptions and unsubscriptions.
+* ```GET /admin/subscribe``` The subscribe page.
+* ```POST /admin/subscribe``` Subscribes to feeds. Reads the ```topic:``` parameter of the body, followed by a list of feed URLs separated by newlines, tabs, spaces, or commas.
 
 **No authentication**
 * ```GET /pubsubhubbub``` The URL the hub will call to receive verification of a subscription request.

@@ -1,70 +1,93 @@
 var express = require('express');
-var mongo = require('./models/mongodb.js');
+var db = require('./models/mongodb.js');
 var config = require('./config.json');
 var hbs = require('hbs');
 var moment = require('moment');
 var ObjectID = require('mongodb').ObjectID;
+
 var flash = require('connect-flash');
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
+var bodyParser = require('body-parser');
+var methodOverride = require('method-override');
+var errorhandler = require('errorhandler');
+var basicAuth = require('basic-auth');
 
 var app = module.exports = express();
-var server = require('http').createServer(app);
+var server = null;
 
-var pubsub = require('./controllers/pubsub.js').pubsub;
-var admin = require('./controllers/admin.js').AdminController(pubsub);
-module.exports.pubsub = pubsub;
+// Middleware
+app.set('views', __dirname + '/views');
+app.set('view engine', 'html');
+app.engine('html', hbs.__express);
+app.use(bodyParser.urlencoded());
+app.use(methodOverride());
+app.use(express.static(__dirname+'/public'));
+app.use(errorhandler());
+app.use(cookieParser('cookiemonster'));
+app.use(session({ cookie: { maxAge: 60000 }}));
+app.use(flash());
+app.enable('trust proxy');
 
+//var auth = express.basicAuth(config.express.admin, config.express.adminpass);
+var auth = function (req, res, next) {
+  function unauthorized(res) {
+    res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
+    return res.send(401);
+  };
+  var user = basicAuth(req);
+  if (!user) {
+    unauthorized(res);
+  };
+  if (user.name === config.express.admin && user.pass === config.express.adminpass) {
+    return next();
+  } else {
+    unauthorized(res);
+  };
+};
+
+// Converts unix time to formatted date
+hbs.registerHelper('unix_to_date', function (unixDate) {
+  return moment.unix(unixDate).format('DD/MM/YYYY HH:mm:ss');
+});
+
+// Routes
+
+// Pubsubhubbub notifications and verification
+app.use('/pubsubhubbub', require('./routes/pubsubRoutes.js').pubsub);
+
+// Administration pages
+app.all('/admin', auth);
+app.use('/admin', require('./routes/adminRoutes.js').admin);
+
+// assume 404 since no middleware responded
+app.use(function (req, res, next) {
+  res.status(404).render(404, { url: req.originalUrl });
+});
+
+// Starts the server and database
 function start(done) {
   console.log('Starting feedrsub...');
   console.log('Connecting to database...');
-  mongo.init(function (err, result) {
+  db.init(function (err, result) {
     if (err) {
       console.log(err);
       process.exit(1);
     };
     console.log(result);
     console.log('Connected to database. Starting server...');
-    server.listen(config.express.port);
+    server = app.listen(config.express.port);
     console.log('Server listening on port %s', config.express.port);
     return done();
   });
 };
 
+// Closes the server
+function close(done) {
+  server.close(function () {
+    return done();
+  });
+};
+
 module.exports.start = start;
-
-app.configure(function () {
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'html');
-  app.engine('html', hbs.__express);
-  app.use(express.urlencoded());
-  //app.use(express.json());
-  app.use(express.methodOverride());
-  app.use(express.static(__dirname+'/public'));
-  app.use(express.errorHandler());
-  app.use(express.cookieParser('cookiemonster'));
-  app.use(express.session({ cookie: { maxAge: 60000 }}));
-  app.use(flash());
-  app.enable('trust proxy');
-});
-
-var auth = express.basicAuth(config.express.admin, config.express.adminpass);
-
-hbs.registerHelper('unix_to_date', function (unixDate) {
-  return moment.unix(unixDate).format('DD/MM/YYYY HH:mm:ss');
-});
-
-app.get('/admin', auth, admin.index );
-app.get('/unsubscribed', auth, admin.unsubscribed_feeds );
-app.get('/subscribed', auth, admin.subscribed_feeds );
-app.get('/pending', auth, admin.pending_feeds );
-
-app.get('/subscribe', auth, admin.newfeed );
-app.post('/subscribe', auth, admin.subscribe );
-app.put('/subscribe/:id', auth, admin.resubscribe );
-
-app.put('/unsubscribe/:id', auth, admin.unsubscribe );
-
-app.get('/feed/:id', auth, admin.feed );
-app.del('/feed/:id', auth, admin.deletefeed );
-
-app.get('/pubsubhubbub', pubsub.verification.bind(pubsub) );
-app.post('/pubsubhubbub', pubsub.notification.bind(pubsub) );
+module.exports.close = close;
