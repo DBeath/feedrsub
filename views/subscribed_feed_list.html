@@ -16,7 +16,7 @@
 {{#each feeds}}
 	<tr>
 		<td>
-			<form method="POST" action="/feed/{{_id}}" role="form">	
+			<form method="POST" action="/admin/feed/{{_id}}" role="form">	
 				<input type="hidden" name="_method" value="DELETE"/>
 				<button type="submit" class="btn btn-danger btn-xs" value="Delete">
 					Delete
@@ -24,7 +24,7 @@
 			</form>	
 		</td>
 		<td>
-			<form method="POST" action="/unsubscribe/{{_id}}" class="">
+			<form method="POST" action="/admin/unsubscribe/{{_id}}" class="">
 				<input type="hidden" name="_method" value="PUT"/>
 				<button type="submit" class="btn btn-warning btn-xs" value="Unsubscribe">
 					Unsubscribe
@@ -32,7 +32,7 @@
 			</form>
 		</td>
 		<td>
-			<form method="GET" action="/feed/{{_id}}">
+			<form method="GET" action="/admin/feed/{{_id}}">
 				<button type="submit" class="btn btn-info btn-xs" value="Entries">
 					Entries
 				</button>
