@@ -1,6 +1,7 @@
-var adminController = require('../controllers/admin.js');
+var express = require('express');
+var adminController = require('../controllers/admin.js').AdminController();
 
-var admin = module.exports = express.Router();
+var admin = express.Router();
 
 admin.get('/', adminController.index );
 admin.get('/unsubscribed', adminController.unsubscribed_feeds );
@@ -14,4 +15,6 @@ admin.put('/subscribe/:id', adminController.resubscribe );
 admin.put('/unsubscribe/:id', adminController.unsubscribe );
 
 admin.get('/feed/:id', adminController.feed );
-admin.del('/feed/:id', adminController.deletefeed );
+admin.delete('/feed/:id', adminController.deletefeed );
+
+module.exports.admin = admin;

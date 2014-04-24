@@ -1,5 +1,5 @@
 var express = require('express');
-var mongo = require('./models/mongodb.js');
+var db = require('./models/mongodb.js');
 var config = require('./config.json');
 var hbs = require('hbs');
 var moment = require('moment');
@@ -16,10 +16,7 @@ var basicAuth = require('basic-auth');
 var app = module.exports = express();
 var server = null;
 
-var pubsub = require('./controllers/pubsub.js').pubsub;
-var admin = require('./controllers/admin.js').AdminController();
-module.exports.pubsub = pubsub;
-
+// Middleware
 app.set('views', __dirname + '/views');
 app.set('view engine', 'html');
 app.engine('html', hbs.__express);
@@ -50,36 +47,30 @@ var auth = function (req, res, next) {
   };
 };
 
+// Converts unix time to formatted date
 hbs.registerHelper('unix_to_date', function (unixDate) {
   return moment.unix(unixDate).format('DD/MM/YYYY HH:mm:ss');
 });
 
-app.get('/admin', auth, admin.index );
-app.get('/unsubscribed', auth, admin.unsubscribed_feeds );
-app.get('/subscribed', auth, admin.subscribed_feeds );
-app.get('/pending', auth, admin.pending_feeds );
+// Routes
 
-app.get('/subscribe', auth, admin.newfeed );
-app.post('/subscribe', auth, admin.subscribe );
-app.put('/subscribe/:id', auth, admin.resubscribe );
+// Pubsubhubbub notifications and verification
+app.use('/pubsubhubbub', require('./routes/pubsubRoutes.js').pubsub);
 
-app.put('/unsubscribe/:id', auth, admin.unsubscribe );
-
-app.get('/feed/:id', auth, admin.feed );
-app.del('/feed/:id', auth, admin.deletefeed );
-
-app.get('/pubsubhubbub', pubsub.verification.bind(pubsub) );
-app.post('/pubsubhubbub', pubsub.notification.bind(pubsub) );
+// Administration pages
+app.all('/admin', auth);
+app.use('/admin', require('./routes/adminRoutes.js').admin);
 
 // assume 404 since no middleware responded
 app.use(function (req, res, next) {
   res.status(404).render(404, { url: req.originalUrl });
 });
 
+// Starts the server and database
 function start(done) {
   console.log('Starting feedrsub...');
   console.log('Connecting to database...');
-  mongo.init(function (err, result) {
+  db.init(function (err, result) {
     if (err) {
       console.log(err);
       process.exit(1);
@@ -92,6 +83,7 @@ function start(done) {
   });
 };
 
+// Closes the server
 function close(done) {
   server.close(function () {
     return done();
