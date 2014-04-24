@@ -23,17 +23,16 @@ app.engine('html', hbs.__express);
 app.use(bodyParser.urlencoded());
 app.use(methodOverride());
 app.use(express.static(__dirname+'/public'));
-app.use(require('errorhandler')());
-app.use(cookieParser('cookiemonster'));
-app.use(session({ cookie: { secure: true }}));
-app.use(flash());
 app.use(errorhandler());
+app.use(cookieParser('cookiemonster'));
+app.use(session({ cookie: { maxAge: 60000 }}));
+app.use(flash());
 app.enable('trust proxy');
 
 //var auth = express.basicAuth(config.express.admin, config.express.adminpass);
 var auth = function (req, res, next) {
   function unauthorized(res) {
-    res.set('WWW-Authenticate', 'Basic realm=secure');
+    res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
     return res.send(401);
   };
   var user = basicAuth(req);
