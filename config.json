@@ -6,6 +6,7 @@
     "secret": "supersecret",
     "format": "json",
     "retrieve": "true",
+    "verify": "sync",
     "domain": "http://localhost:4000"
   },
   "express": {
