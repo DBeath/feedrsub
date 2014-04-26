@@ -274,10 +274,12 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
             headers: res.headers
           });
         } else if (this.retrieve && mode === 'subscribe') {
-          this.retrieve({topic: topic, count: 20}, function (err, result) {
-            if (err) return console.log(err);
-            return console.log(result);
-          });
+          setTimeout((function () {
+            this.retrieveFeed({topic: topic, count: 20}, function (err, result) {
+              if (err) return console.log(err);
+              return console.log(result);
+            });
+          }).bind(this), 500);
         };
 
         // Set feed to subscribed/unsubscribed
@@ -315,7 +317,7 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
 // options.before {id} (optional): only retrieve entries published before this one.
 // options.after {id} (optional): only retrieve entries published after this one.
 // options.hub {url} (optional): the hub to retrieve the entries from.
-Pubsub.prototype.retrieve = function (options, callback) {
+Pubsub.prototype.retrieveFeed = function (options, callback) {
   var topic = options.topic || false;
   var count = options.count || 10;
   var before = options.before || null;
@@ -360,7 +362,7 @@ Pubsub.prototype.retrieve = function (options, callback) {
     };
 
     // Send request
-    request.post(postParams, (function (err, res, body) {
+    var req = request.get(postParams, (function (err, res, body) {
       if (err) return callback(err);
 
       // 404 response means not subscribed or feed not added
@@ -389,5 +391,6 @@ Pubsub.prototype.retrieve = function (options, callback) {
       return callback(null, 'Retrieved feed update');
     }).bind(this));
 
+    console.log(req.headers);
   }).bind(this));
 }
