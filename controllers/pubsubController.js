@@ -251,7 +251,8 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
     var postParams = {
       url: hub,
       form: form,
-      encoding: 'utf-8'
+      encoding: 'utf-8',
+      timeout: 2000
     };
 
     if (this.auth) {
@@ -354,7 +355,8 @@ Pubsub.prototype.retrieveFeed = function (options, callback) {
     var postParams = {
       url: hub,
       form: form,
-      encoding: 'utf-8'
+      encoding: 'utf-8',
+      timeout: 2000
     };
 
     if (this.auth) {
