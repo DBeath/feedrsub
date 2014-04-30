@@ -25,8 +25,8 @@ pubsub.on('feed_update', function (data) {
 
     try {
       var json = JSON.parse(data.feed);
-    } catch (e) {
-      return console.log(e);
+    } catch (err) {
+      return console.error(err);
     };
 
     // If data contains feed status update then update feed.
@@ -37,7 +37,7 @@ pubsub.on('feed_update', function (data) {
       status.updated = json.updated;
 
       db.feeds.updateDetails(data.topic, status, function (err, result) {
-        if (err) return console.log(err);
+        if (err) return console.error(err);
         console.log('Updated status of %s', data.topic);
       });
     };
@@ -61,7 +61,7 @@ pubsub.on('feed_update', function (data) {
 
         // Adds entry item if Id doesn't exist, update entry item if it does.
         db.entries.update(item.id, item, function (err) {
-          if (err) return console.log(err);
+          if (err) return console.error(err);
           return console.log('Added entry from %s at %s', data.topic, moment().format());
         });
       });

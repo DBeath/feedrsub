@@ -5,6 +5,7 @@ var crypto = require('crypto');
 var util = require('util');
 var events = require('events');
 var moment = require('moment');
+var http = require('http');
 
 module.exports.createController = function (options) {
   return new Pubsub(options);
@@ -230,9 +231,7 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
 
   // Only attempt subscription/unsubscription if feed in database 
   db.feeds.findOneByTopic(topic, (function (err, feed) {
-    if (err) {
-      return callback(err);
-    };
+    if (err) return callback(err);
 
     // If feed already has a secret then use that, else create one if config has secret.
     if (feed.secret) {
@@ -301,10 +300,10 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
 
       // Subscription failed, reason in body
       } else if (res.statusCode === 422) {
-        return callback('Subscription failed: ' + body);
+        return callback(new Error('Subscription failed: ' + body));
       // Subscription failed with other code
       } else {
-        return callback('Subscription failed with code ' + res.statusCode);
+        return callback(new Error('Subscription failed: ' + res.statusCode + ' - ' + http.STATUS_CODES[res.statusCode]));
       };
     }).bind(this));
 
@@ -327,7 +326,7 @@ Pubsub.prototype.retrieveFeed = function (options, callback) {
   var hub = options.hub || config.pubsub.hub;
 
   if (!topic) {
-    return callback('No topic specified');
+    return callback(new Error('No topic specified'));
   };
 
   var form = {
@@ -369,17 +368,17 @@ Pubsub.prototype.retrieveFeed = function (options, callback) {
 
       // 404 response means not subscribed or feed not added
       if (res.statusCode === 404) {
-        return callback('404 - not subscribed to feed');
+        return callback(new Error('404 - not subscribed to feed'));
       };
 
       // 422 has reason for failure in body
       if (res.statusCode === 422) {
-        return callback('Retrieve failed because ' + body);
+        return callback(new Error('422 - Retrieve failed because ' + body));
       };
 
       // Catch any other responses
       if (res.statusCode != 200) {
-        return callback('Error - Did not receive 200');
+        return callback(new Error(res.statusCode + ' ' + http.STATUS_CODES[res.statusCode]));
       };
 
       // Emit notification event
