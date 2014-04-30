@@ -71,7 +71,7 @@ function start(done) {
   console.log('Connecting to database...');
   db.init(function (err, result) {
     if (err) {
-      console.log(err);
+      console.error(err);
       process.exit(1);
     };
     console.log(result);

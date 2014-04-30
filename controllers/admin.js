@@ -167,7 +167,7 @@ admin.prototype.subscribe = function (req, res) {
     };
   }, function (err, results) {
     if (err) {
-      console.log(err);
+      console.error(err);
       req.flash('error', err);
       return res.redirect('/admin/subscribed');
     };
