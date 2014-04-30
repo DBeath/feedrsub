@@ -31,19 +31,21 @@ app.enable('trust proxy');
 
 //var auth = express.basicAuth(config.express.admin, config.express.adminpass);
 var auth = function (req, res, next) {
-  function unauthorized(res) {
-    res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
-    return res.send(401);
-  };
   var user = basicAuth(req);
-  if (!user) {
-    unauthorized(res);
+  if (!user || !user.name || !user.pass) {
+    return unauthorized(res);
   };
   if (user.name === config.express.admin && user.pass === config.express.adminpass) {
+    console.log('%s logged in', user.name);
     return next();
   } else {
-    unauthorized(res);
+    return unauthorized(res);
   };
+};
+
+function unauthorized(res) {
+  res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
+  res.send(401);
 };
 
 // Converts unix time to formatted date
