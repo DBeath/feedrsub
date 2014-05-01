@@ -42,7 +42,9 @@ Pubsub.prototype.verification = function (req, res) {
   var challenge = req.query['hub.challenge'] || false;
   var lease_seconds = req.query['lease_seconds'] || false;
 
+  // Verfication must contain topic, mode, and challenge
   if ( !topic || !mode || !challenge) {
+    console.log('Verification request was not valid');
     return res.send(400);
   };
 
@@ -67,14 +69,12 @@ Pubsub.prototype.verification = function (req, res) {
           if (lease_seconds && mode === 'subscribe') {
             db.feeds.updateLeaseSeconds(topic, lease_seconds, function (err, result) {
               if (err) {
-                console.error(err);
-                return res.send(403);
+                return console.error(err);
               };
-              return res.send(200, challenge);
+              console.log('Updated lease time for %s', topic);
             });
-          } else {
-            return res.send(200, challenge);
           };
+          return res.send(200, challenge);
         } else {
           return res.send(404);
         };
@@ -104,6 +104,12 @@ Pubsub.prototype.notification = function (req, res) {
           break;
       };
     });
+
+  // Must have valid hub.
+  if (!hub) {
+    console.log('Notification did not contain hub');
+    return res.send(400);
+  };
 
   // Must have topic.
   if (!topic) {
@@ -172,7 +178,7 @@ Pubsub.prototype.notification = function (req, res) {
       };
 
       // Send acknowledgement of valid notification.
-      console.log('Received notification from %s at %s', topic, moment().format());
+      console.log('Received valid notification from %s at %s', topic, moment().format());
       res.send(204);
 
       // Emit notification event.
