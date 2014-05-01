@@ -6,7 +6,7 @@ var moment = require('moment');
 
 var pubsub = require('../controllers/pubsub.js').pubsub;
 var server = require('../server.js');
-var mongo = require('../models/mongodb.js');
+var mongo = require('../models/db.js');
 
 var thisNow = moment().unix();
 var topic = 'http://test.com';

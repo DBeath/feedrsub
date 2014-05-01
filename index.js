@@ -1,6 +1,6 @@
 var config = require('./config.json');
 var server = require('./server.js');
-var mongo = require('./models/mongodb.js');
+var mongo = require('./models/db.js');
 
 // console.log('Starting feedrsub...');
 // console.log('Connecting to database...');

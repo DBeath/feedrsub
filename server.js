@@ -1,9 +1,8 @@
 var express = require('express');
-var db = require('./models/mongodb.js');
+var db = require('./models/db.js');
 var config = require('./config.json');
 var hbs = require('hbs');
 var moment = require('moment');
-var ObjectID = require('mongodb').ObjectID;
 
 var flash = require('connect-flash');
 var cookieParser = require('cookie-parser');

@@ -1,4 +1,4 @@
-var db = require('../models/mongodb.js');
+var db = require('../models/db.js');
 var config = require('../config.json');
 var validator = require('validator');
 var async = require('async');
@@ -178,6 +178,7 @@ admin.prototype.subscribe = function (req, res) {
 
 // Sends a subscription request for an already existing feed.
 admin.prototype.resubscribe = function (req, res) {
+  console.log(req.params);
   db.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
     if (err) {
       console.error(err);

@@ -1,5 +1,5 @@
 var config = require('../config.json');
-var db = require('../models/mongodb.js');
+var db = require('../models/db.js');
 var request = require('request');
 var crypto = require('crypto');
 var util = require('util');
