@@ -68,7 +68,7 @@ admin.prototype.index = function (req, res) {
   }, function (err, results) {
     if (err) {
       console.error(err);
-      req.flash('error', err);
+      req.flash('error', err.message);
       return next(err);
     };
     return res.render('admin_page', {
@@ -85,7 +85,7 @@ admin.prototype.feed = function (req, res) {
   db.feeds.findOneById(req.params.id, function (err, doc) {
     if (err) {
       console.error(err);
-      req.flash('error', err);
+      req.flash('error', err.message);
       return res.redirect('/admin');
     };
     var dayAgo = moment().subtract('d', 1).unix();
@@ -118,7 +118,7 @@ admin.prototype.feed = function (req, res) {
     }, function (err, results) {
       if (err) {
         console.error(err);
-        req.flash('error', err);
+        req.flash('error', err.message);
         return res.redirect('/admin');
       };
       var title = doc.title || doc.topic;
@@ -168,7 +168,7 @@ admin.prototype.subscribe = function (req, res) {
   }, function (err, results) {
     if (err) {
       console.error(err);
-      req.flash('error', err);
+      req.flash('error', err.message);
       return res.redirect('/admin/subscribed');
     };
     req.flash('info', 'Successfully subscribed');
@@ -181,14 +181,14 @@ admin.prototype.resubscribe = function (req, res) {
   db.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
     if (err) {
       console.error(err);
-      req.flash('error', 'Database update failed');
+      req.flash('error', err.message);
       return res.redirect('/admin/subscribed');
     };
     console.log('Resubscribing to %s', doc.topic);
     pubsub.subscribe(doc.topic, config.pubsub.hub, function (err, result) {
       if (err) {
-        console.error(err);
-        req.flash('error', err);
+        console.error(err.stack);
+        req.flash('error', err.message);
         return res.redirect('/admin/pending');
       };
       console.log('%s to %s at %s', result, doc.topic, moment().format());
@@ -204,14 +204,14 @@ admin.prototype.unsubscribe = function (req, res) {
   db.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
     if (err) {
       console.error(err);
-      req.flash('error', err);
+      req.flash('error', err.message);
       return res.redirect('/admin/unsubscribed');
     };
     console.log('Unsubscribing from %s', doc.topic);
     pubsub.unsubscribe(doc.topic, config.pubsub.hub, function (err, result) {
       if (err) {
         console.error(err);
-        req.flash('error', err);
+        req.flash('error', err.message);
         return res.redirect('/admin/pending');
       };
       console.log('%s from %s at %s', result, doc.topic, moment().format());
@@ -239,7 +239,8 @@ admin.prototype.unsubscribed_feeds = function (req, res) {
     }
   }, function (err, results) {
     if (err) {
-      req.flash('error', err);
+      console.log(err.stack);
+      req.flash('error', err.message);
       return next(err);
     };
     return res.render('unsubscribed_feed_list', {
@@ -270,7 +271,7 @@ admin.prototype.subscribed_feeds = function (req, res) {
   }, function (err, results) {
     if (err) {
       console.error(err);
-      req.flash('error', err);
+      req.flash('error', err.message);
       return next(err);
     };
     return res.render('subscribed_feed_list', {
@@ -301,7 +302,7 @@ admin.prototype.pending_feeds = function (req, res) {
   }, function (err, results) {
     if (err) {
       console.error(err);
-      req.flash('error', err);
+      req.flash('error', err.message);
       return res.redirect('/admin');
     };
     return res.render('pending_feed_list', {

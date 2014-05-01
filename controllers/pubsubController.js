@@ -259,7 +259,12 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
     };
 
     request.post(postParams, (function (err, res, body) {
-      if (err) return callback(err);
+      if (err) {
+        if (err.code === 'ETIMEDOUT') {
+          return callback(new Error('Request to '+hub+' timed out'));
+        };
+        return callback(err);
+      }
 
       // Subscription was successful
       if (res.statusCode === 202 || res.statusCode === 204 || res.statusCode === 200) {
