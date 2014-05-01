@@ -148,6 +148,13 @@ admin.prototype.newfeed = function (req, res) {
 // Requires a 'topic' parameter in the body, containing a list of feeds
 // to subscribe to separated by newline, space, tab, or comma characters.
 admin.prototype.subscribe = function (req, res) {
+  if (!req.param('topic')) {
+    var err = new Error('Topic not specified');
+    console.error(err.stack);
+    req.flash('error', err.message);
+    return res.redirect('/admin/subscribed');
+  };
+  
   var subs = req.param('topic').split(/[\s,]+/);
 
   async.forEachLimit(subs, 10, function (sub, callback) {
@@ -178,7 +185,6 @@ admin.prototype.subscribe = function (req, res) {
 
 // Sends a subscription request for an already existing feed.
 admin.prototype.resubscribe = function (req, res) {
-  console.log(req.params);
   db.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
     if (err) {
       console.error(err);
@@ -314,4 +320,10 @@ admin.prototype.pending_feeds = function (req, res) {
       message: req.flash('info')
     });
   });
+};
+
+function error(err, req, path) {
+  console.error(err.stack);
+  req.flash('error', err.message);
+  return req.redirect(path);
 };

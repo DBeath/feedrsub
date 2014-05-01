@@ -58,8 +58,9 @@ hbs.registerHelper('unix_to_date', function (unixDate) {
 app.use('/pubsubhubbub', require('./routes/pubsubRoutes.js').pubsub);
 
 // Administration pages
-app.all('/admin', auth);
-app.use('/admin', require('./routes/adminRoutes.js').admin);
+app.use('/admin', auth, require('./routes/adminRoutes.js').admin);
+
+app.use('/api/v1', auth, require('./routes/subscriptionsRoutes.js').subs);
 
 // assume 404 since no middleware responded
 app.use(function (req, res, next) {
