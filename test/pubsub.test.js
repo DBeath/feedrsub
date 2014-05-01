@@ -68,9 +68,23 @@ describe('authorization', function () {
     });
   });
 
+  it('should return 401 - unauthorized', function (done) {
+    request.get('http://localhost:4000/admin/pending', function (err, response, body) {
+      expect(response.statusCode).to.equal(401);
+      done();
+    });
+  });
+
+  it('should return 401 - unauthorized', function (done) {
+    request.get('http://localhost:4000/admin/subscribe', function (err, response, body) {
+      expect(response.statusCode).to.equal(401);
+      done();
+    });
+  });
+
   it('should return 200 - authorized', function (done) {
     var postParams = {
-      url: 'http://localhost:4000/admin',
+      url: 'http://localhost:4000/admin/',
       auth: {
         user: 'admin',
         pass: 'password'
@@ -91,6 +105,15 @@ describe('authorization', function () {
       }
     }
     request.get(postParams, function (err, response, body) {
+      expect(response.statusCode).to.equal(401);
+      done();
+    });
+  });
+
+  it('should return 401 - unauthorized', function (done) {
+    var url = 'http://localhost:4000/api/v1/subscribe';
+
+    request.post(url, function (err, response, body) {
       expect(response.statusCode).to.equal(401);
       done();
     });

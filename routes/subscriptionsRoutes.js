@@ -13,7 +13,7 @@ function statusErrorHandler(err, req, res, next) {
     return next(err);
   };
   console.error(err);
-  res.send(err.statusCode);
+  res.send(err.statusCode, err.message);
 };
 
 function errorHandler(err, req, res, next) {

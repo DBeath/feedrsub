@@ -35,7 +35,6 @@ var auth = function (req, res, next) {
     return unauthorized(res);
   };
   if (user.name === config.express.admin && user.pass === config.express.adminpass) {
-    console.log('%s logged in', user.name);
     return next();
   } else {
     return unauthorized(res);
@@ -58,9 +57,12 @@ hbs.registerHelper('unix_to_date', function (unixDate) {
 app.use('/pubsubhubbub', require('./routes/pubsubRoutes.js').pubsub);
 
 // Administration pages
-app.use('/admin', auth, require('./routes/adminRoutes.js').admin);
+app.all('/admin*', auth);
+app.use('/admin', require('./routes/adminRoutes.js').admin);
 
-app.use('/api/v1', auth, require('./routes/subscriptionsRoutes.js').subs);
+// Api
+app.all('/api/v1*', auth);
+app.use('/api/v1', require('./routes/subscriptionsRoutes.js').subs);
 
 // assume 404 since no middleware responded
 app.use(function (req, res, next) {
