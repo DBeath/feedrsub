@@ -4,6 +4,7 @@ var subscriptions = require('../controllers/subscriptions.js').SubscriptionsCont
 var subs = express.Router();
 
 subs.post('/subscribe', subscriptions.subscribe);
+subs.post('/unsubscribe', subscriptions.unsubscribe);
 
 subs.use(statusErrorHandler);
 subs.use(errorHandler);

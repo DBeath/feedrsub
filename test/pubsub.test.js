@@ -61,21 +61,21 @@ describe('authorization', function () {
     });
   });
 
-  it('should return 401 - unauthorized', function (done) {
+  it('should return 401 - unauthorized (admin page)', function (done) {
     request.get('http://localhost:4000/admin', function (err, response, body) {
       expect(response.statusCode).to.equal(401);
       done();
     });
   });
 
-  it('should return 401 - unauthorized', function (done) {
+  it('should return 401 - unauthorized (pending page)', function (done) {
     request.get('http://localhost:4000/admin/pending', function (err, response, body) {
       expect(response.statusCode).to.equal(401);
       done();
     });
   });
 
-  it('should return 401 - unauthorized', function (done) {
+  it('should return 401 - unauthorized (subscribe page)', function (done) {
     request.get('http://localhost:4000/admin/subscribe', function (err, response, body) {
       expect(response.statusCode).to.equal(401);
       done();
@@ -110,7 +110,7 @@ describe('authorization', function () {
     });
   });
 
-  it('should return 401 - unauthorized', function (done) {
+  it('should return 401 - unauthorized (subscribe api)', function (done) {
     var url = 'http://localhost:4000/api/v1/subscribe';
 
     request.post(url, function (err, response, body) {
