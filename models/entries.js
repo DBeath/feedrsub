@@ -9,6 +9,10 @@ module.exports.createCollection = function (db) {
 // The Entries object. Create or opens a collection called 'entries'.
 function Entries (db) {
   this.collection = new mongodb.Collection(db, 'entries');
+  this.collection.ensureIndex('topic', function (err, result) {
+    if (err) return console.log(err);
+    return console.log('Index %s exists for Entries collection', result);
+  });
   module.exports.EntriesCollection = this.collection;
 };
 

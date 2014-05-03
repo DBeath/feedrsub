@@ -9,6 +9,10 @@ module.exports.createCollection = function (db) {
 // The Feeds object. Creates or opens a collection called 'feeds'.
 function Feeds (db) {
   this.collection = new mongodb.Collection(db, 'feeds');
+  this.collection.ensureIndex('topic', function (err, result) {
+    if (err) return console.log(err);
+    return console.log('Index %s exists for Feeds collection', result);
+  });
   module.exports.FeedsCollection = this.collection;
 };
 
