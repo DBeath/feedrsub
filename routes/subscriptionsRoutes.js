@@ -5,6 +5,7 @@ var subs = express.Router();
 
 subs.post('/subscribe', subscriptions.subscribe);
 subs.post('/unsubscribe', subscriptions.unsubscribe);
+subs.post('/retrieve', subscriptions.retrieve);
 
 subs.use(statusErrorHandler);
 subs.use(errorHandler);

@@ -8,15 +8,27 @@ module.exports.SubscriptionsController = function () {
   return new subscriptions();
 };
 
+/**
+ * Creates a subscription object.
+ *
+ * @class subscriptions
+ * @constructor
+ */
 function subscriptions () {};
 
-// Subscribes to a topic
-// Takes a query with the 
+/** 
+ * Subscribes to a topic
+ * 
+ * @method subscribe
+ * @param topic {String} The URL of the topic to subscribe to
+ * @return {String} Echo of the topic URL
+ */
 subscriptions.prototype.subscribe = function (req, res, next) {
   if (!req.param('topic')) {
     return next(new StatusError(400, 'Topic is not specified'));
   };
   var topic = req.param('topic');
+
   if (!validator.isURL(topic)) {
     return next(new StatusError(400, 'Topic is not valid URL'));
   };
@@ -27,34 +39,81 @@ subscriptions.prototype.subscribe = function (req, res, next) {
     pubsub.subscribe(doc.topic, config.pubsub.hub, function (err, result) {
       if (err) return next(err);
       console.log('%s to %s at %s', result, doc.topic, moment().format());
-      return res.send(200, 'Subscribed to '+doc.topic);
+      return res.send(200, doc.topic);
     });
   });
 };
 
+/**
+ * Unsubscribes from a topic
+ * 
+ * @method unsubscribe
+ * @param topic {String} The URL of the topic to unsubscribe from
+ * @return {String} Echo of the topic URL
+ */
 subscriptions.prototype.unsubscribe = function (req, res, next) {
   if (!req.param('topic')) {
     return next(new StatusError(400, 'Topic is not specified'));
   };
   var topic = req.param('topic');
+
   if(!validator.isURL(topic)) {
     return next(new StatusError(400, 'Topic is not valid URL'));
   };
+
   db.feeds.updateStatus(topic, 'pending', function (err, doc) {
     if (err) return next(err);
     console.log('Unsubscribing from %s', doc.topic);
     pubsub.unsubscribe(doc.topic, config.pubsub.hub, function (err, result) {
       if (err) return next(err);
       console.log('%s from %s at %s', result, doc.topic, moment().format());
-      return res.send(200, 'Unsubscribed from '+doc.topic);
+      return res.send(200, doc.topic);
     });
   });
 };
 
+/**
+ * Retrieves the feed for a topic
+ * 
+ * @method retrieve
+ * @param topic {String} The URL of the topic to retrieve
+ * @param count {Number} How many entries to retrieve
+ * @return {String} The result of the retrieval
+ */
 subscriptions.prototype.retrieve = function (req, res, next) {
+  var topic;
+  var count;
 
+  if (!req.param('topic')) {
+    return next(new StatusError(400, 'Topic is not specified'));
+  };
+  topic = req.param('topic');
+
+  if(!validator.isURL(topic)) {
+    return next(new StatusError(400, 'Topic is not valid URL'));
+  };
+
+  var options = {
+    topic: topic
+  };
+
+  if (req.param('count')) {
+    count = req.param('count');
+    options['count'] = count;
+  };
+
+  pubsub.retrieveFeed(options, function (err, result) {
+    if (err) return next(err);
+    return res.send(200, 'Retrieved '+result+' entries from '+topic);
+  });
 };
 
+/**
+ * An Error containing an HTTP StatusCode
+ *
+ * @class StatusError
+ * @constructor
+ */
 function StatusError(code, message) {
   this.statusCode = code || 500;
   this.message = message || 'Something went wrong';

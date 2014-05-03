@@ -311,10 +311,10 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
 
       // Subscription failed, reason in body
       } else if (res.statusCode === 422) {
-        return callback(new Error('Subscription failed: ' + body));
+        return callback(new StatusError(422, 'Subscription failed: ' + body));
       // Subscription failed with other code
       } else {
-        return callback(new Error('Subscription failed: ' + res.statusCode + ' - ' + http.STATUS_CODES[res.statusCode]));
+        return callback(new StatusError(res.statusCode, 'Subscription failed: '+http.STATUS_CODES[res.statusCode]));
       };
     }).bind(this));
 
@@ -379,17 +379,17 @@ Pubsub.prototype.retrieveFeed = function (options, callback) {
 
       // 404 response means not subscribed or feed not added
       if (res.statusCode === 404) {
-        return callback(new Error('404 - not subscribed to feed'));
+        return callback(new StatusError(404, 'Not subscribed to feed'));
       };
 
       // 422 has reason for failure in body
       if (res.statusCode === 422) {
-        return callback(new Error('422 - Retrieve failed because ' + body));
+        return callback(new StatusError(422, 'Retrieve failed because ' + body));
       };
 
       // Catch any other responses
       if (res.statusCode != 200) {
-        return callback(new Error(res.statusCode + ' ' + http.STATUS_CODES[res.statusCode]));
+        return callback(new StatusError(res.statusCode, http.STATUS_CODES[res.statusCode]));
       };
 
       // Emit notification event
@@ -400,9 +400,16 @@ Pubsub.prototype.retrieveFeed = function (options, callback) {
         headers: res.headers
       });
 
-      return callback(null, 'Retrieved feed update');
+      return callback(null, count);
     }).bind(this));
 
     console.log(req.headers);
   }).bind(this));
-}
+};
+
+function StatusError(code, message) {
+  this.statusCode = code || 500;
+  this.message = message || 'Something went wrong';
+};
+StatusError.prototype = new Error();
+StatusError.prototype.constructor = StatusError;
