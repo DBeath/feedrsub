@@ -23,6 +23,13 @@ module.exports.createController = function (options) {
  * 
  * @class Pubsub
  * @constructor
+ *
+ * @param [options] {Object} The options object
+ * @param [options.secret] {String} Secret value for HMAC signatures
+ * @param [options.domain] {String} The FQDN of this application
+ * @param [options.format] {String} The format to receive notifications in
+ * @param [options.retrieve] {Bool} Retrieve entries upon subscription
+ * @param [options.verify] {Bool} Verify request upon when subscribing/unsubscribing
  */
 function Pubsub (options) {
   events.EventEmitter.call(this);
@@ -48,6 +55,10 @@ util.inherits(Pubsub, events.EventEmitter);
  * Handles verification of intent from hub
  *
  * @method verification
+ * @param hub.topic {String} The URL of the feed subscription being verified
+ * @param hub.mode {String} What the verification is for ('subscribe', 'unsubscribe', 'denied')
+ * @param hub.challenge {String} A challenge to be echoed to the hub on success
+ * @param [lease_seconds] {Number} The time this subscription will be active
  */
 Pubsub.prototype.verification = function (req, res) {
   var data;
@@ -103,6 +114,8 @@ Pubsub.prototype.verification = function (req, res) {
  * Called when the hub notifies the subscriber with new data
  *
  * @method notification
+ * @param hub.topic {String} The URL of the feed that this notification is for
+ * @param hub {String} The hub that this notification is from
  */
 Pubsub.prototype.notification = function (req, res) {
   var topic = req.query['hub.topic'] || false;
