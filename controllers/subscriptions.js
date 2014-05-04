@@ -4,8 +4,13 @@ var pubsub = require('./pubsub.js').pubsub;
 var validator = require('validator');
 var moment = require('moment');
 
+/**
+ * Provides the subscriptions API
+ *
+ * @module subscriptions
+ */
 module.exports.SubscriptionsController = function () {
-  return new subscriptions();
+  return new Subscriptions();
 };
 
 /**
@@ -14,7 +19,7 @@ module.exports.SubscriptionsController = function () {
  * @class subscriptions
  * @constructor
  */
-function subscriptions () {};
+function Subscriptions () {};
 
 /** 
  * Subscribes to a topic
@@ -23,7 +28,7 @@ function subscriptions () {};
  * @param topic {String} The URL of the topic to subscribe to
  * @return {String} Echo of the topic URL
  */
-subscriptions.prototype.subscribe = function (req, res, next) {
+Subscriptions.prototype.subscribe = function (req, res, next) {
   if (!req.param('topic')) {
     return next(new StatusError(400, 'Topic is not specified'));
   };
@@ -51,7 +56,7 @@ subscriptions.prototype.subscribe = function (req, res, next) {
  * @param topic {String} The URL of the topic to unsubscribe from
  * @return {String} Echo of the topic URL
  */
-subscriptions.prototype.unsubscribe = function (req, res, next) {
+Subscriptions.prototype.unsubscribe = function (req, res, next) {
   if (!req.param('topic')) {
     return next(new StatusError(400, 'Topic is not specified'));
   };
@@ -80,7 +85,7 @@ subscriptions.prototype.unsubscribe = function (req, res, next) {
  * @param count {Number} How many entries to retrieve
  * @return {String} The result of the retrieval
  */
-subscriptions.prototype.retrieve = function (req, res, next) {
+Subscriptions.prototype.retrieve = function (req, res, next) {
   var topic;
   var count;
 

@@ -7,13 +7,23 @@ var events = require('events');
 var moment = require('moment');
 var http = require('http');
 
+/**
+ * Provides the base Pubsubhubbub controller
+ *
+ * @module Pubsub
+ */
 module.exports.createController = function (options) {
   return new Pubsub(options);
 };
 
-// Pubsub class to control pubsubhubbub subscriptions.
-// Conforms to pubsubhubbub v0.4 specification.
-// https://pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.4.html
+/**
+ * Controls all Pubsubhubbub functions
+ * Conforms to pubsubhubbub v0.4 specification
+ * https://pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.4.html
+ * 
+ * @class Pubsub
+ * @constructor
+ */
 function Pubsub (options) {
   events.EventEmitter.call(this);
 
@@ -34,7 +44,11 @@ function Pubsub (options) {
 
 util.inherits(Pubsub, events.EventEmitter);
 
-// Handles verification of intent from hub.
+/**
+ * Handles verification of intent from hub
+ *
+ * @method verification
+ */
 Pubsub.prototype.verification = function (req, res) {
   var data;
   var topic = req.query['hub.topic'] || false;
@@ -85,7 +99,11 @@ Pubsub.prototype.verification = function (req, res) {
   };
 };
 
-// Called when the hub notifies the subscriber with new data.
+/**
+ * Called when the hub notifies the subscriber with new data
+ *
+ * @method notification
+ */
 Pubsub.prototype.notification = function (req, res) {
   var topic = req.query['hub.topic'] || false;
   var hub = req.query['hub'] || false;
@@ -193,6 +211,14 @@ Pubsub.prototype.notification = function (req, res) {
   }).bind(this));
 };
 
+/**
+ * Sends a subscribe request
+ *
+ * @method subscribe
+ * @param topic {String} The URL of the topic to subscribe to
+ * @param hub {String} The URL of the hub to send the request to
+ * @param callback {Function} Callback containing error and result
+ */
 Pubsub.prototype.subscribe = function (topic, hub, callback) {
   this.sendSubscription('subscribe', topic, hub, function (err, result) {
     if (err) return callback(err);
@@ -200,6 +226,14 @@ Pubsub.prototype.subscribe = function (topic, hub, callback) {
   });
 };
 
+/**
+ * Sends an unsubscribe request
+ *
+ * @method unsubscribe
+ * @param topic {String} The URL of the topic to unsubscribe from
+ * @param hub {String} The URL of the hub to send the request to
+ * @param callback {Function} Callback containing error and result
+ */
 Pubsub.prototype.unsubscribe = function (topic, hub, callback) {
   this.sendSubscription('unsubscribe', topic, hub, function (err, result) {
     if (err) return callback(err);
@@ -207,7 +241,15 @@ Pubsub.prototype.unsubscribe = function (topic, hub, callback) {
   });
 };
 
-// Sends a subscribe or unsubscribe request to the hub
+/**
+ * Sends a subscribe or unsubscribe request to the hub
+ *
+ * @method sendSubscription
+ * @param mode {String} The purpose of the request: 'subscribe' or 'unsubscribe'
+ * @param topic {String} The URL of the topic to subscribe/unsubscribe to
+ * @param hub {String} The URL of the hub to send the request to
+ * @param callback {Function} Callback containing error and result
+ */
 Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
   var uniqueCallbackUrl = this.callbackurl + 
     (this.callbackurl.replace(/^https?:\/\//i, "").match(/\//)?"":"/") +
@@ -321,13 +363,18 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
   }).bind(this));
 };
 
-// Retreive entries from a feed. 
-// 
-// options.topic {url} (required): the feed url.
-// options.count {int} (optional): how many entries to retrieve.
-// options.before {id} (optional): only retrieve entries published before this one.
-// options.after {id} (optional): only retrieve entries published after this one.
-// options.hub {url} (optional): the hub to retrieve the entries from.
+/**
+ * Retrieve entries from a feed
+ * 
+ * @method retrieveFeed
+ * @param options {Object} The options object
+ * @param options.topic {String} The URL of the feed to retrieve
+ * @param [options.count] {Number} How many entries to retrieve
+ * @param [options.before] {ID} The ID of an entry; retrieved entries will be older
+ * @param [options.after] {ID} The ID of an entry; retrieved entries will be newer
+ * @param [options.hub] {String} The URL of the hub to send the request to
+ * @param callback {Function} Callback containing error and result
+ */
 Pubsub.prototype.retrieveFeed = function (options, callback) {
   var topic = options.topic || false;
   var count = options.count || 10;
@@ -407,6 +454,12 @@ Pubsub.prototype.retrieveFeed = function (options, callback) {
   }).bind(this));
 };
 
+/**
+ * An Error containing an HTTP StatusCode
+ *
+ * @class StatusError
+ * @constructor
+ */
 function StatusError(code, message) {
   this.statusCode = code || 500;
   this.message = message || 'Something went wrong';
