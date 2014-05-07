@@ -159,8 +159,7 @@ admin.prototype.subscribe = function (req, res) {
 
   async.forEachLimit(subs, 10, function (sub, callback) {
     if ( !validator.isURL(sub) ) {
-      var message = sub + ' is not a valid URL';
-      return callback(message);
+      return callback(new Error(sub + ' is not a valid URL'));
     } else {
       db.feeds.updateStatus(sub, 'pending', function (err, doc) {
         if (err) return callback(err);

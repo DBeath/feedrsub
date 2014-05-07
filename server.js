@@ -11,6 +11,7 @@ var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var errorhandler = require('errorhandler');
 var basicAuth = require('basic-auth');
+//var csurf = require('csurf');
 
 var app = module.exports = express();
 var server = null;
@@ -24,8 +25,12 @@ app.use(methodOverride());
 app.use(express.static(__dirname+'/public'));
 app.use(errorhandler());
 app.use(cookieParser('cookiemonster'));
-app.use(session({ cookie: { maxAge: 60000 }}));
+app.use(session({ 
+  secret: 'notsuchagoodsecret',
+  cookie: { maxAge: 60000 }
+}));
 app.use(flash());
+//app.use(csurf());
 app.enable('trust proxy');
 
 // Authentication handler
@@ -45,6 +50,11 @@ var auth = function (req, res, next) {
 function unauthorized(res) {
   res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
   res.send(401);
+};
+
+var csrf = function (req, res, next) {
+  res.locals.csrftoken = req.csrfToken();
+  next();
 };
 
 // Converts unix time to formatted date
@@ -98,6 +108,10 @@ var close = function (done) {
       console.log('Server was running for',Math.round(process.uptime()),'seconds');
       return done();
     });
+    setTimeout(function () {
+      console.log('Server took too long to shutdown, forcing shutdown');
+      return done();
+    }, 2000);
   });
 };
 
