@@ -1,7 +1,7 @@
 feedrsub
 ========
 
-Node.js subscriber and admin page for [Superfeedr](http://superfeedr.com/) subscriptions.
+Node.js subscriber and admin page for [Superfeedr](http://superfeedr.com/) subscriptions. Saves subscribed feeds and entries to Mongodb.
 
 ## Installation
 Install node.js and mongodb.
@@ -16,7 +16,7 @@ Navigate to the folder and install the required modules from the package.
 
 	npm install .
 
-Edit the _config.json_ file with your settings for Superfeedr, and the login settings for the admin page.
+Edit the ```config.json``` file with your settings for Superfeedr, and the login settings for the admin page.
 
 ## Config settings
 
@@ -58,7 +58,7 @@ nginx example:
 ## Main Routes
 **Note** this is not currently a fully functional api.
 
-**Require Authentication**
+**Requires Authentication**
 * ```GET /admin``` The main admin page.
 * ```GET /admin/subscribed``` A list of current subscriptions.
 * ```GET /admin/unsubscribed``` A list of unsubscribed feeds.
@@ -75,12 +75,12 @@ nginx example:
 **Requires Authentication**
 * ```POST /api/v1/subscribe/``` Subscribes to a single feed. Requires a 'topic' parameter containing the URL of the feed to subscribe to. Returns 200 and echos the feed URL upon success.
 * ```POST /api/v1/unsubscribe/``` Unsubscribes from a single feed. Requires a 'topic' parameter containing the URL of the feed to unsubscribe from. Returns 200 and echos the feed URL upon success.
-* ```POST /api/v1/retrieve/``` Retrieves the entries from a single feed. Requires a 'topic' parameter containing the URL of the feed to retrieve. Returns 200 and a success message. *Note* This does not return a list of the entries, it saves the entries to the database. 
+* ```POST /api/v1/retrieve/``` Retrieves the entries from a single feed. Requires a 'topic' parameter containing the URL of the feed to retrieve, and an optional 'count' parameter containing the number of entries to retrieve (default 10). Returns 200 and the content of the feed. It will also save the updated entries to the database. 
 
 ## Usage
 To start the app, run ```node index.js```
 
-Navigate to 
+Navigate to the ```http://yourdomain/admin``` and login with your specified credentials.
 
 To subscribe to feeds, the subscribe page has a text field where you can enter a list of feeds separated by newlines, tabs, spaces, or commas.
 
