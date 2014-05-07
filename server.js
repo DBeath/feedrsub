@@ -28,7 +28,7 @@ app.use(session({ cookie: { maxAge: 60000 }}));
 app.use(flash());
 app.enable('trust proxy');
 
-//var auth = express.basicAuth(config.express.admin, config.express.adminpass);
+// Authentication handler
 var auth = function (req, res, next) {
   var user = basicAuth(req);
   if (!user || !user.name || !user.pass) {
@@ -41,6 +41,7 @@ var auth = function (req, res, next) {
   };
 };
 
+// Send unauthorized response
 function unauthorized(res) {
   res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
   res.send(401);

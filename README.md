@@ -70,8 +70,17 @@ nginx example:
 * ```GET /pubsubhubbub``` The URL the hub will call to receive verification of a subscription request.
 * ```POST /pubsubhubbub``` The URL the hub will post feed update notifications to.
 
+## API
+
+**Requires Authentication**
+* ```POST /api/v1/subscribe/``` Subscribes to a single feed. Requires a 'topic' parameter containing the URL of the feed to subscribe to. Returns 200 and echos the feed URL upon success.
+* ```POST /api/v1/unsubscribe/``` Unsubscribes from a single feed. Requires a 'topic' parameter containing the URL of the feed to unsubscribe from. Returns 200 and echos the feed URL upon success.
+* ```POST /api/v1/retrieve/``` Retrieves the entries from a single feed. Requires a 'topic' parameter containing the URL of the feed to retrieve. Returns 200 and a success message. *Note* This does not return a list of the entries, it saves the entries to the database. 
+
 ## Usage
 To start the app, run ```node index.js```
+
+Navigate to 
 
 To subscribe to feeds, the subscribe page has a text field where you can enter a list of feeds separated by newlines, tabs, spaces, or commas.
 

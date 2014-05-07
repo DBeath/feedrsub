@@ -386,6 +386,7 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
  * @param [options.before] {ID} The ID of an entry; retrieved entries will be older
  * @param [options.after] {ID} The ID of an entry; retrieved entries will be newer
  * @param [options.hub] {String} The URL of the hub to send the request to
+ * @param [options.returnFeed] {Bool} If true returns the feed in the callback
  * @param callback {Function} Callback containing error and result
  */
 Pubsub.prototype.retrieveFeed = function (options, callback) {
@@ -393,6 +394,7 @@ Pubsub.prototype.retrieveFeed = function (options, callback) {
   var count = options.count || 10;
   var before = options.before || null;
   var after = options.after || null;
+  var returnFeed = options.returnFeed || false;
   var feedSecret = false;
   var hub = options.hub || config.pubsub.hub;
 
@@ -460,6 +462,10 @@ Pubsub.prototype.retrieveFeed = function (options, callback) {
         headers: res.headers
       });
 
+      if (returnFeed) {
+        return callback(null, body);
+      };
+      
       return callback(null, count);
     }).bind(this));
 

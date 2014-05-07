@@ -99,7 +99,8 @@ Subscriptions.prototype.retrieve = function (req, res, next) {
   };
 
   var options = {
-    topic: topic
+    topic: topic,
+    returnFeed: true
   };
 
   if (req.param('count')) {
@@ -109,7 +110,7 @@ Subscriptions.prototype.retrieve = function (req, res, next) {
 
   pubsub.retrieveFeed(options, function (err, result) {
     if (err) return next(err);
-    return res.send(200, 'Retrieved '+result+' entries from '+topic);
+    return res.send(200, result);
   });
 };
 
