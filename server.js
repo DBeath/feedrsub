@@ -70,7 +70,7 @@ app.use(function (req, res, next) {
 });
 
 // Starts the server and database
-function start(done) {
+var start = function (done) {
   console.log('Starting feedrsub...');
   console.log('Connecting to database...');
   db.init(function (err, result) {
@@ -87,11 +87,34 @@ function start(done) {
 };
 
 // Closes the server
-function close(done) {
-  server.close(function () {
-    return done();
+var close = function (done) {
+  console.log('Closing the database connection...');
+  db.close(function (err) {
+    if (err) console.log(err);
+    console.log('Stopping the server...');
+    server.close(function () {
+      console.log('Server has shutdown.');
+      console.log('Server was running for',Math.round(process.uptime()),'seconds');
+      return done();
+    });
   });
 };
+
+// Gracefully closes the server on SIGTERM event
+process.on('SIGTERM', function () {
+  console.log('\nReceived SIGTERM, closing server.');
+  close(function () {
+    process.exit(0);
+  });
+});
+
+// Gracefully closes the server on SIGINT event
+process.on('SIGINT', function () {
+  console.log('\nReceived SIGINT, closing server.');
+  close(function () {
+    process.exit(0);
+  });
+});
 
 module.exports.start = start;
 module.exports.close = close;

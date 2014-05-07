@@ -22,7 +22,8 @@ function Entries (db) {
   this.collection = new mongodb.Collection(db, 'entries');
   this.collection.ensureIndex('topic', function (err, result) {
     if (err) return console.log(err);
-    return console.log('Index %s exists for Entries collection', result);
+    //console.log('Index %s exists for Entries collection', result);
+    return;
   });
   module.exports.EntriesCollection = this.collection;
 };
