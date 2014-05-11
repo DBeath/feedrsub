@@ -312,3 +312,21 @@ Feeds.prototype.countRecent = function (time, callback) {
     return callback(null, result);
   });
 };
+
+/**
+ * Verifies that a feed is pending subscription/unsubscription
+ *
+ * @method verifyRequest
+ * @param topic {String} The URL of the feed
+ * @param callback {Function} Callback containing error, or true if pending, false if not
+ */
+Feeds.prototype.verifyRequest = function (topic, callback) {
+  this.collection.findOne({topic: topic}, function (err, doc) {
+    if (err) return callback(err);
+    if (doc.status === 'pending') {
+      return callback(null, true);
+    } else {
+      return callback(null, false);
+    };
+  });
+};

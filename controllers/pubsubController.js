@@ -85,12 +85,12 @@ Pubsub.prototype.verification = function (req, res) {
     // If subscribing or unsubscribing check that topic is pending, then echo challenge.
     case 'subscribe':
     case 'unsubscribe':
-      db.feeds.findOneByTopic(topic, function (err, doc) {
+      db.feeds.verifyRequest(topic, function (err, isPending) {
         if (err) {
           console.error(err);
           return res.send(403);
         };
-        if (doc.status === 'pending') {
+        if (isPending) {
           if (lease_seconds && mode === 'subscribe') {
             db.feeds.updateLeaseSeconds(topic, lease_seconds, function (err, result) {
               if (err) {
