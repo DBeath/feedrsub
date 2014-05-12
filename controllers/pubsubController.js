@@ -6,7 +6,7 @@ var util = require('util');
 var events = require('events');
 var moment = require('moment');
 var http = require('http');
-var StatusError = require('../lib/statuserror.js');
+var StatusError = require('../lib/errors.js').StatusError;
 
 /**
  * Provides the base Pubsubhubbub controller

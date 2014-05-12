@@ -3,7 +3,7 @@ var config = require('../config.json');
 var pubsub = require('./pubsub.js').pubsub;
 var validator = require('validator');
 var moment = require('moment');
-var StatusError = require('../lib/statuserror.js');
+var StatusError = require('../lib/errors.js').StatusError;
 
 /**
  * Provides the subscriptions API

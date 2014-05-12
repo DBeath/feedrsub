@@ -76,6 +76,9 @@ app.all('/api/v1*', auth);
 app.use('/api/v1', require('./routes/subscriptionsRoutes.js').subs);
 app.use('/api/v1', require('./routes/feedsRoutes.js').feeds);
 
+app.use(require('./lib/errors.js').StatusErrorHandler);
+app.use(require('./lib/errors.js').ErrorHandler);
+
 // assume 404 since no middleware responded
 app.use(function (req, res, next) {
   res.status(404).render(404, { url: req.originalUrl });

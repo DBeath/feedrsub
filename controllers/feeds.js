@@ -2,7 +2,7 @@ var db = require('../models/db.js');
 var config = require('../config.json');
 var validator = require('validator');
 var moment = require('moment');
-var StatusError = require('../lib/statuserror.js');
+var StatusError = require('../lib/errors.js').StatusError;
 
 /**
  * Provides the feeds API
