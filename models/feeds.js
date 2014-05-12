@@ -33,10 +33,15 @@ function Feeds (db) {
  *
  * @method subscribe
  * @param topic {String} The URL of the feed
- * @param secret {String} Secret for calculating HMAC signatures
+ * @param [secret] {String} Secret for calculating HMAC signatures
  * @param callback {Function} Callback containing error or result
  */
 Feeds.prototype.subscribe = function (topic, secret, callback) {
+  if(!callback && typeof secret === "function"){
+    callback = secret;
+    secret = undefined;
+  };
+
   this.collection.update({
       topic: topic
     },
