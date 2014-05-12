@@ -74,6 +74,7 @@ app.use('/admin', require('./routes/adminRoutes.js').admin);
 // Api
 app.all('/api/v1*', auth);
 app.use('/api/v1', require('./routes/subscriptionsRoutes.js').subs);
+app.use('/api/v1', require('./routes/feedsRoutes.js').feeds);
 
 // assume 404 since no middleware responded
 app.use(function (req, res, next) {

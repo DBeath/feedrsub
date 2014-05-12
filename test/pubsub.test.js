@@ -82,7 +82,7 @@ describe('authorization', function () {
     });
   });
 
-  it('should return 200 - authorized', function (done) {
+  it('should return 200 - authorized (admin page)', function (done) {
     var postParams = {
       url: 'http://localhost:4000/admin/',
       auth: {
@@ -96,7 +96,7 @@ describe('authorization', function () {
     });
   });
 
-  it('should return 401 - incorrect authorization', function (done) {
+  it('should return 401 - incorrect authorization (admin page)', function (done) {
     var postParams = {
       url: 'http://localhost:4000/admin',
       auth: {

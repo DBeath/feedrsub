@@ -6,6 +6,7 @@ var util = require('util');
 var events = require('events');
 var moment = require('moment');
 var http = require('http');
+var StatusError = require('../lib/statuserror.js');
 
 /**
  * Provides the base Pubsubhubbub controller
@@ -472,16 +473,3 @@ Pubsub.prototype.retrieveFeed = function (options, callback) {
     console.log(req.headers);
   }).bind(this));
 };
-
-/**
- * An Error containing an HTTP StatusCode
- *
- * @class StatusError
- * @constructor
- */
-function StatusError(code, message) {
-  this.statusCode = code || 500;
-  this.message = message || 'Something went wrong';
-};
-StatusError.prototype = new Error();
-StatusError.prototype.constructor = StatusError;

@@ -3,6 +3,7 @@ var config = require('../config.json');
 var pubsub = require('./pubsub.js').pubsub;
 var validator = require('validator');
 var moment = require('moment');
+var StatusError = require('../lib/statuserror.js');
 
 /**
  * Provides the subscriptions API
@@ -16,7 +17,7 @@ module.exports.SubscriptionsController = function () {
 /**
  * Creates a subscription object.
  *
- * @class subscriptions
+ * @class Subscriptions
  * @constructor
  */
 function Subscriptions () {};
@@ -113,16 +114,3 @@ Subscriptions.prototype.retrieve = function (req, res, next) {
     return res.send(200, result);
   });
 };
-
-/**
- * An Error containing an HTTP StatusCode
- *
- * @class StatusError
- * @constructor
- */
-function StatusError(code, message) {
-  this.statusCode = code || 500;
-  this.message = message || 'Something went wrong';
-};
-StatusError.prototype = new Error();
-StatusError.prototype.constructor = StatusError;
