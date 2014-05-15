@@ -321,6 +321,34 @@ admin.prototype.pending_feeds = function (req, res) {
   });
 };
 
+admin.prototype.authors = function (req, res) {
+  async.parallel({
+    docs: function (callback) {
+      db.authors.listAll(function (err, docs) {
+        if (err) return callback(err);
+        return callback(null, docs);
+      });
+    },
+    count: function (callback) {
+      db.authors.count(function (err, result) {
+        if (err) return callback(err);
+        return callback(null, result);
+      });
+    }
+  }, function (err, results) {
+    if (err) {
+      console.error(err);
+      req.flash('error', err.message);
+      return res.redirect('/admin');
+    };
+    return res.render('authors', {
+      title: 'Authors',
+      authors: results.docs,
+      count: results.count
+    }); 
+  });
+};
+
 function error(err, req, path) {
   console.error(err.stack);
   req.flash('error', err.message);
