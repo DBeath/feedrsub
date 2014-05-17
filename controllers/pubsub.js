@@ -73,3 +73,18 @@ pubsub.on('feed_update', function (data) {
     console.log('Notification was not in JSON format');
   };
 });
+
+var parseAuthor = function (input) {
+  var split = input.displayName.split(/[\s,]+/);
+  var givenName = split[0];
+  var familyName = split[1];
+
+  var author = ({
+    displayName: input.displayName,
+    givenName: givenName,
+    familyName: familyName,
+    id: input.id
+  });
+
+  return author;
+};

@@ -7,7 +7,7 @@ module.exports.createCollection = function (db) {
 };
 
 function Authors(db) {
-  this.collection = new mongodb.Collection(db, 'authors');
+  this.collection = new mongodb.Collection(db, 'authorstest');
   module.exports.AuthorsCollection = this.collection;
 };
 

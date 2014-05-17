@@ -25,7 +25,8 @@ mc.connect('mongodb://localhost:27017/feedrsub', function (err, db) {
       authors.insert({
         displayName: item.displayName,
         givenName: givenName,
-        familyName: familyName
+        familyName: familyName,
+        id: item.id
       }
       , function (err, result) {
         if (err) {

@@ -3,15 +3,16 @@
 <table class="table table-condensed table-striped">
   <thead>
     <tr>
-      <th>ID</th>
       <th>Entries</th>
+      <th>ID</th>
       <th>DisplayName</th>
+      <th>Given Name</th>
+      <th>Family Name</th>
     </tr>
   </thead>
   <tbody>
     {{#each authors}}
     <tr>
-      <td>{{id}}</td>
       <td>
         <form method="Get" action="/admin/authors/{{id}}">
           <button type="submit" class="btn btn-info btn-xs" value="Entries">
@@ -19,7 +20,10 @@
           </button>
         </form>
       </td>
+      <td>{{id}}</td>
       <td>{{displayName}}</td>
+      <td>{{givenName}}</td>
+      <td>{{familyName}}</td>
     {{/each}}
   </tbody>
 </table>

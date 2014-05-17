@@ -350,9 +350,12 @@ admin.prototype.authors = function (req, res) {
 };
 
 admin.prototype.authorEntries = function (req, res) {
-  console.log(req.params);
   db.authors.findOne(req.params.id, function (err, result) {
-    console.log(result);
+    if (err) {
+      console.error(err);
+      req.flash('error', err.message);
+      return res.redirect('/admin');
+    };
     db.entries.listByAuthor(result.id, 100, function (err, docs) {
       if (err) {
         console.error(err);
