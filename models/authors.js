@@ -37,3 +37,17 @@ Authors.prototype.count = function (callback) {
     return callback(null, result);
   });
 };
+
+Authors.prototype.findOneById = function (id, callback) {
+  this.collection.findOne({_id: ObjectID.createFromHexString(id)}, function (err, doc) {
+    if (err) return callback(err);
+    return callback(null, doc);
+  });
+};
+
+Authors.prototype.findOne = function (id, callback) {
+  this.collection.findOne({id: id}, function (err, result) {
+    if (err) return callback(err);
+    return callback(null, result);
+  });
+};

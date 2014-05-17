@@ -1,0 +1,26 @@
+<h3>{{title}}</h3>
+<!-- <p>Entries: {{results.entriesCount}}</p>
+<p>Entries in Last Day: {{results.entriesInLastDay}}</p>
+<p>Entries in Last Week: {{results.entriesInLastWeek}}</p> -->
+<table class="table table-condensed table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Published</th>
+      <th>Title</th>
+      <th>Author</th>
+      <th>Permalink</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each entries}}
+    <tr>
+      <td>{{_id}}</td>
+      <td>{{unix_to_date published}}</td>
+      <td>{{title}}</td>
+      <td>{{actor.displayName}}</td>
+      <td><a href="{{permalinkUrl}}">{{permalinkUrl}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>

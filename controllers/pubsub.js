@@ -3,7 +3,7 @@ var db = require('../models/db.js');
 var moment = require('moment');
 var config = require('../config.json');
 
-// Creates Pubsub object.
+//Creates Pubsub object.
 var pubsub = pubsubController.createController({
   secret: config.pubsub.secret,
   domain: config.pubsub.domain,

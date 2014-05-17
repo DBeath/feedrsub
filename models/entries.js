@@ -150,3 +150,15 @@ Entries.prototype.countRecentByTopic = function (topic, time, callback) {
     return callback(null, result);
   });
 };
+
+Entries.prototype.listByAuthor = function (authorId, limit, callback) {
+  this.collection.find({
+    'actor.id': authorId
+  }).limit(limit)
+    .sort([['published', -1]])
+    .toArray(
+      function (err, docs) {
+        if (err) return callback(err);
+        return callback(null, docs);
+  });
+};
