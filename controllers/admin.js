@@ -350,7 +350,7 @@ admin.prototype.authors = function (req, res) {
 };
 
 admin.prototype.authorEntries = function (req, res) {
-  db.authors.findOne(req.params.id, function (err, result) {
+  db.authors.findOneById(req.params.id, function (err, result) {
     if (err) {
       console.error(err);
       req.flash('error', err.message);

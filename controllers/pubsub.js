@@ -59,11 +59,25 @@ pubsub.on('feed_update', function (data) {
           item.id = item.permalinkUrl || data.topic+'/'+item.title+'/'+item.published;
         };
 
-        // Adds entry item if Id doesn't exist, update entry item if it does.
-        db.entries.update(item.id, item, function (err) {
-          if (err) return console.error(err);
-          return console.log('Added entry from %s at %s', data.topic, moment().format());
-        });
+        if (item.actor) {
+          getAuthorId(item.actor, function (err, id) {
+            if (err) console.error(err);
+            if (id) {
+              item.actor.id = id;
+            };
+            addEntry();
+          });
+        } else {
+          addEntry();
+        };
+       
+        function addEntry() {
+          // Adds entry item if Id doesn't exist, update entry item if it does.
+          db.entries.update(item.id, item, function (err) {
+            if (err) return console.error(err);
+            return console.log('Added entry from %s at %s', data.topic, moment().format());
+          });
+        };
       });
 
     } else {
@@ -74,8 +88,24 @@ pubsub.on('feed_update', function (data) {
   };
 });
 
-var parseAuthor = function (input) {
-  var split = input.displayName.split(/[\s,]+/);
+var getAuthorId = function (author, callback) {
+  db.authors.findOne(author.displayName, function (err, result) {
+    if (err) return callback(err);
+    if (result) {
+      return callback(null, result._id);
+    } else {
+      db.authors.insert(author, function (err, result) {
+        if (err) return callback(err);
+        return callback(null, result._id);
+      });
+    };
+  });
+};
+
+var parseAuthors = function (input) {
+  var split = input.split(/[\s,]+/);
+
+
   var givenName = split[0];
   var familyName = split[1];
 
@@ -86,5 +116,5 @@ var parseAuthor = function (input) {
     id: input.id
   });
 
-  return author;
+  return authors;
 };

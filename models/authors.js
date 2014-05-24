@@ -13,7 +13,7 @@ function Authors(db) {
 
 Authors.prototype.update = function (id, author, callback) {
   this.collection.update({
-    _id: id
+    id: id
   },
   author,
   {
@@ -47,6 +47,13 @@ Authors.prototype.findOneById = function (id, callback) {
 
 Authors.prototype.findOne = function (id, callback) {
   this.collection.findOne({id: id}, function (err, result) {
+    if (err) return callback(err);
+    return callback(null, result);
+  });
+};
+
+Authors.prototype.insert = function (author, callback) {
+  this.collection.insert(author, function (err, result) {
     if (err) return callback(err);
     return callback(null, result);
   });
