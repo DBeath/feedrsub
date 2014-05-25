@@ -1,4 +1,4 @@
-var config = require('../config.json');
+var config = require('../config');
 var db = require('../models/db.js');
 var request = require('request');
 var crypto = require('crypto');

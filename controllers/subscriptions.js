@@ -1,5 +1,5 @@
 var db = require('../models/db.js');
-var config = require('../config.json');
+var config = require('../config');
 var pubsub = require('./pubsub.js').pubsub;
 var validator = require('validator');
 var moment = require('moment');

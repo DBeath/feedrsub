@@ -3,12 +3,12 @@ var mongodb = require('mongodb');
 var Feeds = require('./feeds.js');
 var Entries = require('./entries.js');
 var Authors = require('./authors.js');
-var config = require('../config.json');
+var config = require('../config/');
 
 var mongoclient;
 
 module.exports.init = function (callback) {
-  var connString = config.express.connString || "mongodb://localhost:27017/feedrsub";
+  var connString = config.express.connstring || "mongodb://localhost:27017/feedrsub";
   mongoclient = new MongoClient();
 
   mongoclient.connect(connString, function (err, database) {
