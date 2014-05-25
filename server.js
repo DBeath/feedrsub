@@ -1,8 +1,9 @@
 var express = require('express');
 var db = require('./models/db.js');
-var config = require('./config.json');
+
 var hbs = require('hbs');
 var moment = require('moment');
+var nconf = require('nconf');
 
 var flash = require('connect-flash');
 var cookieParser = require('cookie-parser');
@@ -15,6 +16,9 @@ var basicAuth = require('basic-auth');
 
 var app = module.exports = express();
 var server = null;
+
+// Set up configs
+var config = require('./config/');
 
 // Middleware
 app.set('views', __dirname + '/views');
