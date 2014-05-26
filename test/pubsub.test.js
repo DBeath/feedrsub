@@ -34,7 +34,10 @@ var response_body = JSON.stringify(
       },
       {
         "title": item2Title,
-        "status": itemStatus
+        "status": itemStatus,
+        "actor": {
+          "displayName": authorname,
+        }
       }
     ]
   }
@@ -285,6 +288,13 @@ describe('pubsub notification', function () {
           mongo.authors.findOne(authorname, function (err, doc) {
             if (err) return callback(err);
             expect(doc.displayName, 'author DisplayName').to.equal(authorname);
+            callback(null);
+          });
+        },
+        authornumber: function (callback) {
+          mongo.authors.count(function (err, result) {
+            if (err) return callback(err);
+            expect(result, 'number of authors').to.equal(1);
             callback(null);
           });
         }
