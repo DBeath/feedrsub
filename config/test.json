@@ -1,0 +1,5 @@
+{
+  "express": {
+    "connstring": "mongodb://localhost:27017/feedrsub_test"
+  }
+}
