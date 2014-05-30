@@ -19,6 +19,7 @@ module.exports.init = function (callback) {
     module.exports.feeds = Feeds.createCollection(db);
     module.exports.authors = Authors.createCollection(db);
     module.exports.errors = new mongodb.Collection(db, 'errors');
+    module.exports.database = db;
     var message = 'Connected to ' + connString;
     return callback(null, message);
   });

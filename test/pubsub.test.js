@@ -14,6 +14,7 @@ var topicTitle = 'Test Feed';
 var itemTitle = 'This is a test';
 var itemStatus = 'Test';
 var item2Title = 'This is the second item';
+var authorname = 'Testy Authorson';
 var response_body = JSON.stringify(
   {
     "title": topicTitle,
@@ -22,15 +23,22 @@ var response_body = JSON.stringify(
       "http": 200
     },
     "items": [
-    {
-      "title": itemTitle,
-      "published": thisNow,
-      "status": itemStatus
-    },
-    {
-      "title": item2Title,
-      "status": itemStatus
-    }
+      {
+        "title": itemTitle,
+        "published": thisNow,
+        "status": itemStatus,
+        "actor": {
+          "displayName": authorname,
+          "id": authorname
+        }
+      },
+      {
+        "title": item2Title,
+        "status": itemStatus,
+        "actor": {
+          "displayName": authorname,
+        }
+      }
     ]
   }
 );
@@ -141,6 +149,12 @@ describe('pubsub notification', function () {
             if (err) return callback(err);
             return callback(null, result);
           });
+        },
+        authors: function (callback) {
+          mongo.authors.collection.remove({}, function (err, result) {
+            if (err) return callback(err);
+            return callback(null, result);
+          });
         }
       }, function (err, results) {
         if (err) throw err;
@@ -150,30 +164,8 @@ describe('pubsub notification', function () {
   });
 
   after(function (done) {
-    async.series({
-      removeFeed: function (callback) {
-        mongo.feeds.collection.remove({topic: topic}, function (err, result) {
-          if (err) return callback(err);
-          return callback(null, result);
-        });
-      },
-      feed: function (callback) {
-        mongo.feeds.subscribe(topic, encrypted_secret, function (err, result) {
-          if (err) return callback(err);
-          return callback(null, result);
-        });
-      },
-      entry: function (callback) {
-        mongo.entries.collection.remove({status: 'Test'}, function (err, result) {
-          if (err) return callback(err);
-          return callback(null, result);
-        });
-      }
-    }, function (err, results) {
-      if (err) throw err;
-      server.close(function () {
-        done();
-      });
+    server.close(function () {
+      done();
     });
   });
 
@@ -278,6 +270,7 @@ describe('pubsub notification', function () {
             expect(doc.title, 'doc1 title').to.equal(itemTitle);
             expect(doc.published, 'doc1 published').to.equal(thisNow);
             expect(doc.status, 'doc1 status').to.equal(itemStatus);
+            expect(doc.actor.displayName, 'doc1 author').to.equal('Testy Authorson');
             callback(null);
           });
         },
@@ -290,9 +283,23 @@ describe('pubsub notification', function () {
             expect(doc.status, 'doc2 status').to.equal(itemStatus);
             callback(null);
           });
+        },
+        author: function (callback) {
+          mongo.authors.findOne(authorname, function (err, doc) {
+            if (err) return callback(err);
+            expect(doc.displayName, 'author DisplayName').to.equal(authorname);
+            callback(null);
+          });
+        },
+        authornumber: function (callback) {
+          mongo.authors.count(function (err, result) {
+            if (err) return callback(err);
+            expect(result, 'number of authors').to.equal(1);
+            callback(null);
+          });
         }
       }, function (err, result) {
-        if (err) done();
+        if (err) return done();
         done();
       });
     }, 10);

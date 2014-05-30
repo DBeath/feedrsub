@@ -7,13 +7,13 @@ module.exports.createCollection = function (db) {
 };
 
 function Authors(db) {
-  this.collection = new mongodb.Collection(db, 'authorstest');
+  this.collection = new mongodb.Collection(db, 'authors');
   module.exports.AuthorsCollection = this.collection;
 };
 
 Authors.prototype.update = function (id, author, callback) {
   this.collection.update({
-    _id: id
+    displayName: id
   },
   author,
   {
@@ -46,7 +46,14 @@ Authors.prototype.findOneById = function (id, callback) {
 };
 
 Authors.prototype.findOne = function (id, callback) {
-  this.collection.findOne({id: id}, function (err, result) {
+  this.collection.findOne({displayName: id}, function (err, result) {
+    if (err) return callback(err);
+    return callback(null, result);
+  });
+};
+
+Authors.prototype.insert = function (author, callback) {
+  this.collection.insert(author, function (err, result) {
     if (err) return callback(err);
     return callback(null, result);
   });
