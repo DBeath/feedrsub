@@ -28,11 +28,22 @@ app.use(bodyParser.urlencoded());
 app.use(methodOverride());
 app.use(express.static(__dirname+'/public'));
 app.use(errorhandler());
-app.use(cookieParser('cookiemonster'));
+
+var cookiesecret = null;
+if (config.express.cookiesecret) {
+  cookiesecret = config.express.cookiesecret;
+};
+app.use(cookieParser(cookiesecret));
+
+var sessionsecret = 'notsuchagoodsecret';
+if (config.express.sessionsecret) {
+  sessionsecret = config.express.sessionsecret;
+};
 app.use(session({ 
-  secret: 'notsuchagoodsecret',
+  secret: sessionsecret,
   cookie: { maxAge: 60000 }
 }));
+
 app.use(flash());
 //app.use(csurf());
 app.enable('trust proxy');
@@ -85,7 +96,10 @@ app.use(require('./lib/errors.js').ErrorHandler);
 
 // assume 404 since no middleware responded
 app.use(function (req, res, next) {
-  res.status(404).render(404, { url: req.originalUrl });
+  res.status(404).render(404, {
+    layout: '404_layout', 
+    url: req.originalUrl 
+  });
 });
 
 // Starts the server and database
