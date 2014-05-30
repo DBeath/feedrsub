@@ -63,7 +63,7 @@ pubsub.on('feed_update', function (data) {
           getAuthorId(item.actor, function (err, id) {
             if (err) console.error(err);
             if (id) {
-              item.actor.id = id;
+              item.actor._id = id;
             };
             addEntry();
           });
