@@ -97,4 +97,21 @@ describe('authors', function () {
       done();
     });
   });
+
+  it('should return an rss feed for an author', function (done) {
+    var url = 'http://localhost:4000/api/v1/author/rss/?' + qs.stringify({author: 'John Doe'}); 
+    var postParams = {
+      url: url,
+      auth: {
+        user: 'admin',
+        pass: 'password'
+      }
+    };
+
+    request.get(postParams, function (err, response, body) {
+      expect(response.statusCode).to.equal(200);
+      console.log(body);
+      done();
+    });
+  });
 });
