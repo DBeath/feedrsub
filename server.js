@@ -91,6 +91,8 @@ app.all('/api/v1*', auth);
 app.use('/api/v1', require('./routes/subscriptionsRoutes.js').subs);
 app.use('/api/v1', require('./routes/feedsRoutes.js').feeds);
 
+app.use('/api/v1', require('./routes/authorRoutes.js').authors);
+
 app.use(require('./lib/errors.js').StatusErrorHandler);
 app.use(require('./lib/errors.js').ErrorHandler);
 
