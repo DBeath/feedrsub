@@ -85,7 +85,7 @@ Authors.prototype.rss = function (req, res, next) {
             feed.item({
               title: entry.title,
               description: entry.content,
-              published: entry.published,
+              date: entry.published,
               author: entry.actor.displayName,
               url: entry.permalinkUrl,
 
