@@ -11,14 +11,14 @@ module.exports.AuthorsController = function () {
 
 function Authors () {};
 
-Authors.prototype.list = function (req, res) {
+Authors.prototype.list = function (req, res, next) {
   db.authors.listAll(function (err, result) {
     if (err) return next(err);
     return res.send(200, result);
   });
 };
 
-Authors.prototype.authorEntries = function (req, res) {
+Authors.prototype.authorEntries = function (req, res, next) {
   if (!req.param('author')) {
     return next(new StatusError(400, 'Author is not specified'));
   };
@@ -32,7 +32,7 @@ Authors.prototype.authorEntries = function (req, res) {
   });
 };
 
-Authors.prototype.rss = function (req, res) {
+Authors.prototype.rss = function (req, res, next) {
   var param = null;
   var paramType = null;
 
@@ -74,7 +74,8 @@ Authors.prototype.rss = function (req, res) {
           description: 'Articles by '+ author.displayName,
           feed_url: config.pubsub.domain + req.originalUrl,
           site_url: config.pubsub.domain,
-          author: author.displayName
+          author: author.displayName,
+          ttl: '60'
         });
 
         db.entries.listByAuthor(author._id, 10, function (err, entries) {
@@ -85,7 +86,9 @@ Authors.prototype.rss = function (req, res) {
               title: entry.title,
               description: entry.content,
               published: entry.published,
-              author: entry.actor.displayName
+              author: entry.actor.displayName,
+              url: entry.permalinkUrl,
+
             });
             cb();
           }, function (err) {
