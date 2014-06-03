@@ -84,14 +84,17 @@ Authors.prototype.rss = function (req, res, next) {
           if (err) return next(err);
           
           async.eachSeries(entries, function (entry, cb) {
+            var content = entry.content || entry.summary;
+
             feed.item({
               title: entry.title,
-              description: entry.content,
+              description: content,
               date: moment.unix(entry.published),
               author: entry.actor.displayName,
               url: entry.permalinkUrl,
               guid: entry._id.toHexString()
             });
+            
             cb();
           }, function (err) {
             var xml = feed.xml();
