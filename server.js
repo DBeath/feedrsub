@@ -72,10 +72,8 @@ var csrf = function (req, res, next) {
   next();
 };
 
-// Converts unix time to formatted date
-hbs.registerHelper('unix_to_date', function (unixDate) {
-  return moment.unix(unixDate).format('DD/MM/YYYY HH:mm:ss');
-});
+// Handlebars helpers
+require('./lib/hbs_helpers.js')();
 
 // Routes
 
