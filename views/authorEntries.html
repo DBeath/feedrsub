@@ -1,7 +1,7 @@
 <h3>{{title}}</h3>
-<!-- <p>Entries: {{results.entriesCount}}</p>
+<p>Entries: {{results.entriesCount}}</p>
 <p>Entries in Last Day: {{results.entriesInLastDay}}</p>
-<p>Entries in Last Week: {{results.entriesInLastWeek}}</p> -->
+<p>Entries in Last Week: {{results.entriesInLastWeek}}</p>
 <table class="table table-condensed table-striped">
   <thead>
     <tr>
@@ -13,7 +13,7 @@
     </tr>
   </thead>
   <tbody>
-    {{#each entries}}
+    {{#each results.entries}}
     <tr>
       <td>{{_id}}</td>
       <td>{{unix_to_date published}}</td>

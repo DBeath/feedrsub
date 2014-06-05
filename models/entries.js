@@ -151,6 +151,14 @@ Entries.prototype.countRecentByTopic = function (topic, time, callback) {
   });
 };
 
+/*
+ * Lists entries by a given author
+ *
+ * @method listByAuthor
+ * @param authorId {Id} The Id of the author
+ * @param limit {Number} The number of entries to return
+ * @param callback {Function} Callback containing error or result
+ */
 Entries.prototype.listByAuthor = function (authorId, limit, callback) {
   this.collection.find({
     'actor.id': authorId
@@ -160,5 +168,42 @@ Entries.prototype.listByAuthor = function (authorId, limit, callback) {
       function (err, docs) {
         if (err) return callback(err);
         return callback(null, docs);
+  });
+};
+
+/**
+ * Returns a count of the total number of entries for a given author which were published more 
+ * recently than the given time
+ *
+ * @method countRecentByAuthor
+ * @param authorId {Id} The Id of the author
+ * @param time {Number} The Unix date to count entries newer than
+ * @param callback {Function} Callback containing error or result
+ */
+Entries.prototype.countRecentByAuthor = function (authorId, time, callback) {
+  this.collection.count({
+    'actor.id': authorId,
+    published: {$gt: time}
+  },
+  function (err, result) {
+    if (err) return callback(err);
+    return callback(null, result);
+  });
+};
+
+/**
+ * Returns a count of the total number of entries for a given author
+ *
+ * @method countAllByAuthor
+ * @param authorId {Id} The Id of the author
+ * @param callback {Function} Callback containing error or result
+ */
+Entries.prototype.countAllByAuthor = function (authorId, callback) {
+  this.collection.count({
+    'actor.id': authorId
+  },
+  function (err, result) {
+    if (err) return callback(err);
+    return callback(null, result);
   });
 };

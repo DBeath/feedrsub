@@ -5,6 +5,8 @@ var async = require('async');
 var moment = require('moment');
 var pubsub = require('./pubsub.js').pubsub;
 
+var dayAgo = moment().subtract('d', 1).unix();
+var weekAgo = moment().subtract('d', 7).unix();
 
 module.exports.AdminController = function () {
   return new admin();
@@ -14,8 +16,6 @@ function admin () {};
 
 // The main Admin page. Contains statistics on feed and entry counts.
 admin.prototype.index = function (req, res) {
-  var dayAgo = moment().subtract('d', 1).unix();
-  var weekAgo = moment().subtract('d', 7).unix();
   async.parallel({
     feedCount: function (callback) {
       db.feeds.countAll(function (err, result) {
@@ -88,8 +88,7 @@ admin.prototype.feed = function (req, res) {
       req.flash('error', err.message);
       return res.redirect('/admin');
     };
-    var dayAgo = moment().subtract('d', 1).unix();
-    var weekAgo = moment().subtract('d', 7).unix();
+
     async.parallel({
       entries: function (callback) {
         db.entries.list(doc.topic, 100, function (err, docs) {
@@ -350,21 +349,49 @@ admin.prototype.authors = function (req, res) {
 };
 
 admin.prototype.authorEntries = function (req, res) {
-  db.authors.findOneById(req.params.id, function (err, result) {
+  db.authors.findOneById(req.params.id, function (err, author) {
     if (err) {
       console.error(err);
       req.flash('error', err.message);
       return res.redirect('/admin');
     };
-    db.entries.listByAuthor(result._id, 100, function (err, docs) {
+
+    async.parallel({
+      entries: function (callback) {
+        db.entries.listByAuthor(author._id, 100, function (err, docs) {
+          if (err) return callback(err);
+          return callback(null, docs);
+        });
+      },
+      entriesCount: function (callback) {
+        db.entries.countAllByAuthor(author._id, function (err, result) {
+          if (err) return callback(err);
+          return callback(null, result);
+        });
+      },
+      entriesInLastDay: function (callback) {
+        db.entries.countRecentByAuthor(author._id, dayAgo, function (err, result) {
+          if (err) return callback(err);
+          return callback(null, result);
+        });
+      } ,
+      entriesInLastWeek: function (callback) {
+        db.entries.countRecentByAuthor(author._id, weekAgo, function (err, result) {
+          if (err) return callback(err);
+          return callback(null, result);
+        });
+      }
+    }, function (err, results) {
       if (err) {
         console.error(err);
         req.flash('error', err.message);
         return res.redirect('/admin');
       };
       return res.render('authorEntries', {
-        title: 'Entries for '+result.displayName,
-        entries: docs
+        title: 'Entries for ' + author.displayName,
+        results: results,
+        error: req.flash('error'),
+        message: req.flash('info')
       });
     });
   });
