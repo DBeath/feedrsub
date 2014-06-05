@@ -389,6 +389,7 @@ admin.prototype.authorEntries = function (req, res) {
       };
       return res.render('authorEntries', {
         title: 'Entries for ' + author.displayName,
+        author: author,
         results: results,
         error: req.flash('error'),
         message: req.flash('info')
