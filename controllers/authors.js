@@ -25,11 +25,20 @@ Authors.prototype.authorEntries = function (req, res, next) {
     return next(new StatusError(400, 'Author is not specified'));
   };
 
+  var limit = 10;
+  if (req.param('limit')) {
+    if (validator.isNumeric(req.param('limit'))) {
+      limit = req.param('limit');
+    } else {
+      return next(new StatusError(400, 'Limit is not a numeric value'));
+    };
+  };
+
   db.authors.findOne(req.param('author'), function (err, author) {
     if (err) return next(err);
     db.entries.listByAuthor(author._id, 10, function (err, entries) {
       if (err) return next(err);
-      res.send(200, entries);
+      return res.send(200, entries);
     });
   });
 };
