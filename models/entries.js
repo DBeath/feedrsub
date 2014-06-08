@@ -75,8 +75,8 @@ Entries.prototype.update = function (id, doc, callback) {
  */
 Entries.prototype.list = function (topic, limit, callback) {
   this.collection.find({topic: topic})
-    .limit(limit)
     .sort([['published', -1]])
+    .limit(limit)
     .toArray(
       function (err, docs) {
         if (err) return callback(err);
@@ -162,12 +162,12 @@ Entries.prototype.countRecentByTopic = function (topic, time, callback) {
 Entries.prototype.listByAuthor = function (authorId, limit, callback) {
   this.collection.find({
     'actor.id': authorId
-  }).limit(limit)
-    .sort([['published', -1]])
-    .toArray(
-      function (err, docs) {
-        if (err) return callback(err);
-        return callback(null, docs);
+  })
+  .sort([['published', -1]])
+  .limit(limit)
+  .toArray(function (err, docs) {
+    if (err) return callback(err);
+    return callback(null, docs);
   });
 };
 
