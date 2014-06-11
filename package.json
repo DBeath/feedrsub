@@ -31,7 +31,8 @@
     "csurf": "1.1.0",
     "async": "0.7.0",
     "nconf": "0.6.9",
-    "rss": "0.3.2"
+    "rss": "0.3.2",
+    "passport": "0.2.0"
   },
   "devDependencies": {
     "mocha": "1.18.2",
