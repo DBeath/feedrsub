@@ -3,6 +3,7 @@ var request = require('request');
 var crypto = require('crypto');
 var async = require('async');
 var moment = require('moment');
+var ObjectID = require('mongodb').ObjectID;
 
 var pubsub = require('../controllers/pubsub.js').pubsub;
 var server = require('../server.js');
@@ -251,6 +252,7 @@ describe('pubsub notification', function () {
     });
 
     setTimeout(function () {
+      var authorId = null;
       expect(eventFired, 'event fired').to.equal(true);
       async.series({
         feed: function (callback) {
@@ -263,14 +265,24 @@ describe('pubsub notification', function () {
             callback(null);
           });
         },
+        author: function (callback) {
+          mongo.authors.findOne(authorname, function (err, doc) {
+            if (err) return callback(err);
+            expect(doc.displayName, 'author DisplayName').to.equal(authorname);
+            authorId = doc._id;
+            callback(null);
+          });
+        },
         entry1: function (callback) {
           mongo.entries.collection.findOne({title: itemTitle}, function (err, doc) {
             if (err) return callback(err);
+            console.log(doc);
             expect(doc.topic, 'doc1 topic').to.equal(topic);
             expect(doc.title, 'doc1 title').to.equal(itemTitle);
             expect(doc.published, 'doc1 published').to.equal(thisNow);
             expect(doc.status, 'doc1 status').to.equal(itemStatus);
-            expect(doc.actor.displayName, 'doc1 author').to.equal('Testy Authorson');
+            expect(doc.actor.displayName, 'doc1 author').to.equal(authorname);
+            expect(doc.actor.id.toHexString(), 'doc1 author id').to.equal(authorId.toHexString());
             callback(null);
           });
         },
@@ -281,13 +293,6 @@ describe('pubsub notification', function () {
             expect(doc.title, 'doc2 title').to.equal(item2Title);
             expect(doc.published, 'doc2 published').to.exist;
             expect(doc.status, 'doc2 status').to.equal(itemStatus);
-            callback(null);
-          });
-        },
-        author: function (callback) {
-          mongo.authors.findOne(authorname, function (err, doc) {
-            if (err) return callback(err);
-            expect(doc.displayName, 'author DisplayName').to.equal(authorname);
             callback(null);
           });
         },
@@ -302,6 +307,6 @@ describe('pubsub notification', function () {
         if (err) return done();
         done();
       });
-    }, 10);
+    }, 100);
   });
 });

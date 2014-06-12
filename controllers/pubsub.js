@@ -94,7 +94,7 @@ var getAuthorId = function (author, callback) {
     if (result) {
       return callback(null, result._id);
     } else {
-      db.authors.update(author.displayName, author, function (err, result) {
+      db.authors.findAndModify(author.displayName, author, function (err, result) {
         if (err) return callback(err);
         return callback(null, result._id);
       });
