@@ -13,6 +13,7 @@ var methodOverride = require('method-override');
 var errorhandler = require('errorhandler');
 var basicAuth = require('basic-auth');
 //var csurf = require('csurf');
+var passport = require('./config/passport.js').passport;
 
 var app = module.exports = express();
 var server = null;
@@ -43,7 +44,8 @@ app.use(session({
   secret: sessionsecret,
   cookie: { maxAge: 60000 }
 }));
-
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(flash());
 //app.use(csurf());
 app.enable('trust proxy');
@@ -61,6 +63,14 @@ var auth = function (req, res, next) {
   };
 };
 
+var isLoggedIn = function (req, res, next) {
+  if (req.isAuthenticated()) {
+    console.log('Authenticated');
+    return next();
+  };
+  res.redirect('/login');
+};
+
 // Send unauthorized response
 function unauthorized(res) {
   res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
@@ -76,12 +86,21 @@ var csrf = function (req, res, next) {
 require('./lib/hbs_helpers.js')();
 
 // Routes
+app.post('/login', passport.authenticate('local-login', {
+  successRedirect: '/admin',
+  failureRedirect: '/login',
+  failureFlash: true
+}));
+
+app.get('/login', function (req, res) {
+  res.render('login', { message: req.flash('message') });
+});
 
 // Pubsubhubbub notifications and verification
 app.use('/pubsubhubbub', require('./routes/pubsubRoutes.js').pubsub);
 
 // Administration pages
-app.all('/admin*', auth);
+app.all('/admin*', isLoggedIn);
 app.use('/admin', require('./routes/adminRoutes.js').admin);
 
 // Api
