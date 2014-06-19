@@ -6,7 +6,8 @@ var validator = require('validator');
 
 passport.serializeUser(function (user, callback) {
   console.log('Serialized user');
-  callback(null, user._id);
+  console.log(user);
+  callback(null, user);
 });
 
 passport.deserializeUser(function(id, callback) {
@@ -45,17 +46,21 @@ passport.use('local-login', new LocalStrategy({
   passReqToCallback: true
 },
 function (req, email, password, callback) {
-  db.users.findOne(email, function (err, user) {
-    if (err) return callback(err);
-    if (!user) {
-      return callback(null, false, req.flash('message', 'No user found.'));
-    };
-    if (!db.users.validPassword(password, user.password)) {
-      return callback(null, false, req.flash('message', 'Wrong password.'));
-    };
-    console.log('Valid login');
-    console.log(user);
-    return callback(null, user);
+  process.nextTick(function () {
+    db.users.findOne(email, function (err, user) {
+      if (err) return callback(err);
+      if (!user) {
+        return callback(null, false, req.flash('message', 'No user found.'));
+      };
+      if (!db.users.validPassword(password, user.password)) {
+        return callback(null, false, req.flash('message', 'Wrong password.'));
+      };
+      console.log('Valid login');
+      //console.log(user);
+      
+      return callback(null, user);
+    });
+    
   });
 }));
 

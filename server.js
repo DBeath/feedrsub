@@ -64,6 +64,7 @@ var auth = function (req, res, next) {
 };
 
 var isLoggedIn = function (req, res, next) {
+  console.log(req.user);
   if (req.isAuthenticated()) {
     console.log('Authenticated');
     return next();
