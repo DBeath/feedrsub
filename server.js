@@ -14,6 +14,7 @@ var errorhandler = require('errorhandler');
 var basicAuth = require('basic-auth');
 //var csurf = require('csurf');
 var passport = require('./config/passport.js').passport;
+var morgan = require('morgan');
 
 var app = module.exports = express();
 var server = null;
@@ -25,7 +26,9 @@ var config = require('./config/');
 app.set('views', __dirname + '/views');
 app.set('view engine', 'html');
 app.engine('html', hbs.__express);
-app.use(bodyParser.urlencoded());
+
+app.use(morgan('dev'));
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(methodOverride());
 app.use(express.static(__dirname+'/public'));
 app.use(errorhandler());
@@ -39,11 +42,14 @@ app.use(cookieParser(cookiesecret));
 var sessionsecret = 'notsuchagoodsecret';
 if (config.express.sessionsecret) {
   sessionsecret = config.express.sessionsecret;
+  console.log('Session secret: ' + sessionsecret);
 };
+//app.use(cookieParser(sessionsecret));
 app.use(session({ 
-  secret: sessionsecret,
-  cookie: { maxAge: 60000 }
+  secret: sessionsecret
+  //cookie: { maxAge: 60000 }
 }));
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
@@ -64,9 +70,7 @@ var auth = function (req, res, next) {
 };
 
 var isLoggedIn = function (req, res, next) {
-  console.log(req.user);
   if (req.isAuthenticated()) {
-    console.log('Authenticated');
     return next();
   };
   res.redirect('/login');
@@ -88,7 +92,7 @@ require('./lib/hbs_helpers.js')();
 
 // Routes
 app.post('/login', passport.authenticate('local-login', {
-  successRedirect: '/admin',
+  successRedirect: '/admin/subscribed',
   failureRedirect: '/login',
   failureFlash: true
 }));
@@ -99,6 +103,7 @@ app.get('/login', function (req, res) {
 
 // Pubsubhubbub notifications and verification
 app.use('/pubsubhubbub', require('./routes/pubsubRoutes.js').pubsub);
+
 
 // Administration pages
 app.all('/admin*', isLoggedIn);

@@ -20,7 +20,7 @@ Users.prototype.findOne = function (email, callback) {
 };
 
 Users.prototype.findOneById = function (id, callback) {
-  this.collection.findOne({_id: id}, function (err, result) {
+  this.collection.findOne({_id: ObjectID.createFromHexString(id)}, function (err, result) {
     if (err) return callback(err);
     return callback(null, result);
   });

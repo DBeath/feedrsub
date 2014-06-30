@@ -7,12 +7,15 @@ var validator = require('validator');
 passport.serializeUser(function (user, callback) {
   console.log('Serialized user');
   console.log(user);
-  callback(null, user);
+  callback(null, user._id);
 });
 
-passport.deserializeUser(function(id, callback) {
+passport.deserializeUser(function (id, callback) {
+  console.log(id);
   db.users.findOneById(id, function (err, user) {
-    callback(err, user);
+    if (err) console.log(err);
+    console.log(user);
+    return callback(err, user);
   });
 });
 
@@ -50,17 +53,18 @@ function (req, email, password, callback) {
     db.users.findOne(email, function (err, user) {
       if (err) return callback(err);
       if (!user) {
+        console.log('No user found');
         return callback(null, false, req.flash('message', 'No user found.'));
       };
       if (!db.users.validPassword(password, user.password)) {
+        console.log('Wrong password');
         return callback(null, false, req.flash('message', 'Wrong password.'));
       };
       console.log('Valid login');
       //console.log(user);
       
       return callback(null, user);
-    });
-    
+    }); 
   });
 }));
 
