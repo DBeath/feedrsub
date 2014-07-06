@@ -70,6 +70,7 @@ var auth = function (req, res, next) {
 };
 
 var isLoggedIn = function (req, res, next) {
+  console.log(req.session);
   if (req.isAuthenticated()) {
     return next();
   };
@@ -110,7 +111,7 @@ app.all('/admin*', isLoggedIn);
 app.use('/admin', require('./routes/adminRoutes.js').admin);
 
 // Api
-app.all('/api/v1*', auth);
+app.all('/api/v1*', passport.authenticate('basic', { session: false }));
 app.use('/api/v1', require('./routes/subscriptionsRoutes.js').subs);
 app.use('/api/v1', require('./routes/feedsRoutes.js').feeds);
 

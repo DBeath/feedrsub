@@ -33,9 +33,11 @@
     "nconf": "*",
     "rss": "*",
     "passport": "*",
+    "passport-http": "*",
     "bcrypt-nodejs": "*",
     "passport-local": "*",
-    "morgan": "*"
+    "morgan": "*",
+    "connect-roles": "*"
   },
   "devDependencies": {
     "mocha": "*",

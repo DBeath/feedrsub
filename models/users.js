@@ -42,7 +42,8 @@ Users.prototype.newUserLocal = function (email, password, callback) {
     } else {
        this.collection.insert({
         email: email,
-        password: this.generateHash(password)
+        password: this.generateHash(password),
+        role: 'user'
       }, function (err, result) {
         if (err) return callback(err);
         return callback(null);

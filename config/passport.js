@@ -1,20 +1,17 @@
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
+var BasicStrategy = require('passport-http').BasicStrategy;
 var config = require('./index.js');
 var db = require('../models/db.js');
 var validator = require('validator');
 
 passport.serializeUser(function (user, callback) {
-  console.log('Serialized user');
-  console.log(user);
-  callback(null, user._id);
+  return callback(null, user._id);
 });
 
 passport.deserializeUser(function (id, callback) {
-  console.log(id);
   db.users.findOneById(id, function (err, user) {
     if (err) console.log(err);
-    console.log(user);
     return callback(err, user);
   });
 });
@@ -67,5 +64,18 @@ function (req, email, password, callback) {
     }); 
   });
 }));
+
+passport.use('basic', new BasicStrategy(
+  function (email, password, callback) {
+    db.users.findOne(email, function (err, user) {
+      if (err) return callback(err);
+      if (!user) return callback(null, false);
+      if (!db.users.validPassword(password, user.password)) {
+        return callback(null, false);
+      };
+      return callback(null, user);
+    });
+  }
+));
 
 module.exports.passport = passport;
