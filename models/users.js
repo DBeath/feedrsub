@@ -52,11 +52,12 @@ Users.prototype.newUserLocal = function (email, password, callback) {
   })
 };
 
-Users.prototype.create = function (email, password, callback) {
+Users.prototype.create = function (email, password, role, callback) {
   this.collection.insert({
     email: email,
     password: this.generateHash(password),
-    added: Date.now()
+    added: Date.now(),
+    role: role
   },
   {w: 1},
   function (err, result) {

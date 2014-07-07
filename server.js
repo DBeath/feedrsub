@@ -14,6 +14,7 @@ var errorhandler = require('errorhandler');
 var basicAuth = require('basic-auth');
 //var csurf = require('csurf');
 var passport = require('./config/passport.js').passport;
+var roles = require('./config/roles.js').user;
 var morgan = require('morgan');
 
 var app = module.exports = express();
@@ -107,7 +108,7 @@ app.use('/pubsubhubbub', require('./routes/pubsubRoutes.js').pubsub);
 
 
 // Administration pages
-app.all('/admin*', isLoggedIn);
+app.all('/admin*', roles.can('access admin page'));
 app.use('/admin', require('./routes/adminRoutes.js').admin);
 
 // Api

@@ -8,7 +8,7 @@ server.start(function () {
   db.users.findOne('admin@feedrsub.com', function (err, result) {
     if (err) return console.error(err);
     if (!result) {
-      db.users.create('admin@feedrsub.com', 'password', function (err, result) {
+      db.users.create('admin@feedrsub.com', 'password', 'admin', function (err, result) {
         if (err) return console.error(err);
         return console.log(result);
       });
