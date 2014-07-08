@@ -22,7 +22,7 @@ describe('feeds', function () {
     var postParams = {
       url: 'http://localhost:4000/api/v1/feed/asdf',
       auth: {
-        user: 'admin',
+        user: 'admin@feedrsub.com',
         pass: 'password'
       }
     };
@@ -36,7 +36,7 @@ describe('feeds', function () {
   it('should return a feed', function (done) {
     var postParams = {
       auth: {
-        user: 'admin',
+        user: 'admin@feedrsub.com',
         pass: 'password'
       }
     };

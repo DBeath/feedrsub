@@ -115,9 +115,9 @@ app.use('/admin', require('./routes/adminRoutes.js').admin);
 app.all('/api/v1*', passport.authenticate('basic', { session: false }));
 app.use('/api/v1', require('./routes/subscriptionsRoutes.js').subs);
 app.use('/api/v1', require('./routes/feedsRoutes.js').feeds);
-
 app.use('/api/v1', require('./routes/authorRoutes.js').authors);
 
+// Error Handlers
 app.use(require('./lib/errors.js').StatusErrorHandler);
 app.use(require('./lib/errors.js').ErrorHandler);
 

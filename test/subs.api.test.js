@@ -18,17 +18,20 @@ describe('subscribe', function () {
       {upsert: true},
       function (err) {
         if (err) throw err;
-        return done();
+        db.users.collection.findOne({email: 'admin@feedrsub.com'}, function (err, result) {
+          if (err) throw err;
+          if (!result) throw err;
+          console.log(result);
+          return done();
+        })
+        //return done();
       });
     });
   });
 
   after(function (done) {
     server.close(function () {
-      db.users.collection.remove({email: 'admin@feedrsub.com'}, function (err) {
-        if (err) throw err;
-        return done();
-      });
+      return done();
     });
   });
 
