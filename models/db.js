@@ -3,6 +3,7 @@ var mongodb = require('mongodb');
 var Feeds = require('./feeds.js');
 var Entries = require('./entries.js');
 var Authors = require('./authors.js');
+var Users = require('./users.js');
 var config = require('../config/');
 
 var mongoclient;
@@ -18,9 +19,11 @@ module.exports.init = function (callback) {
     module.exports.entries = Entries.createCollection(db);
     module.exports.feeds = Feeds.createCollection(db);
     module.exports.authors = Authors.createCollection(db);
+    module.exports.users = Users.createCollection(db);
     module.exports.errors = new mongodb.Collection(db, 'errors');
     module.exports.database = db;
     var message = 'Connected to ' + connString;
+
     return callback(null, message);
   });
 };

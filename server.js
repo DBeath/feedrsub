@@ -13,6 +13,9 @@ var methodOverride = require('method-override');
 var errorhandler = require('errorhandler');
 var basicAuth = require('basic-auth');
 //var csurf = require('csurf');
+var passport = require('./config/passport.js').passport;
+var roles = require('./config/roles.js').user;
+var morgan = require('morgan');
 
 var app = module.exports = express();
 var server = null;
@@ -24,7 +27,9 @@ var config = require('./config/');
 app.set('views', __dirname + '/views');
 app.set('view engine', 'html');
 app.engine('html', hbs.__express);
-app.use(bodyParser.urlencoded());
+
+app.use(morgan('dev'));
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(methodOverride());
 app.use(express.static(__dirname+'/public'));
 app.use(errorhandler());
@@ -38,12 +43,16 @@ app.use(cookieParser(cookiesecret));
 var sessionsecret = 'notsuchagoodsecret';
 if (config.express.sessionsecret) {
   sessionsecret = config.express.sessionsecret;
+  console.log('Session secret: ' + sessionsecret);
 };
+//app.use(cookieParser(sessionsecret));
 app.use(session({ 
-  secret: sessionsecret,
-  cookie: { maxAge: 60000 }
+  secret: sessionsecret
+  //cookie: { maxAge: 60000 }
 }));
 
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(flash());
 //app.use(csurf());
 app.enable('trust proxy');
@@ -61,6 +70,14 @@ var auth = function (req, res, next) {
   };
 };
 
+var isLoggedIn = function (req, res, next) {
+  console.log(req.session);
+  if (req.isAuthenticated()) {
+    return next();
+  };
+  res.redirect('/login');
+};
+
 // Send unauthorized response
 function unauthorized(res) {
   res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
@@ -76,21 +93,49 @@ var csrf = function (req, res, next) {
 require('./lib/hbs_helpers.js')();
 
 // Routes
+app.post('/login', passport.authenticate('local-login', {
+  successRedirect: '/admin/subscribed',
+  failureRedirect: '/login',
+  failureFlash: true
+}));
+
+app.get('/login', function (req, res) {
+  res.render('login', { message: req.flash('message') });
+});
+
+// show the signup form
+app.get('/signup', function (req, res) {
+  // render the page and pass in any flash data if it exists
+  res.render('signup', { message: req.flash('signupMessage') });
+});
+
+// process the signup form
+app.post('/signup', passport.authenticate('local-signup', {
+  successRedirect : '/', // redirect to the secure profile section
+  failureRedirect : '/signup', // redirect back to the signup page if there is an error
+  failureFlash : true // allow flash messages
+}));
+
+app.get('/logout', function (req, res) {
+  req.logout();
+  res.redirect('/');
+});
 
 // Pubsubhubbub notifications and verification
 app.use('/pubsubhubbub', require('./routes/pubsubRoutes.js').pubsub);
 
+
 // Administration pages
-app.all('/admin*', auth);
+app.all('/admin*', roles.can('access admin page'));
 app.use('/admin', require('./routes/adminRoutes.js').admin);
 
 // Api
-app.all('/api/v1*', auth);
+app.all('/api/v1*', passport.authenticate('basic', { session: false }));
 app.use('/api/v1', require('./routes/subscriptionsRoutes.js').subs);
 app.use('/api/v1', require('./routes/feedsRoutes.js').feeds);
-
 app.use('/api/v1', require('./routes/authorRoutes.js').authors);
 
+// Error Handlers
 app.use(require('./lib/errors.js').StatusErrorHandler);
 app.use(require('./lib/errors.js').ErrorHandler);
 

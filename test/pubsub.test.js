@@ -3,6 +3,7 @@ var request = require('request');
 var crypto = require('crypto');
 var async = require('async');
 var moment = require('moment');
+var ObjectID = require('mongodb').ObjectID;
 
 var pubsub = require('../controllers/pubsub.js').pubsub;
 var server = require('../server.js');
@@ -53,78 +54,6 @@ describe('pubsub', function () {
   it('should have correct options', function () {
     expect(pubsub.secret).to.equal('supersecret');
     expect(pubsub.format).to.equal('json');
-  });
-});
-
-describe('authorization', function () {
-  before(function (done) {
-    server.start(function () {
-      done();
-    });
-  });
-
-  after(function (done) {
-    server.close(function () {
-      done();
-    });
-  });
-
-  it('should return 401 - unauthorized (admin page)', function (done) {
-    request.get('http://localhost:4000/admin', function (err, response, body) {
-      expect(response.statusCode).to.equal(401);
-      done();
-    });
-  });
-
-  it('should return 401 - unauthorized (pending page)', function (done) {
-    request.get('http://localhost:4000/admin/pending', function (err, response, body) {
-      expect(response.statusCode).to.equal(401);
-      done();
-    });
-  });
-
-  it('should return 401 - unauthorized (subscribe page)', function (done) {
-    request.get('http://localhost:4000/admin/subscribe', function (err, response, body) {
-      expect(response.statusCode).to.equal(401);
-      done();
-    });
-  });
-
-  it('should return 200 - authorized (admin page)', function (done) {
-    var postParams = {
-      url: 'http://localhost:4000/admin/',
-      auth: {
-        user: 'admin',
-        pass: 'password'
-      }
-    }
-    request.get(postParams, function (err, response, body) {
-      expect(response.statusCode).to.equal(200);
-      done();
-    });
-  });
-
-  it('should return 401 - incorrect authorization (admin page)', function (done) {
-    var postParams = {
-      url: 'http://localhost:4000/admin',
-      auth: {
-        user: 'administrator',
-        pass: 'password1'
-      }
-    }
-    request.get(postParams, function (err, response, body) {
-      expect(response.statusCode).to.equal(401);
-      done();
-    });
-  });
-
-  it('should return 401 - unauthorized (subscribe api)', function (done) {
-    var url = 'http://localhost:4000/api/v1/subscribe';
-
-    request.post(url, function (err, response, body) {
-      expect(response.statusCode).to.equal(401);
-      done();
-    });
   });
 });
 
@@ -251,6 +180,7 @@ describe('pubsub notification', function () {
     });
 
     setTimeout(function () {
+      var authorId = null;
       expect(eventFired, 'event fired').to.equal(true);
       async.series({
         feed: function (callback) {
@@ -263,14 +193,24 @@ describe('pubsub notification', function () {
             callback(null);
           });
         },
+        author: function (callback) {
+          mongo.authors.findOne(authorname, function (err, doc) {
+            if (err) return callback(err);
+            expect(doc.displayName, 'author DisplayName').to.equal(authorname);
+            authorId = doc._id;
+            callback(null);
+          });
+        },
         entry1: function (callback) {
           mongo.entries.collection.findOne({title: itemTitle}, function (err, doc) {
             if (err) return callback(err);
+            console.log(doc);
             expect(doc.topic, 'doc1 topic').to.equal(topic);
             expect(doc.title, 'doc1 title').to.equal(itemTitle);
             expect(doc.published, 'doc1 published').to.equal(thisNow);
             expect(doc.status, 'doc1 status').to.equal(itemStatus);
-            expect(doc.actor.displayName, 'doc1 author').to.equal('Testy Authorson');
+            expect(doc.actor.displayName, 'doc1 author').to.equal(authorname);
+            expect(doc.actor.id.toHexString(), 'doc1 author id').to.equal(authorId.toHexString());
             callback(null);
           });
         },
@@ -281,13 +221,6 @@ describe('pubsub notification', function () {
             expect(doc.title, 'doc2 title').to.equal(item2Title);
             expect(doc.published, 'doc2 published').to.exist;
             expect(doc.status, 'doc2 status').to.equal(itemStatus);
-            callback(null);
-          });
-        },
-        author: function (callback) {
-          mongo.authors.findOne(authorname, function (err, doc) {
-            if (err) return callback(err);
-            expect(doc.displayName, 'author DisplayName').to.equal(authorname);
             callback(null);
           });
         },
@@ -302,6 +235,6 @@ describe('pubsub notification', function () {
         if (err) return done();
         done();
       });
-    }, 10);
+    }, 50);
   });
 });

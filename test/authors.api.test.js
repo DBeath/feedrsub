@@ -47,14 +47,14 @@ describe('authors', function () {
   });
 
   after(function (done) {
-    server.close(function () {
-      // db.entries.collection.remove({}, function (err) {
-      //   if (err) throw err;
-      // });
-      // db.authors.collection.remove({}, function (err) {
-      //   if (err) throw err;
-      // });
-      done();
+    db.entries.collection.remove({}, function (err) {
+      if (err) throw err;
+      db.authors.collection.remove({}, function (err) {
+        if (err) throw err;
+        server.close(function () {
+           done();
+        }); 
+      });
     });
   });
 
@@ -62,7 +62,7 @@ describe('authors', function () {
     var postParams = {
       url: 'http://localhost:4000/api/v1/authors',
       auth: {
-        user: 'admin',
+        user: 'admin@feedrsub.com',
         pass: 'password'
       }
     };
@@ -82,7 +82,7 @@ describe('authors', function () {
     var postParams = {
       url: url,
       auth: {
-        user: 'admin',
+        user: 'admin@feedrsub.com',
         pass: 'password'
       }
     };
@@ -103,7 +103,7 @@ describe('authors', function () {
     var postParams = {
       url: url,
       auth: {
-        user: 'admin',
+        user: 'admin@feedrsub.com',
         pass: 'password'
       }
     };

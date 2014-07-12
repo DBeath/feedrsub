@@ -2,17 +2,36 @@ var expect = require('chai').expect;
 var request = require('request');
 var server = require('../server.js');
 var qs = require('querystring');
+var db = require('../models/db.js');
 
 describe('subscribe', function () {
   before(function (done) {
     server.start(function () {
-      done();
+      db.users.collection.update({
+        email: 'admin@feedrsub.com'
+      },
+      {
+        email: 'admin@feedrsub.com',
+        password: db.users.generateHash('password'),
+        role: 'admin'
+      },
+      {upsert: true},
+      function (err) {
+        if (err) throw err;
+        db.users.collection.findOne({email: 'admin@feedrsub.com'}, function (err, result) {
+          if (err) throw err;
+          if (!result) throw err;
+          console.log(result);
+          return done();
+        })
+        //return done();
+      });
     });
   });
 
   after(function (done) {
     server.close(function () {
-      done();
+      return done();
     });
   });
 
@@ -20,7 +39,7 @@ describe('subscribe', function () {
     var postParams = {
       url: 'http://localhost:4000/api/v1/subscribe',
       auth: {
-        user: 'admin',
+        user: 'admin@feedrsub.com',
         pass: 'password'
       }
     };
@@ -35,7 +54,7 @@ describe('subscribe', function () {
     var postParams = {
       url: 'http://localhost:4000/api/v1/subscribe',
       auth: {
-        user: 'admin',
+        user: 'admin@feedrsub.com',
         pass: 'password'
       },
       form: {
@@ -54,7 +73,7 @@ describe('subscribe', function () {
     var postParams = {
       url: url,
       auth: {
-        user: 'admin',
+        user: 'admin@feedrsub.com',
         pass: 'password'
       }
     };
@@ -82,7 +101,7 @@ describe('unsubscribe', function () {
     var postParams = {
       url: 'http://localhost:4000/api/v1/unsubscribe',
       auth: {
-        user: 'admin',
+        user: 'admin@feedrsub.com',
         pass: 'password'
       }
     };
@@ -97,7 +116,7 @@ describe('unsubscribe', function () {
     var postParams = {
       url: 'http://localhost:4000/api/v1/unsubscribe',
       auth: {
-        user: 'admin',
+        user: 'admin@feedrsub.com',
         pass: 'password'
       },
       form: {
@@ -116,7 +135,7 @@ describe('unsubscribe', function () {
     var postParams = {
       url: url,
       auth: {
-        user: 'admin',
+        user: 'admin@feedrsub.com',
         pass: 'password'
       }
     };
@@ -144,7 +163,7 @@ describe('retrieve', function () {
     var postParams = {
       url: 'http://localhost:4000/api/v1/retrieve',
       auth: {
-        user: 'admin',
+        user: 'admin@feedrsub.com',
         pass: 'password'
       }
     };
@@ -159,7 +178,7 @@ describe('retrieve', function () {
     var postParams = {
       url: 'http://localhost:4000/api/v1/retrieve',
       auth: {
-        user: 'admin',
+        user: 'admin@feedrsub.com',
         pass: 'password'
       },
       form: {
