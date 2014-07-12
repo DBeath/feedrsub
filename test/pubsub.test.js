@@ -302,6 +302,6 @@ describe('pubsub notification', function () {
         if (err) return done();
         done();
       });
-    }, 10);
+    }, 50);
   });
 });
