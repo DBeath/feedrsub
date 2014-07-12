@@ -58,3 +58,16 @@ Authors.prototype.insert = function (author, callback) {
     return callback(null, result);
   });
 };
+
+Authors.prototype.findAndModify = function (id, author, callback) {
+  this.collection.findAndModify({
+    displayName: id
+  },
+  [['displayName', 1]],
+  author,
+  {new: true, upsert: true, w:1},
+  function (err, result) {
+    if (err) return callback(err);
+    return callback(null, result);
+  });
+};

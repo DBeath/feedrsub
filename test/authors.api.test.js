@@ -47,14 +47,14 @@ describe('authors', function () {
   });
 
   after(function (done) {
-    server.close(function () {
-      // db.entries.collection.remove({}, function (err) {
-      //   if (err) throw err;
-      // });
-      // db.authors.collection.remove({}, function (err) {
-      //   if (err) throw err;
-      // });
-      done();
+    db.entries.collection.remove({}, function (err) {
+      if (err) throw err;
+      db.authors.collection.remove({}, function (err) {
+        if (err) throw err;
+        server.close(function () {
+           done();
+        }); 
+      });
     });
   });
 
