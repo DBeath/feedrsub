@@ -17,6 +17,8 @@ var passport = require('./config/passport.js').passport;
 var roles = require('./config/roles.js').user;
 var morgan = require('morgan');
 
+var mongoose = require('mongoose');
+
 var app = module.exports = express();
 var server = null;
 
@@ -151,6 +153,7 @@ app.use(function (req, res, next) {
 var start = function (done) {
   console.log('Starting feedrsub...');
   console.log('Connecting to database...');
+  mongoose.connect(config.express.connstring);
   db.init(function (err, result) {
     if (err) {
       console.error(err);

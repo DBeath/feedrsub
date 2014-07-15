@@ -9,14 +9,18 @@ server.start(function () {
 
   User.findOne({ email: config.express.admin }, function (err, result) {
     if (err) return console.error(err);
-    if (!result) {
-      var admin = new User();
-      db.users.create(config.express.admin, config.express.password, 'admin', function (err, result) {
-        if (err) return console.error(err);
-        return console.log(result);
-      });
-    } else {
+    if (result) {
       console.log('Admin account already exists');
+    } else {
+      var admin = new User();
+      admin.email = config.express.admin;
+      admin.password = config.express.password;
+      admin.role = 'admin';
+
+      admin.save(function (err) {
+        if (err) throw err;
+        return console.log('Created admin with email ' + admin.email);
+      });
     };
   });
 });

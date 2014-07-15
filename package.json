@@ -37,7 +37,8 @@
     "bcrypt-nodejs": "*",
     "passport-local": "*",
     "morgan": "*",
-    "connect-roles": "*"
+    "connect-roles": "*",
+    "mongoose": "*"
   },
   "devDependencies": {
     "mocha": "*",
