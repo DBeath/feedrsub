@@ -3,6 +3,8 @@ var db = require('../models/db.js');
 var moment = require('moment');
 var config = require('../config');
 
+var Author = require('../models/author');
+
 //Creates Pubsub object.
 var pubsub = pubsubController.createController({
   secret: config.pubsub.secret,
@@ -89,12 +91,12 @@ pubsub.on('feed_update', function (data) {
 });
 
 var getAuthorId = function (author, callback) {
-  db.authors.findOne(author.displayName, function (err, result) {
+  Author.findOne({ displayName: author.displayName }, function (err, result) {
     if (err) return callback(err);
     if (result) {
       return callback(null, result._id);
     } else {
-      db.authors.findAndModify(author.displayName, author, function (err, result) {
+      Author.findOneAndUpdate({ displayName: author.displayName }, author, function (err, result) {
         if (err) return callback(err);
         return callback(null, result._id);
       });
