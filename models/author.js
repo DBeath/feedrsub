@@ -6,6 +6,6 @@ var authorSchema = mongoose.Schema({
   familyName: String
 });
 
-var Author = mongoose.model('Feed', feedSchema);
+var Author = mongoose.model('Author', authorSchema);
 
 module.exports = Author;

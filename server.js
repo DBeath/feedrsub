@@ -170,6 +170,7 @@ var start = function (done) {
 // Closes the server
 var close = function (done) {
   console.log('Closing the database connection...');
+  mongoose.connection.close();
   db.close(function (err) {
     if (err) console.log(err);
     console.log('Stopping the server...');

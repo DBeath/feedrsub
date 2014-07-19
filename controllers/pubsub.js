@@ -62,7 +62,10 @@ pubsub.on('feed_update', function (data) {
         };
 
         if (item.actor) {
-          getAuthorId(item.actor, function (err, id) {
+          var author = new Author();
+          author.displayName = item.actor;
+
+          getAuthorId(author, function (err, id) {
             if (err) console.error(err);
             if (id) {
               item.actor.id = id;
@@ -96,9 +99,13 @@ var getAuthorId = function (author, callback) {
     if (result) {
       return callback(null, result._id);
     } else {
-      Author.findOneAndUpdate({ displayName: author.displayName }, author, function (err, result) {
-        if (err) return callback(err);
-        return callback(null, result._id);
+      Author.findOneAndUpdate(
+        { displayName: author.displayName }, 
+        author,
+        { upsert: true }, 
+        function (err, result) {
+          if (err) return callback(err);
+          return callback(null, result._id);
       });
     };
   });

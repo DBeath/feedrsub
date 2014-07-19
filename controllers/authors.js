@@ -7,6 +7,8 @@ var validator = require('validator');
 var ObjectID = require('mongodb').ObjectID;
 var moment = require('moment');
 
+var Author = require('../models/author');
+
 module.exports.AuthorsController = function () {
   return new Authors();
 };
@@ -14,7 +16,7 @@ module.exports.AuthorsController = function () {
 function Authors () {};
 
 Authors.prototype.list = function (req, res, next) {
-  db.authors.listAll(function (err, result) {
+  Author.find({}, function (err, result) {
     if (err) return next(err);
     return res.send(200, result);
   });
@@ -34,7 +36,7 @@ Authors.prototype.authorEntries = function (req, res, next) {
     };
   };
 
-  db.authors.findOne(req.param('author'), function (err, author) {
+  Author.findOne({ displayName: req.param('author') }, function (err, author) {
     if (err) return next(err);
     db.entries.listByAuthor(author._id, 10, function (err, entries) {
       if (err) return next(err);
@@ -63,13 +65,13 @@ Authors.prototype.rss = function (req, res, next) {
       function (callback) {
         switch (paramType) {
           case 'name':
-            db.authors.findOne(param, function (err, author) {
+            Author.findOne({ displayName: param }, function (err, author) {
               if (err) return callback(err);
               return callback(null, author);
             });
             break;
           case 'id':
-            db.authors.findOneById(param, function (err, author) {
+            Author.findOneById(param, function (err, author) {
               if (err) return callback(err);
               return callback(null, author);
             });

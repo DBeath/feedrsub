@@ -5,26 +5,26 @@ var qs = require('querystring');
 var db = require('../models/db.js');
 var async = require('async');
 
+var Author = require('../models/author');
+
 var authors = [
-  {
-    displayName: 'John Doe',
-    id: 'John Doe'
-  },
-  {
-    displayName: 'Jane Doe',
-    id: 'Jane Doe'
-  }
+  new Author({
+    displayName: 'John Doe'
+  }),
+  new Author({
+    displayName: 'Jane Doe'
+  })
 ];
 
 describe('authors', function () {
   before(function (done) {
     server.start(function () {
-      db.authors.collection.remove({}, function (err) {
+      Author.collection.remove({}, function (err) {
         if (err) throw err;
         async.each(authors, function (author, callback) {
-          db.authors.collection.insert(author, function (err) {
+          author.save(function (err) {
             if (err) return callback(err);
-            db.authors.collection.findOne({displayName: author.displayName}, function (err, result) {
+            Author.findOne({displayName: author.displayName}, function (err, result) {
               if (err) return callback(err);
               db.entries.collection.insert({
                 title: 'TestTitle',
@@ -49,7 +49,7 @@ describe('authors', function () {
   after(function (done) {
     db.entries.collection.remove({}, function (err) {
       if (err) throw err;
-      db.authors.collection.remove({}, function (err) {
+      Author.collection.remove({}, function (err) {
         if (err) throw err;
         server.close(function () {
            done();
