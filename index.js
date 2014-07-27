@@ -14,7 +14,7 @@ server.start(function () {
     } else {
       var admin = new User();
       admin.email = config.express.admin;
-      admin.password = config.express.password;
+      admin.password = admin.generateHash(config.express.adminpass);
       admin.role = 'admin';
 
       admin.save(function (err) {
