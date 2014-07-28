@@ -36,7 +36,7 @@ function (req, email, password, done) {
     } else {
       var newUser = new User();
       newUser.email = email;
-      newUser.password = newUser.generateHash(password);
+      newUser.password = password;
 
       newUser.save(function (err) {
         if (err) throw err;
@@ -60,12 +60,20 @@ function (req, email, password, done) {
         console.log('No user found');
         return done(null, false, req.flash('loginMessage', 'No user found.'));
       };
-      if (!user.validPassword(password)) {
-        console.log('Wrong password');
-        return done(null, false, req.flash('loginMessage', 'Wrong password.'));
-      };
+      user.comparePassword(password, function (err, isMatch) {
+        if (err) return done(err);
+        if (!isMatch) {
+          console.log('Wrong password');
+          return done(null, false, req.flash('loginMessage', 'Wrong password.'));
+        };
+        return done(null, user);
+      });
+      // if (!user.validPassword(password)) {
+      //   console.log('Wrong password');
+      //   return done(null, false, req.flash('loginMessage', 'Wrong password.'));
+      // };
       
-      return done(null, user);
+      // return done(null, user);
     }); 
   });
 }));
@@ -75,10 +83,18 @@ passport.use('basic', new BasicStrategy(
     User.findOne({ email: email }, function (err, user) {
       if (err) return done(err);
       if (!user) return done(null, false);
-      if (!user.validPassword(password)) {
-        return done(null, false);
-      };
-      return done(null, user);
+      user.comparePassword(password, function (err, isMatch) {
+        if (err) return done(err);
+        if (!isMatch) {
+          return done(null, false);
+        } else {
+          return done(null, user);
+        };
+      });
+      // if (!user.validPassword(password)) {
+      //   return done(null, false);
+      // };
+      // return done(null, user);
     });
   }
 ));
