@@ -34,7 +34,7 @@
     "rss": "*",
     "passport": "*",
     "passport-http": "*",
-    "bcrypt-nodejs": "*",
+    "bcrypt": "*",
     "passport-local": "*",
     "morgan": "*",
     "connect-roles": "*",
