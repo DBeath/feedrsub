@@ -97,24 +97,37 @@ pubsub.on('feed_update', function (data) {
       var authors = getAuthors(names);
       console.log('Authors ' + authors);
 
-      for (var i = json.items.length - 1; i >= 0; i--) {
-        var item = json.items[i];
+      async.waterfall([
+        function (callback) {
+          var names = getNames(json);
+          return callback(null, names);
+        },
+        function (names, callback) {
+          getAuthors(names, function (err, authors) {
+            if (err) return callback(err);
+            return callback(null, authors);
+          });
+        } 
+      ], function (err, authors) {
+        console.log('Returned Authors ' + authors);
+        for (var i = json.items.length - 1; i >= 0; i--) {
+          var item = json.items[i];
 
-        console.log('Authors 2 ' + authors);
-        var author = getAuthorId(authors, item.actor.displayName);
+          var author = getAuthorId(authors, item.actor.displayName);
 
-        var entry = new Entry();
-        entry.title = item.title;
-        entry.topic = data.topic;
-        entry.published = item.published;
-        entry.updated = item.updated;
-        entry.content = item.content;
-        entry.permalinkUrl = item.permalinkUrl;
-        entry.summary = item.summary;
-        entry.actor = author;
+          var entry = new Entry();
+          entry.title = item.title;
+          entry.topic = data.topic;
+          entry.published = item.published;
+          entry.updated = item.updated;
+          entry.content = item.content;
+          entry.permalinkUrl = item.permalinkUrl;
+          entry.summary = item.summary;
+          entry.actor = author;
 
-        entry.save();
-      };
+          entry.save();
+        };
+      });
     }
   } else {
     console.log('Notification was not in JSON format');
@@ -135,16 +148,16 @@ var getNames = function (json) {
   return names;
 };
 
-var getAuthors = function (names) {
+var getAuthors = function (names, callback) {
   var authors = [];
-  async.each(names, function (name, callback) {
+  async.each(names, function (name, cb) {
     console.log('Async name ' + name);
     Author.findOne({ displayName: name }, function (err, result) {
-      if (err) callback(err);
+      if (err) cb(err);
       if (result) {
         authors.push(result);
         console.log('Found author ' + result);
-        callback(null);
+        cb(null);
       } else {
         var author = new Author();
         author.displayName = name;
@@ -152,12 +165,12 @@ var getAuthors = function (names) {
         console.log('Created author ' + author);
 
         authors.push(author);
-        callback(null);
+        cb(null);
       };
     });
   }, function (err) {
-    if (err) throw err;
-    return authors;
+    if (err) return callback(err);
+    return callback(null, authors);
   });
 };
 
