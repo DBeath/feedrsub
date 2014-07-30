@@ -100,6 +100,7 @@ pubsub.on('feed_update', function (data) {
       for (var i = json.items.length - 1; i >= 0; i--) {
         var item = json.items[i];
 
+        console.log('Authors 2 ' + authors);
         var author = getAuthorId(authors, item.actor.displayName);
 
         var entry = new Entry();

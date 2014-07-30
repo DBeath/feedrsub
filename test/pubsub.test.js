@@ -235,6 +235,6 @@ describe('pubsub notification', function () {
         if (err) return done();
         done();
       });
-    }, 50);
+    }, 100);
   });
 });

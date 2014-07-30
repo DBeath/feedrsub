@@ -102,21 +102,30 @@ function (req, email, password, done) {
 
 passport.use('basic', new BasicStrategy(
   function (email, password, done) {
-    User.findOne({ email: email }, function (err, user) {
+    // User.findOne({ email: email }, function (err, user) {
+    //   if (err) return done(err);
+    //   if (!user) return done(null, false);
+    //   user.comparePassword(password, function (err, isMatch) {
+    //     if (err) return done(err);
+    //     if (!isMatch) {
+    //       return done(null, false);
+    //     } else {
+    //       return done(null, user);
+    //     };
+    //   });
+    //   // if (!user.validPassword(password)) {
+    //   //   return done(null, false);
+    //   // };
+    //   // return done(null, user);
+    // });
+
+    User.getAuthenticated(email, password, function (err, user, reason) {
       if (err) return done(err);
-      if (!user) return done(null, false);
-      user.comparePassword(password, function (err, isMatch) {
-        if (err) return done(err);
-        if (!isMatch) {
-          return done(null, false);
-        } else {
-          return done(null, user);
-        };
-      });
-      // if (!user.validPassword(password)) {
-      //   return done(null, false);
-      // };
-      // return done(null, user);
+      if (user) {
+        return done(null, user);
+      } else {
+        return done(null, false);
+      };
     });
   }
 ));

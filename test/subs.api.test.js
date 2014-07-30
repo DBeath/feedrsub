@@ -4,34 +4,53 @@ var server = require('../server.js');
 var qs = require('querystring');
 var db = require('../models/db.js');
 
+var User = require('../models/user');
+
+var testEmail = 'admin@test.com';
+var testPassword = 'password';
+var testRole = 'admin';
+
 describe('subscribe', function () {
   before(function (done) {
     server.start(function () {
-      db.users.collection.update({
-        email: 'admin@feedrsub.com'
-      },
-      {
-        email: 'admin@feedrsub.com',
-        password: db.users.generateHash('password'),
-        role: 'admin'
-      },
-      {upsert: true},
-      function (err) {
+      var testUser = new User();
+      testUser.email = testEmail;
+      testUser.password = testPassword;
+      testUser.role = testRole;
+
+      testUser.save(function (err) {
         if (err) throw err;
-        db.users.collection.findOne({email: 'admin@feedrsub.com'}, function (err, result) {
-          if (err) throw err;
-          if (!result) throw err;
-          console.log(result);
-          return done();
-        })
-        //return done();
+        return done();
       });
+
+      // db.users.collection.update({
+      //   email: 'admin@feedrsub.com'
+      // },
+      // {
+      //   email: 'admin@feedrsub.com',
+      //   password: db.users.generateHash('password'),
+      //   role: 'admin'
+      // },
+      // {upsert: true},
+      // function (err) {
+      //   if (err) throw err;
+      //   db.users.collection.findOne({email: 'admin@feedrsub.com'}, function (err, result) {
+      //     if (err) throw err;
+      //     if (!result) throw err;
+      //     console.log(result);
+      //     return done();
+      //   })
+      //   //return done();
+      // });
     });
   });
 
   after(function (done) {
     server.close(function () {
-      return done();
+      User.remove({email: testEmail}, function (err) {
+        if (err) throw err;
+        return done();
+      });
     });
   });
 
@@ -39,8 +58,8 @@ describe('subscribe', function () {
     var postParams = {
       url: 'http://localhost:4000/api/v1/subscribe',
       auth: {
-        user: 'admin@feedrsub.com',
-        pass: 'password'
+        user: testEmail,
+        pass: testPassword
       }
     };
     request.post(postParams, function (err, response, body) {
@@ -54,8 +73,8 @@ describe('subscribe', function () {
     var postParams = {
       url: 'http://localhost:4000/api/v1/subscribe',
       auth: {
-        user: 'admin@feedrsub.com',
-        pass: 'password'
+        user: testEmail,
+        pass: testPassword
       },
       form: {
         topic: 'testing'
@@ -73,8 +92,8 @@ describe('subscribe', function () {
     var postParams = {
       url: url,
       auth: {
-        user: 'admin@feedrsub.com',
-        pass: 'password'
+        user: testEmail,
+        pass: testPassword
       }
     };
     request.post(postParams, function (err, response, body) {
