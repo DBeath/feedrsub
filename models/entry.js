@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 
-var entrySchema = mongoose.Schema({
+var EntrySchema = mongoose.Schema({
   title: String,
   topic: String,
   published: Date,
@@ -14,3 +14,5 @@ var entrySchema = mongoose.Schema({
     displayName: String
   }
 });
+
+module.exports = mongoose.model('Entry', EntrySchema);

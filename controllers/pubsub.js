@@ -92,10 +92,10 @@ pubsub.on('feed_update', function (data) {
 
     
     if (json.items) {
-      var names = getNames(json);
-      console.log('Names ' + names);
-      var authors = getAuthors(names);
-      console.log('Authors ' + authors);
+      // var names = getNames(json);
+      // console.log('Names ' + names);
+      // var authors = getAuthors(names);
+      // console.log('Authors ' + authors);
 
       async.waterfall([
         function (callback) {
