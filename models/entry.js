@@ -9,7 +9,7 @@ var EntrySchema = mongoose.Schema({
   content: String,
   permalinkUrl: String,
   summary: String,
-  actor: {
+  author: {
     _id: ObjectId,
     displayName: String
   }

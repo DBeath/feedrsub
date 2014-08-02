@@ -96,7 +96,7 @@ require('./lib/hbs_helpers.js')();
 
 // Routes
 app.post('/login', passport.authenticate('local-login', {
-  successRedirect: '/admin/subscribed',
+  successRedirect: '/admin',
   failureRedirect: '/login',
   failureFlash: true
 }));

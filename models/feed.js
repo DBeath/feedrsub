@@ -5,7 +5,7 @@ var config = require('../config');
 
 var FeedSchema = mongoose.Schema({
   topic: { type: String, required: true, index: { unique: true } },
-  status: { type: String, default: 'Pending', required: true },
+  status: { type: String, default: 'pending', required: true },
   hub: String,
   subtime: { type: Date },
   unsubtime: Date,
@@ -29,15 +29,15 @@ FeedSchema.virtual('isPending').get(function () {
 
 // status enum for the model
 var statusOptions = FeedSchema.statics.statusOptions = {
-  SUBSCRIBED: 'Subscribed',
-  UNSUBSCRIBED: 'Unsubscribed',
-  PENDING: 'Pending'
+  SUBSCRIBED: 'subscribed',
+  UNSUBSCRIBED: 'unsubscribed',
+  PENDING: 'pending'
 };
 
 var Feed = mongoose.model('Feed', FeedSchema);
 
 Feed.schema.path('status').validate(function (value) {
-  return /Pending|Subscribed|Unsubscribed/i.test(value);
+  return /pending|subscribed|unsubscribed/i.test(value);
 }, 'Invalid status');
 
 Feed.schema.path('topic').validate(function (value) {

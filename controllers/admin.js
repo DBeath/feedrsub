@@ -5,8 +5,15 @@ var async = require('async');
 var moment = require('moment');
 var pubsub = require('./pubsub.js').pubsub;
 
-var dayAgo = moment().subtract('d', 1).unix();
-var weekAgo = moment().subtract('d', 7).unix();
+var Feed = require('../models/feed');
+var Author = require('../models/author');
+var Entry = require('../models/entry');
+var User = require('../models/user');
+
+var statusOptions = Feed.statusOptions;
+
+var dayAgo = moment().subtract('d', 1);
+var weekAgo = moment().subtract('d', 7);
 
 module.exports.AdminController = function () {
   return new admin();
@@ -18,49 +25,55 @@ function admin () {};
 admin.prototype.index = function (req, res) {
   async.parallel({
     feedCount: function (callback) {
-      db.feeds.countAll(function (err, result) {
+      Feed.count({}, function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
     },
     subscribedCount: function (callback) {
-      db.feeds.countByStatus('subscribed', function (err, result) {
+      Feed.count({ status: statusOptions.SUBSCRIBED }, function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
     },
     unsubscribedCount: function (callback) {
-      db.feeds.countByStatus('unsubscribed', function (err, result) {
+      Feed.count({ status: statusOptions.UNSUBSCRIBED }, function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
     },
     pendingCount: function (callback) {
-      db.feeds.countByStatus('pending', function (err, result) {
+      Feed.count({ status: statusOptions.PENDING }, function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
     },
     entriesCount: function (callback) {
-      db.entries.countAll(function (err, result) {
+      Entry.count({},function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
     },
     entriesInLastDay: function (callback) {
-      db.entries.countRecent(dayAgo, function (err, result) {
+      Entry.count({ published: { $gte: dayAgo } }, function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
     },
     entriesInLastWeek: function (callback) {
-      db.entries.countRecent(weekAgo, function (err, result) {
+      Entry.count({ published: { $gte: weekAgo } }, function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
     },
     feedsAddedInLastWeek: function (callback) {
-      db.feeds.countRecent(weekAgo, function (err, result) {
+      Feed.count({ subtime: { $gte: weekAgo } }, function (err, result) {
+        if (err) return callback(err);
+        return callback(null, result);
+      });
+    },
+    usersCount: function (callback) {
+      User.count({}, function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
@@ -82,7 +95,7 @@ admin.prototype.index = function (req, res) {
 
 // Renders a page containing a list of entries by feed.
 admin.prototype.feed = function (req, res) {
-  db.feeds.findOneById(req.params.id, function (err, doc) {
+  Feed.findById(req.params.id, function (err, doc) {
     if (err) {
       console.error(err);
       req.flash('error', err.message);
@@ -91,28 +104,38 @@ admin.prototype.feed = function (req, res) {
 
     async.parallel({
       entries: function (callback) {
-        db.entries.list(doc.topic, 100, function (err, docs) {
-          if (err) return callback(err);
-          return callback(null, docs);
-        });
+        Entry
+          .find({ topic: doc.topic })
+          .limit(100)
+          .sort('-published')
+          .exec(function (err, docs) {
+            if (err) return callback(err);
+            return callback(null, docs);
+          });
       },
       entriesCount: function (callback) {
-        db.entries.countAllByTopic(doc.topic, function (err, result) {
+        Entry.count({ topic: doc.topic }, function (err, result) {
           if (err) return callback(err);
           return callback(null, result);
         });
       },
       entriesInLastDay: function (callback) {
-        db.entries.countRecentByTopic(doc.topic, dayAgo, function (err, result) {
-          if (err) return callback(err);
-          return callback(null, result);
-        });
+        Entry
+          .count({ topic: doc.topic })
+          .where('published').gte(dayAgo)
+          .exec(function (err, result) {
+            if (err) return callback(err);
+            return callback(null, result);
+          });
       },
       entriesInLastWeek: function (callback) {
-        db.entries.countRecentByTopic(doc.topic, weekAgo, function (err, result) {
-          if (err) return callback(err);
-          return callback(null, result);
-        });
+        Entry
+          .count({ topic: doc.topic })
+          .where('published').gte(weekAgo)
+          .exec(function (err, result) {
+            if (err) return callback(err);
+            return callback(null, result);
+          });
       }
     }, function (err, results) {
       if (err) {
@@ -231,13 +254,13 @@ admin.prototype.unsubscribe = function (req, res) {
 admin.prototype.unsubscribed_feeds = function (req, res) {
   async.parallel({
     docs: function (callback) {
-      db.feeds.listByStatus('unsubscribed', function (err, docs) {
+      Feed.find({ status: 'unsubscribed' }, function (err, docs) {
         if (err) return callback(err);
         return callback(null, docs);
       });
     },
     count: function (callback) {
-      db.feeds.countByStatus('unsubscribed', function (err, result) {
+      Feed.count({ status: statusOptions.UNSUBSCRIBED }, function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
@@ -262,13 +285,13 @@ admin.prototype.unsubscribed_feeds = function (req, res) {
 admin.prototype.subscribed_feeds = function (req, res) {
   async.parallel({
     docs: function (callback) {
-      db.feeds.listByStatus('subscribed', function (err, docs) {
+      Feed.find({ status: statusOptions.SUBSCRIBED }, function (err, docs) {
         if (err) return callback(err);
         return callback(null, docs);
       });
     },
     count: function (callback) {
-      db.feeds.countByStatus('subscribed', function (err, result) {
+      Feed.count({ status: statusOptions.SUBSCRIBED }, function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
@@ -293,13 +316,13 @@ admin.prototype.subscribed_feeds = function (req, res) {
 admin.prototype.pending_feeds = function (req, res) {
   async.parallel({
     docs: function (callback) {
-      db.feeds.listByStatus('pending', function (err, docs) {
+      Feed.find({ status: statusOptions.PENDING }, function (err, docs) {
         if (err) return callback(err);
         return callback(null, docs);
       });
     },
     count: function (callback) {
-      db.feeds.countByStatus('pending', function (err, result) {
+      Feed.count({ status: statusOptions.PENDING }, function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
@@ -323,13 +346,13 @@ admin.prototype.pending_feeds = function (req, res) {
 admin.prototype.authors = function (req, res) {
   async.parallel({
     docs: function (callback) {
-      db.authors.listAll(function (err, docs) {
+      Author.find(function (err, docs) {
         if (err) return callback(err);
         return callback(null, docs);
       });
     },
     count: function (callback) {
-      db.authors.count(function (err, result) {
+      Author.count(function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
@@ -349,7 +372,7 @@ admin.prototype.authors = function (req, res) {
 };
 
 admin.prototype.authorEntries = function (req, res) {
-  db.authors.findOneById(req.params.id, function (err, author) {
+  Author.findById(req.params.id, function (err, author) {
     if (err) {
       console.error(err);
       req.flash('error', err.message);
@@ -358,25 +381,25 @@ admin.prototype.authorEntries = function (req, res) {
 
     async.parallel({
       entries: function (callback) {
-        db.entries.listByAuthor(author._id, 100, function (err, docs) {
+        Entry.find({ 'author._id': author._id }, 100, function (err, docs) {
           if (err) return callback(err);
           return callback(null, docs);
         });
       },
       entriesCount: function (callback) {
-        db.entries.countAllByAuthor(author._id, function (err, result) {
+        Entry.count({ 'author._id': author._id }, function (err, result) {
           if (err) return callback(err);
           return callback(null, result);
         });
       },
       entriesInLastDay: function (callback) {
-        db.entries.countRecentByAuthor(author._id, dayAgo, function (err, result) {
+        Entry.count({ 'author._id': author._id }, dayAgo, function (err, result) {
           if (err) return callback(err);
           return callback(null, result);
         });
       } ,
       entriesInLastWeek: function (callback) {
-        db.entries.countRecentByAuthor(author._id, weekAgo, function (err, result) {
+        Entry.count({ 'author._id': author._id }, weekAgo, function (err, result) {
           if (err) return callback(err);
           return callback(null, result);
         });

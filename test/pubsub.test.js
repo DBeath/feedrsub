@@ -9,6 +9,10 @@ var pubsub = require('../controllers/pubsub.js').pubsub;
 var server = require('../server.js');
 var mongo = require('../models/db.js');
 
+var Feed = require('../models/feed');
+var Author = require('../models/author');
+var Entry = require('../models/entry');
+
 var thisNow = new Date();
 var topic = 'http://test.com';
 var topicTitle = 'Test Feed';
@@ -184,7 +188,7 @@ describe('pubsub notification', function () {
       expect(eventFired, 'event fired').to.equal(true);
       async.series({
         feed: function (callback) {
-          mongo.feeds.findOneByTopic(topic, function (err, doc) {
+          Feed.findOne({ topic: topic }, function (err, doc) {
             if (err) return callback(err);
             expect(doc.topic, 'feed topic').to.equal(topic);
             expect(doc.title, 'feed title').to.equal(topicTitle);
@@ -192,7 +196,7 @@ describe('pubsub notification', function () {
           });
         },
         author: function (callback) {
-          mongo.authors.findOne(authorname, function (err, doc) {
+          Author.findOne({ displayName: authorname }, function (err, doc) {
             if (err) return callback(err);
             expect(doc.displayName, 'author DisplayName').to.equal(authorname);
             authorId = doc._id;
@@ -200,19 +204,19 @@ describe('pubsub notification', function () {
           });
         },
         entry1: function (callback) {
-          mongo.entries.collection.findOne({title: itemTitle}, function (err, doc) {
+          Entry.findOne({ title: itemTitle }, function (err, doc) {
             if (err) return callback(err);
             console.log(doc);
             expect(doc.topic, 'doc1 topic').to.equal(topic);
             expect(doc.title, 'doc1 title').to.equal(itemTitle);
             expect(doc.published.toString(), 'doc1 published').to.equal(thisNow.toString());
-            expect(doc.actor.displayName, 'doc1 author').to.equal(authorname);
-            expect(doc.actor._id.toHexString(), 'doc1 author id').to.equal(authorId.toHexString());
+            expect(doc.author.displayName, 'doc1 author').to.equal(authorname);
+            expect(doc.author._id.toHexString(), 'doc1 author id').to.equal(authorId.toHexString());
             callback(null);
           });
         },
         entry2: function (callback) {
-          mongo.entries.collection.findOne({title: item2Title}, function (err, doc) {
+          Entry.findOne({ title: item2Title }, function (err, doc) {
             if (err) return callback(err);
             expect(doc.topic, 'doc2 topic').to.equal(topic);
             expect(doc.title, 'doc2 title').to.equal(item2Title);
@@ -221,7 +225,7 @@ describe('pubsub notification', function () {
           });
         },
         authornumber: function (callback) {
-          mongo.authors.count(function (err, result) {
+          Author.count(function (err, result) {
             if (err) return callback(err);
             expect(result, 'number of authors').to.equal(1);
             callback(null);

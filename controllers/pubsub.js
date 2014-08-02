@@ -75,7 +75,7 @@ pubsub.on('feed_update', function (data) {
           entry.content = item.content;
           entry.permalinkUrl = item.permalinkUrl;
           entry.summary = item.summary;
-          entry.actor = author;
+          entry.author = author;
 
           entry.save();
         };
