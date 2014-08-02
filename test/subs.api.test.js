@@ -22,33 +22,13 @@ describe('subscribe', function () {
         if (err) throw err;
         return done();
       });
-
-      // db.users.collection.update({
-      //   email: 'admin@feedrsub.com'
-      // },
-      // {
-      //   email: 'admin@feedrsub.com',
-      //   password: db.users.generateHash('password'),
-      //   role: 'admin'
-      // },
-      // {upsert: true},
-      // function (err) {
-      //   if (err) throw err;
-      //   db.users.collection.findOne({email: 'admin@feedrsub.com'}, function (err, result) {
-      //     if (err) throw err;
-      //     if (!result) throw err;
-      //     console.log(result);
-      //     return done();
-      //   })
-      //   //return done();
-      // });
     });
   });
 
   after(function (done) {
-    server.close(function () {
-      User.remove({email: testEmail}, function (err) {
-        if (err) throw err;
+    User.remove({email: testEmail}, function (err) {
+      if (err) throw err;
+      server.close(function () {
         return done();
       });
     });
@@ -65,7 +45,7 @@ describe('subscribe', function () {
     request.post(postParams, function (err, response, body) {
       expect(response.statusCode).to.equal(400);
       expect(response.body).to.equal('Topic is not specified');
-      done();
+      return done();
     });
   });
 
@@ -83,7 +63,7 @@ describe('subscribe', function () {
     request.post(postParams, function (err, response, body) {
       expect(response.statusCode).to.equal(400);
       expect(response.body).to.equal('Topic is not valid URL');
-      done();
+      return done();
     });
   });
 
@@ -98,7 +78,7 @@ describe('subscribe', function () {
     };
     request.post(postParams, function (err, response, body) {
       expect(response.statusCode).to.equal(400);
-      done();
+      return done();
     });
   });
 });
@@ -106,13 +86,24 @@ describe('subscribe', function () {
 describe('unsubscribe', function () {
   before(function (done) {
     server.start(function () {
-      done();
+      var testUser = new User();
+      testUser.email = testEmail;
+      testUser.password = testPassword;
+      testUser.role = testRole;
+
+      testUser.save(function (err) {
+        if (err) throw err;
+        return done();
+      });
     });
   });
 
   after(function (done) {
-    server.close(function () {
-      done();
+    User.remove({email: testEmail}, function (err) {
+      if (err) throw err;
+      server.close(function () {
+        return done();
+      });
     });
   });
 
@@ -120,8 +111,8 @@ describe('unsubscribe', function () {
     var postParams = {
       url: 'http://localhost:4000/api/v1/unsubscribe',
       auth: {
-        user: 'admin@feedrsub.com',
-        pass: 'password'
+        user: testEmail,
+        pass: testPassword
       }
     };
     request.post(postParams, function (err, response, body) {
@@ -135,8 +126,8 @@ describe('unsubscribe', function () {
     var postParams = {
       url: 'http://localhost:4000/api/v1/unsubscribe',
       auth: {
-        user: 'admin@feedrsub.com',
-        pass: 'password'
+        user: testEmail,
+        pass: testPassword
       },
       form: {
         topic: 'testing'
@@ -145,7 +136,7 @@ describe('unsubscribe', function () {
     request.post(postParams, function (err, response, body) {
       expect(response.statusCode).to.equal(400);
       expect(response.body).to.equal('Topic is not valid URL');
-      done();
+      return done();
     });
   });
 
@@ -154,13 +145,13 @@ describe('unsubscribe', function () {
     var postParams = {
       url: url,
       auth: {
-        user: 'admin@feedrsub.com',
-        pass: 'password'
+        user: testEmail,
+        pass: testPassword
       }
     };
     request.post(postParams, function (err, response, body) {
       expect(response.statusCode).to.equal(400);
-      done();
+      return done();
     });
   });
 });
@@ -168,13 +159,24 @@ describe('unsubscribe', function () {
 describe('retrieve', function () {
   before(function (done) {
     server.start(function () {
-      done();
+      var testUser = new User();
+      testUser.email = testEmail;
+      testUser.password = testPassword;
+      testUser.role = testRole;
+
+      testUser.save(function (err) {
+        if (err) throw err;
+        return done();
+      });
     });
   });
 
   after(function (done) {
-    server.close(function () {
-      done();
+    User.remove({email: testEmail}, function (err) {
+      if (err) throw err;
+      server.close(function () {
+        return done();
+      });
     });
   });
 
@@ -182,14 +184,14 @@ describe('retrieve', function () {
     var postParams = {
       url: 'http://localhost:4000/api/v1/retrieve',
       auth: {
-        user: 'admin@feedrsub.com',
-        pass: 'password'
+        user: testEmail,
+        pass: testPassword
       }
     };
     request.post(postParams, function (err, response, body) {
       expect(response.statusCode).to.equal(400);
       expect(response.body).to.equal('Topic is not specified');
-      done();
+      return done();
     });
   });
 
@@ -197,8 +199,8 @@ describe('retrieve', function () {
     var postParams = {
       url: 'http://localhost:4000/api/v1/retrieve',
       auth: {
-        user: 'admin@feedrsub.com',
-        pass: 'password'
+        user: testEmail,
+        pass: testPassword
       },
       form: {
         topic: 'testing'
@@ -207,7 +209,7 @@ describe('retrieve', function () {
     request.post(postParams, function (err, response, body) {
       expect(response.statusCode).to.equal(400);
       expect(response.body).to.equal('Topic is not valid URL');
-      done();
+      return done();
     });
   });
 })

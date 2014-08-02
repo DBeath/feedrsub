@@ -5,16 +5,33 @@ var qs = require('querystring');
 var async = require('async');
 var db = require('../models/db.js');
 
+var User = require('../models/user');
+
+var testEmail = 'admin@test.com';
+var testPassword = 'password';
+var testRole = 'admin';
+
 describe('feeds', function () {
   before(function (done) {
     server.start(function () {
-      done();
+      var testUser = new User();
+      testUser.email = testEmail;
+      testUser.password = testPassword;
+      testUser.role = testRole;
+
+      testUser.save(function (err) {
+        if (err) throw err;
+        return done();
+      });
     });
   });
 
   after(function (done) {
-    server.close(function () {
-      done();
+    User.remove({email: testEmail}, function (err) {
+      if (err) throw err;
+      server.close(function () {
+        return done();
+      });
     });
   });
 
@@ -22,8 +39,8 @@ describe('feeds', function () {
     var postParams = {
       url: 'http://localhost:4000/api/v1/feed/asdf',
       auth: {
-        user: 'admin@feedrsub.com',
-        pass: 'password'
+        user: testEmail,
+        pass: testPassword
       }
     };
     request.get(postParams, function (err, response, body) {
@@ -36,8 +53,8 @@ describe('feeds', function () {
   it('should return a feed', function (done) {
     var postParams = {
       auth: {
-        user: 'admin@feedrsub.com',
-        pass: 'password'
+        user: testEmail,
+        pass: testPassword
       }
     };
     async.series({

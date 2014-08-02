@@ -179,10 +179,10 @@ var close = function (done) {
       console.log('Server was running for',Math.round(process.uptime()),'seconds');
       return done();
     });
-    setTimeout(function () {
-      console.log('Server took too long to shutdown, forcing shutdown');
-      return done();
-    }, 2000);
+    // setTimeout(function () {
+    //   console.log('Server took too long to shutdown, forcing shutdown');
+    //   return done();
+    // }, 2000);
   });
 };
 

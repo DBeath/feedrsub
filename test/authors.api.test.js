@@ -16,6 +16,12 @@ var authors = [
   })
 ];
 
+var User = require('../models/user');
+
+var testEmail = 'admin@test.com';
+var testPassword = 'password';
+var testRole = 'admin';
+
 describe('authors', function () {
   before(function (done) {
     server.start(function () {
@@ -40,7 +46,16 @@ describe('authors', function () {
           });
         }, function (err) {
           if (err) throw err;
-          done();
+
+          var testUser = new User();
+          testUser.email = testEmail;
+          testUser.password = testPassword;
+          testUser.role = testRole;
+
+          testUser.save(function (err) {
+            if (err) throw err;
+            return done();
+          });
         });
       }); 
     });
@@ -51,8 +66,10 @@ describe('authors', function () {
       if (err) throw err;
       Author.collection.remove({}, function (err) {
         if (err) throw err;
-        server.close(function () {
-           done();
+        User.remove({email: testEmail}, function (err) {
+          server.close(function () {
+            return done();
+          });
         }); 
       });
     });
@@ -62,8 +79,8 @@ describe('authors', function () {
     var postParams = {
       url: 'http://localhost:4000/api/v1/authors',
       auth: {
-        user: 'admin@feedrsub.com',
-        pass: 'password'
+        user: testEmail,
+        pass: testPassword
       }
     };
 
@@ -73,7 +90,7 @@ describe('authors', function () {
       console.log(result);
       expect(result.length).to.equal(2);
       expect(result[0].displayName).to.equal('John Doe');
-      done();
+      return done();
     });
   });
 
@@ -82,8 +99,8 @@ describe('authors', function () {
     var postParams = {
       url: url,
       auth: {
-        user: 'admin@feedrsub.com',
-        pass: 'password'
+        user: testEmail,
+        pass: testPassword
       }
     };
 
@@ -94,7 +111,7 @@ describe('authors', function () {
       expect(result.length).to.equal(1);
       expect(result[0].title).to.equal('TestTitle');
       expect(result[0].actor.displayName).to.equal('John Doe');
-      done();
+      return done();
     });
   });
 
@@ -103,15 +120,15 @@ describe('authors', function () {
     var postParams = {
       url: url,
       auth: {
-        user: 'admin@feedrsub.com',
-        pass: 'password'
+        user: testEmail,
+        pass: testPassword
       }
     };
 
     request.get(postParams, function (err, response, body) {
       expect(response.statusCode).to.equal(200);
       console.log(body);
-      done();
+      return done();
     });
   });
 });

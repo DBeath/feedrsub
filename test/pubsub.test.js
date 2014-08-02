@@ -13,14 +13,13 @@ var thisNow = new Date();
 var topic = 'http://test.com';
 var topicTitle = 'Test Feed';
 var itemTitle = 'This is a test';
-var itemStatus = 'Test';
+var itemStatus = 'subscribed';
 var item2Title = 'This is the second item';
 var authorname = 'Testy Authorson';
 var response_body = JSON.stringify(
   {
     "title": topicTitle,
     "status": {
-      "lastFetch": thisNow,
       "http": 200
     },
     "items": [
@@ -43,6 +42,8 @@ var response_body = JSON.stringify(
     ]
   }
 );
+
+console.log(response_body);
 var encrypted_secret = crypto.createHmac("sha1", pubsub.secret).update(topic).digest("hex");
 var hub_encryption = crypto.createHmac('sha1', encrypted_secret).update(response_body).digest('hex');
 
@@ -183,16 +184,14 @@ describe('pubsub notification', function () {
       var authorId = null;
       expect(eventFired, 'event fired').to.equal(true);
       async.series({
-        // feed: function (callback) {
-        //   mongo.feeds.findOneByTopic(topic, function (err, doc) {
-        //     if (err) return callback(err);
-        //     expect(doc.topic, 'feed topic').to.equal(topic);
-        //     expect(doc.title, 'feed title').to.equal(topicTitle);
-        //     expect(doc.lastFetch, 'feed lastFetch').to.equal(thisNow);
-        //     expect(doc.http, 'feed http').to.equal(200);
-        //     callback(null);
-        //   });
-        // },
+        feed: function (callback) {
+          mongo.feeds.findOneByTopic(topic, function (err, doc) {
+            if (err) return callback(err);
+            expect(doc.topic, 'feed topic').to.equal(topic);
+            expect(doc.title, 'feed title').to.equal(topicTitle);
+            callback(null);
+          });
+        },
         author: function (callback) {
           mongo.authors.findOne(authorname, function (err, doc) {
             if (err) return callback(err);
@@ -207,7 +206,7 @@ describe('pubsub notification', function () {
             console.log(doc);
             expect(doc.topic, 'doc1 topic').to.equal(topic);
             expect(doc.title, 'doc1 title').to.equal(itemTitle);
-            expect(doc.published, 'doc1 published').to.equal(thisNow.toISOString());
+            expect(doc.published.toString(), 'doc1 published').to.equal(thisNow.toString());
             expect(doc.status, 'doc1 status').to.equal(itemStatus);
             expect(doc.actor.displayName, 'doc1 author').to.equal(authorname);
             expect(doc.actor.id.toHexString(), 'doc1 author id').to.equal(authorId.toHexString());

@@ -8,6 +8,9 @@ var moment = require('moment');
 var http = require('http');
 var StatusError = require('../lib/errors.js').StatusError;
 
+var Feed = require('../models/feed');
+var statusOptions = Feed.statusOptions;
+
 /**
  * Provides the base Pubsubhubbub controller
  *
