@@ -26,7 +26,6 @@ var response_body = JSON.stringify(
       {
         "title": itemTitle,
         "published": thisNow,
-        "status": itemStatus,
         "actor": {
           "displayName": authorname,
           "id": authorname
@@ -34,7 +33,7 @@ var response_body = JSON.stringify(
       },
       {
         "title": item2Title,
-        "status": itemStatus,
+        "published": thisNow,
         "actor": {
           "displayName": authorname,
         }
@@ -43,7 +42,7 @@ var response_body = JSON.stringify(
   }
 );
 
-console.log(response_body);
+//console.log(response_body);
 var encrypted_secret = crypto.createHmac("sha1", pubsub.secret).update(topic).digest("hex");
 var hub_encryption = crypto.createHmac('sha1', encrypted_secret).update(response_body).digest('hex');
 
@@ -207,9 +206,8 @@ describe('pubsub notification', function () {
             expect(doc.topic, 'doc1 topic').to.equal(topic);
             expect(doc.title, 'doc1 title').to.equal(itemTitle);
             expect(doc.published.toString(), 'doc1 published').to.equal(thisNow.toString());
-            expect(doc.status, 'doc1 status').to.equal(itemStatus);
             expect(doc.actor.displayName, 'doc1 author').to.equal(authorname);
-            expect(doc.actor.id.toHexString(), 'doc1 author id').to.equal(authorId.toHexString());
+            expect(doc.actor._id.toHexString(), 'doc1 author id').to.equal(authorId.toHexString());
             callback(null);
           });
         },
@@ -219,7 +217,6 @@ describe('pubsub notification', function () {
             expect(doc.topic, 'doc2 topic').to.equal(topic);
             expect(doc.title, 'doc2 title').to.equal(item2Title);
             expect(doc.published, 'doc2 published').to.exist;
-            expect(doc.status, 'doc2 status').to.equal(itemStatus);
             callback(null);
           });
         },

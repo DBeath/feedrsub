@@ -1,15 +1,26 @@
 var mongoose = require('mongoose');
 var validator = require('validator');
+var crypto = require('crypto');
+var config = require('../config');
 
 var FeedSchema = mongoose.Schema({
   topic: { type: String, required: true, index: { unique: true } },
-  status: { type: String, default: 'pending', required: true },
-  subtime: { type: Date, default: Date.now },
+  status: { type: String, default: 'Pending', required: true },
+  hub: String,
+  subtime: { type: Date },
   unsubtime: Date,
   secret: String,
   title: String,
   permalinkUrl: String,
   leaseSeconds: Number
+});
+
+FeedSchema.pre('save', function (next) {
+  var feed = this;
+  if (feed.secret) return next();
+  if (!config.pubsub.secret) return next();
+  feed.secret = crypto.createHmac('sha1', config.pubsub.secret).update(feed.topic).digest('hex');
+  return next();
 });
 
 FeedSchema.virtual('isPending').get(function () {

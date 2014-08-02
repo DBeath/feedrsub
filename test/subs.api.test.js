@@ -3,11 +3,12 @@ var request = require('request');
 var server = require('../server.js');
 var qs = require('querystring');
 var db = require('../models/db.js');
+var config = require('../config');
 
 var User = require('../models/user');
 
-var testEmail = 'admin@test.com';
-var testPassword = 'password';
+var testEmail = config.express.admin;
+var testPassword = config.express.adminpass;
 var testRole = 'admin';
 
 describe('subscribe', function () {
