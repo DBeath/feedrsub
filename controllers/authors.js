@@ -8,6 +8,7 @@ var ObjectID = require('mongodb').ObjectID;
 var moment = require('moment');
 
 var Author = require('../models/author');
+var Entry = require('../models/entry');
 
 module.exports.AuthorsController = function () {
   return new Authors();
@@ -91,27 +92,31 @@ Authors.prototype.rss = function (req, res, next) {
           ttl: '60'
         });
 
-        db.entries.listByAuthor(author._id, 10, function (err, entries) {
-          if (err) return next(err);
+        Entry
+          .find({ 'author._id': author._id })
+          .limit(10)
+          .sort('-published')
+          .exec(function (err, entries) {
+            if (err) return next(err);
           
-          async.eachSeries(entries, function (entry, cb) {
-            var content = entry.content || entry.summary;
+            async.eachSeries(entries, function (entry, cb) {
+              var content = entry.content || entry.summary;
 
-            feed.item({
-              title: entry.title,
-              description: content,
-              date: moment.unix(entry.published),
-              author: entry.actor.displayName,
-              url: entry.permalinkUrl,
-              guid: entry._id.toHexString()
+              feed.item({
+                title: entry.title,
+                description: content,
+                date: moment.unix(entry.published),
+                author: entry.actor.displayName,
+                url: entry.permalinkUrl,
+                guid: entry._id.toHexString()
+              });
+              
+              cb();
+            }, function (err) {
+              var xml = feed.xml();
+              callback(null, xml);
             });
-            
-            cb();
-          }, function (err) {
-            var xml = feed.xml();
-            callback(null, xml);
           });
-        });
       }
   ], function (err, result) {
     if (err) return next(err);

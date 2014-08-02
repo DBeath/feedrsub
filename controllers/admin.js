@@ -4,6 +4,7 @@ var validator = require('validator');
 var async = require('async');
 var moment = require('moment');
 var pubsub = require('./pubsub.js').pubsub;
+var ObjectID = require('mongodb').ObjectID;
 
 var Feed = require('../models/feed');
 var Author = require('../models/author');
@@ -378,31 +379,43 @@ admin.prototype.authorEntries = function (req, res) {
       req.flash('error', err.message);
       return res.redirect('/admin');
     };
-
+    console.log(author._id);
     async.parallel({
       entries: function (callback) {
-        Entry.find({ 'author._id': author._id }, 100, function (err, docs) {
-          if (err) return callback(err);
-          return callback(null, docs);
-        });
+        Entry
+          .find({ 'author._id': author._id })
+          .limit(100)
+          .sort('-published')
+          .exec(function (err, docs) {
+            if (err) return callback(err);
+            return callback(null, docs);
+          });
       },
       entriesCount: function (callback) {
-        Entry.count({ 'author._id': author._id }, function (err, result) {
-          if (err) return callback(err);
-          return callback(null, result);
-        });
+        Entry
+          .count({ 'author._id': author._id })
+          .exec(function (err, result) {
+            if (err) return callback(err);
+            return callback(null, result);
+          });
       },
       entriesInLastDay: function (callback) {
-        Entry.count({ 'author._id': author._id }, dayAgo, function (err, result) {
-          if (err) return callback(err);
-          return callback(null, result);
-        });
+        Entry
+          .count({ 'author._id': author._id })
+          .where('published').gte(dayAgo)
+          .exec(function (err, result) {
+            if (err) return callback(err);
+            return callback(null, result);
+          });
       } ,
       entriesInLastWeek: function (callback) {
-        Entry.count({ 'author._id': author._id }, weekAgo, function (err, result) {
-          if (err) return callback(err);
-          return callback(null, result);
-        });
+        Entry
+          .count({ 'author._id': author._id })
+          .where('published').gte(weekAgo)
+          .exec(function (err, result) {
+            if (err) return callback(err);
+            return callback(null, result);
+          });
       }
     }, function (err, results) {
       if (err) {
@@ -417,6 +430,37 @@ admin.prototype.authorEntries = function (req, res) {
         error: req.flash('error'),
         message: req.flash('info')
       });
+    });
+  });
+};
+
+admin.prototype.users = function (req, res) {
+  async.parallel({
+    users: function (callback) {
+      User
+      .find({})
+      .exec(function (err, results) {
+        if (err) return callback(err);
+        return callback(null, results);
+      });
+    },
+    usersCount: function (callback) {
+      User.count({}).exec(function (err, result) {
+        if (err) return callback(err);
+        return callback(null, result);
+      });
+    }
+  }, function (err, results) {
+    if (err) {
+      console.error(err);
+      req.flash('error', err.message);
+      return res.redirect('/admin');
+    };
+    return res.render('users', {
+      title: 'Users',
+      results: results,
+      error: req.flash('error'),
+      message: req.flash('info')
     });
   });
 };

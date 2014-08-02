@@ -9,9 +9,10 @@ var UserSchema = mongoose.Schema({
   email: { type: String, required: true, index: { unique: true } },
   password: { type: String, required: true },
   role: { type: String, default: 'user' },
-  added: { type: Date, default: Date.now },
+  joined: { type: Date, default: Date.now },
   loginAttempts: { type: Number, required: true, default: 0 },
-  lockUntil: { type: Number }
+  lockUntil: { type: Number },
+  lastLogin: { type: Date }
 });
 
 UserSchema.pre('save', function (next) {
@@ -95,10 +96,18 @@ UserSchema.statics.getAuthenticated = function (email, password, callback) {
       // check if the password was a match
       if (isMatch) {
         // if there's no lock or failed attempts, just return the user
-        if (!user.loginAttempts && !user.lockUntil) return callback(null, user);
+        if (!user.loginAttempts && !user.lockUntil) {
+          user.update({ $set: { lastLogin: Date.now() } }).exec(function (err) {
+            if (err) console.error(err);
+          });
+          return callback(null, user);
+        };
         // reset attempts and lock info
         var updates = {
-          $set: { loginAttempts: 0 },
+          $set: { 
+            loginAttempts: 0,
+            lastLogin: Date.now
+          },
           $unset: { lockUntil: 1 }
         };
         return user.update(updates, function (err) {

@@ -9,6 +9,7 @@ admin.get('/subscribed', adminController.subscribed_feeds );
 admin.get('/pending', adminController.pending_feeds );
 admin.get('/authors', adminController.authors );
 admin.get('/authors/:id', adminController.authorEntries );
+admin.get('/users', adminController.users );
 
 admin.get('/subscribe', adminController.newfeed );
 admin.post('/subscribe', adminController.subscribe );

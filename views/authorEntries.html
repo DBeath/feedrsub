@@ -17,9 +17,10 @@
     {{#each results.entries}}
     <tr>
       <td>{{_id}}</td>
-      <td>{{unix_to_date published}}</td>
+      <!-- <td>{{unix_to_date published}}</td> -->
+      <td>{{published}}</td>
       <td>{{title}}</td>
-      <td>{{actor.displayName}}</td>
+      <td>{{author.displayName}}</td>
       <td><a href="{{permalinkUrl}}">{{permalinkUrl}}</td>
     </tr>
     {{/each}}
