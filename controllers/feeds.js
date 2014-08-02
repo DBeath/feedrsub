@@ -1,8 +1,8 @@
-var db = require('../models/db.js');
 var config = require('../config');
 var validator = require('validator');
 var moment = require('moment');
 var StatusError = require('../lib/errors.js').StatusError;
+var Feed = require('../models/feed');
 
 /**
  * Provides the feeds API
@@ -33,7 +33,7 @@ Feeds.prototype.getFeed = function (req, res, next) {
     return next(new StatusError(400, 'Id is not valid'));
   };
 
-  db.feeds.findOneById(req.params.id, function (err, doc) {
+  Feed.findById(req.params.id, function (err, doc) {
     if (err) return next(err);
     console.log(doc);
     return res.send(200, doc);

@@ -6,6 +6,7 @@ var async = require('async');
 
 var Author = require('../models/author');
 var Entry = require('../models/entry');
+var Feed = require('../models/feed');
 
 //Creates Pubsub object.
 var pubsub = pubsubController.createController({
@@ -35,14 +36,15 @@ pubsub.on('feed_update', function (data) {
 
     // If data contains feed status update then update feed.
     if (json.status) {
-      var status = json.status;
-      status.title = json.title;
-      status.permalinkUrl = json.permalinkUrl;
-      status.updated = json.updated;
-
-      db.feeds.updateDetails(data.topic, status, function (err, result) {
+      Feed.findOne({ topic: data.topic }, function (err, feed) {
         if (err) return console.error(err);
-        console.log('Updated status of %s', data.topic);
+        feed.title = json.title || null;
+        feed.permalinkUrl = json.permalinkUrl || null;
+        feed.updated = json.updated || null;
+        feed.save(function (err) {
+          if (err) return console.log(err);
+          console.log('Updated status of %s', data.topic);
+        });
       });
     };
     

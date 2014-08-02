@@ -71,7 +71,7 @@ Authors.prototype.rss = function (req, res, next) {
             });
             break;
           case 'id':
-            Author.findOneById(param, function (err, author) {
+            Author.findById(param, function (err, author) {
               if (err) return callback(err);
               return callback(null, author);
             });

@@ -41,7 +41,7 @@ Feed.schema.path('status').validate(function (value) {
 }, 'Invalid status');
 
 Feed.schema.path('topic').validate(function (value) {
-  return validator.isUrl(value);
+  return validator.isURL(value);
 }, 'Topic is not URL');
 
 
