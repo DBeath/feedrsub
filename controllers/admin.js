@@ -86,6 +86,7 @@ admin.prototype.index = function (req, res) {
       return next(err);
     };
     return res.render('admin_page', {
+      layout: 'admin_layout',
       title: 'Admin',
       results: results,
       error: req.flash('error'),
@@ -146,6 +147,7 @@ admin.prototype.feed = function (req, res) {
       };
       var title = doc.title || doc.topic;
       return res.render('feed', {
+        layout: 'admin_layout',
         title: 'Entries for ' + title,
         results: results
       });
@@ -273,6 +275,7 @@ admin.prototype.unsubscribed_feeds = function (req, res) {
       return next(err);
     };
     return res.render('unsubscribed_feed_list', {
+      layout: 'admin_layout',
       title: 'Unsubscribed Feeds',
       feeds: results.docs,
       unsubscribedCount: results.count,
@@ -304,6 +307,7 @@ admin.prototype.subscribed_feeds = function (req, res) {
       return next(err);
     };
     return res.render('subscribed_feed_list', {
+      layout: 'admin_layout',
       title: 'Subscribed Feeds',
       feeds: results.docs,
       subscribedCount: results.count,
@@ -335,6 +339,7 @@ admin.prototype.pending_feeds = function (req, res) {
       return res.redirect('/admin');
     };
     return res.render('pending_feed_list', {
+      layout: 'admin_layout',
       title: 'Feeds pending subscription/unsubscription',
       feeds: results.docs,
       count: results.count,
@@ -424,6 +429,7 @@ admin.prototype.authorEntries = function (req, res) {
         return res.redirect('/admin');
       };
       return res.render('authorEntries', {
+        layout: 'admin_layout',
         title: 'Entries for ' + author.displayName,
         author: author,
         results: results,
@@ -457,6 +463,7 @@ admin.prototype.users = function (req, res) {
       return res.redirect('/admin');
     };
     return res.render('users', {
+      layout: 'admin_layout',
       title: 'Users',
       results: results,
       error: req.flash('error'),
