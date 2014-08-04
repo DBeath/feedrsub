@@ -1,4 +1,3 @@
-var db = require('../models/db.js');
 var config = require('../config');
 var StatusError = require('../lib/errors.js').StatusError;
 var RSS = require('rss');
@@ -17,7 +16,7 @@ module.exports.AuthorsController = function () {
 function Authors () {};
 
 Authors.prototype.list = function (req, res, next) {
-  Author.find({}, function (err, result) {
+  Author.find({}).lean().exec(function (err, result) {
     if (err) return next(err);
     return res.send(200, result);
   });
@@ -37,7 +36,7 @@ Authors.prototype.authorEntries = function (req, res, next) {
     };
   };
 
-  Author.findOne({ displayName: req.param('author') }, function (err, author) {
+  Author.findOne({ displayName: req.param('author') }).lean().exec(function (err, author) {
     if (err) return next(err);
     // db.entries.listByAuthor(author._id, 10, function (err, entries) {
     //   if (err) return next(err);
@@ -47,6 +46,7 @@ Authors.prototype.authorEntries = function (req, res, next) {
       .find({ 'author._id': author._id })
       .limit(10)
       .sort('-published')
+      .lean()
       .exec(function (err, entries) {
         if (err) return next(err);
         return res.send(200, entries);

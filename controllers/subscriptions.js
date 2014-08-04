@@ -1,4 +1,3 @@
-var db = require('../models/db.js');
 var config = require('../config');
 var pubsub = require('./pubsub.js').pubsub;
 var validator = require('validator');

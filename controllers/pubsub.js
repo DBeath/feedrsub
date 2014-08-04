@@ -1,5 +1,4 @@
 var pubsubController = require('./pubsubController.js');
-var db = require('../models/db.js');
 var moment = require('moment');
 var config = require('../config');
 var async = require('async');

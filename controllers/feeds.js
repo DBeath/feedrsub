@@ -33,7 +33,7 @@ Feeds.prototype.getFeed = function (req, res, next) {
     return next(new StatusError(400, 'Id is not valid'));
   };
 
-  Feed.findById(req.params.id, function (err, doc) {
+  Feed.findById(req.params.id).lean().exec(function (err, doc) {
     if (err) return next(err);
     console.log(doc);
     return res.send(200, doc);
