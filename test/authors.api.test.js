@@ -6,6 +6,8 @@ var db = require('../models/db.js');
 var async = require('async');
 
 var Author = require('../models/author');
+var Entry = require('../models/entry');
+var User = require('../models/user');
 
 var authors = [
   new Author({
@@ -62,15 +64,25 @@ describe('authors', function () {
   });
 
   after(function (done) {
-    db.entries.collection.remove({}, function (err) {
-      if (err) throw err;
-      Author.collection.remove({}, function (err) {
-        if (err) throw err;
-        User.remove({email: testEmail}, function (err) {
-          server.close(function () {
-            return done();
-          });
-        }); 
+    async.parallel([
+      function (callback) {
+        Entry.remove({}, function (err) {
+          return callback(null);
+        });
+      },
+      function (callback) {
+        Author.remove({}, function (err) {
+          return callback(null);
+        });
+      },
+      function (callback) {
+        User.remove({ email: testEmail }, function (err) {
+          return callback(null);
+        });
+      }
+    ], function (err, result) {
+      server.close(function () {
+        return done();
       });
     });
   });
