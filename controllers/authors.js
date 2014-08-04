@@ -39,10 +39,18 @@ Authors.prototype.authorEntries = function (req, res, next) {
 
   Author.findOne({ displayName: req.param('author') }, function (err, author) {
     if (err) return next(err);
-    db.entries.listByAuthor(author._id, 10, function (err, entries) {
-      if (err) return next(err);
-      return res.send(200, entries);
-    });
+    // db.entries.listByAuthor(author._id, 10, function (err, entries) {
+    //   if (err) return next(err);
+    //   return res.send(200, entries);
+    // });
+    Entry
+      .find({ 'author._id': author._id })
+      .limit(10)
+      .sort('-published')
+      .exec(function (err, entries) {
+        if (err) return next(err);
+        return res.send(200, entries);
+      });
   });
 };
 
@@ -106,7 +114,7 @@ Authors.prototype.rss = function (req, res, next) {
                 title: entry.title,
                 description: content,
                 date: moment.unix(entry.published),
-                author: entry.actor.displayName,
+                author: entry.author.displayName,
                 url: entry.permalinkUrl,
                 guid: entry._id.toHexString()
               });

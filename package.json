@@ -38,10 +38,11 @@
     "passport-local": "*",
     "morgan": "*",
     "connect-roles": "*",
-    "mongoose": "*"
+    "mongoose": "*",
   },
   "devDependencies": {
     "mocha": "*",
-    "chai": "*"
+    "chai": "*",
+    "nock": "*"
   }
 }

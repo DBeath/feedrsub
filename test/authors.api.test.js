@@ -18,48 +18,105 @@ var authors = [
   })
 ];
 
-var User = require('../models/user');
+var author1 = new Author({
+  displayName: 'John Doe'
+});
+
+var author2 = new Author({
+  displayName: 'Jane Doe'
+});
+
+var entry1 = new Entry({
+  title: 'TestTitle',
+  author: {
+    displayName: author1.displayName,
+    _id: author1._id
+  }
+});
+
+var entry2 = new Entry({
+  title: 'TestTitle 2',
+  author: {
+    displayName: author2.displayName,
+    _id: author2._id
+  }
+});
 
 var testEmail = 'admin@test.com';
 var testPassword = 'password';
 var testRole = 'admin';
 
+var testUser = new User({
+  email: testEmail,
+  password: testPassword,
+  role: testRole
+});
+
 describe('authors', function () {
   before(function (done) {
     server.start(function () {
-      Author.collection.remove({}, function (err) {
-        if (err) throw err;
-        async.each(authors, function (author, callback) {
-          author.save(function (err) {
-            if (err) return callback(err);
-            Author.findOne({displayName: author.displayName}, function (err, result) {
-              if (err) return callback(err);
-              db.entries.collection.insert({
-                title: 'TestTitle',
-                actor: {
-                  displayName: result.displayName,
-                  id: result._id 
-                }
-              }, function (err) {
-                if (err) return callback(err);
-                return callback();
-              });
-            });
+      // Author.collection.remove({}, function (err) {
+      //   if (err) throw err;
+      //   async.each(authors, function (author, callback) {
+      //     author.save(function (err) {
+      //       if (err) return callback(err);
+      //       Author.findOne({displayName: author.displayName}, function (err, result) {
+      //         if (err) return callback(err);
+      //         db.entries.collection.insert({
+      //           title: 'TestTitle',
+      //           actor: {
+      //             displayName: result.displayName,
+      //             id: result._id 
+      //           }
+      //         }, function (err) {
+      //           if (err) return callback(err);
+      //           return callback();
+      //         });
+      //       });
+      //     });
+      //   }, function (err) {
+      //     if (err) throw err;
+
+      //     var testUser = new User();
+      //     testUser.email = testEmail;
+      //     testUser.password = testPassword;
+      //     testUser.role = testRole;
+
+      //     testUser.save(function (err) {
+      //       if (err) throw err;
+      //       return done();
+      //     });
+      //   });
+      // }); 
+      async.parallel([
+        function (callback) {
+          author1.save(function (err) {
+            return callback(null);
           });
-        }, function (err) {
-          if (err) throw err;
-
-          var testUser = new User();
-          testUser.email = testEmail;
-          testUser.password = testPassword;
-          testUser.role = testRole;
-
+        },
+        function (callback) {
+          author2.save(function (err) {
+            return callback(null);
+          });
+        },
+        function (callback) {
+          entry1.save(function (err) {
+            return callback(null);
+          });
+        },
+        function (callback) {
+          entry2.save(function (err) {
+            return callback(null);
+          });
+        },
+        function (callback) {
           testUser.save(function (err) {
-            if (err) throw err;
-            return done();
+            return callback(null);
           });
-        });
-      }); 
+        }
+      ], function (err, result) {
+        return done();
+      });
     });
   });
 
@@ -122,7 +179,7 @@ describe('authors', function () {
       console.log(result);
       expect(result.length).to.equal(1);
       expect(result[0].title).to.equal('TestTitle');
-      expect(result[0].actor.displayName).to.equal('John Doe');
+      expect(result[0].author.displayName).to.equal('John Doe');
       return done();
     });
   });

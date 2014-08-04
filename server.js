@@ -1,5 +1,5 @@
 var express = require('express');
-var db = require('./models/db.js');
+//var db = require('./models/db.js');
 
 var hbs = require('hbs');
 var moment = require('moment');
@@ -159,37 +159,58 @@ app.use(function (req, res, next) {
 var start = function (done) {
   console.log('Starting feedrsub...');
   console.log('Connecting to database...');
-  mongoose.connect(config.express.connstring);
-  db.init(function (err, result) {
+  mongoose.connect(config.express.connstring, function (err) {
     if (err) {
       console.error(err);
       process.exit(1);
     };
-    console.log(result);
     console.log('Connected to database. Starting server...');
     server = app.listen(config.express.port);
     console.log('Server listening on port %s', config.express.port);
     return done();
   });
+  // db.init(function (err, result) {
+  //   if (err) {
+  //     console.error(err);
+  //     process.exit(1);
+  //   };
+  //   console.log(result);
+  //   console.log('Connected to database. Starting server...');
+  //   server = app.listen(config.express.port);
+  //   console.log('Server listening on port %s', config.express.port);
+  //   return done();
+  // });
 };
 
 // Closes the server
 var close = function (done) {
   console.log('Closing the database connection...');
-  mongoose.connection.close();
-  db.close(function (err) {
-    if (err) console.log(err);
+  mongoose.connection.close(function (err) {
+    if (err) console.error(err);
     console.log('Stopping the server...');
     server.close(function () {
       console.log('Server has shutdown.');
-      console.log('Server was running for',Math.round(process.uptime()),'seconds');
+      console.log('Server was running for', Math.round(process.uptime()),'seconds');
       return done();
     });
     setTimeout(function () {
-      console.log('Server took too long to shutdown, forcing shutdown');
+      console.log('Server took too long to shutdown. Forcing shutdown.');
       return done();
-    }, 2000);
+    }, 5000);
   });
+  // db.close(function (err) {
+  //   if (err) console.log(err);
+  //   console.log('Stopping the server...');
+  //   server.close(function () {
+  //     console.log('Server has shutdown.');
+  //     console.log('Server was running for',Math.round(process.uptime()),'seconds');
+  //     return done();
+  //   });
+  //   setTimeout(function () {
+  //     console.log('Server took too long to shutdown, forcing shutdown');
+  //     return done();
+  //   }, 2000);
+  // });
 };
 
 // Gracefully closes the server on SIGTERM event

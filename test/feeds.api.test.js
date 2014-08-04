@@ -6,10 +6,13 @@ var async = require('async');
 var db = require('../models/db.js');
 
 var User = require('../models/user');
+var Feed = require('../models/feed');
 
 var testEmail = 'admin@test.com';
 var testPassword = 'password';
 var testRole = 'admin';
+
+var topic = 'http://testfeedapi.com';
 
 describe('feeds', function () {
   before(function (done) {
@@ -27,10 +30,12 @@ describe('feeds', function () {
   });
 
   after(function (done) {
-    User.remove({email: testEmail}, function (err) {
-      if (err) throw err;
-      server.close(function () {
-        return done();
+    Feed.remove({}, function (err) {
+      User.remove({email: testEmail}, function (err) {
+        if (err) throw err;
+        server.close(function () {
+          return done();
+        });
       });
     });
   });
@@ -57,30 +62,19 @@ describe('feeds', function () {
         pass: testPassword
       }
     };
-    async.series({
-      addFeed: function (callback) {
-        db.feeds.subscribe('http://testfeedapi.com', function (err, result) {
-          if (err) callback(err);
-          callback(null, result);
-        });
-      },
-      findFeed: function (callback) {
-        db.feeds.findOneByTopic('http://testfeedapi.com', function (err, doc) {
-          if (err) callback(err);
-          callback(null, doc);
-        });
-      }
-    }, function (err, results) {
-      var doc = results.findFeed;
-      postParams.url = 'http://localhost:4000/api/v1/feed/'+doc._id;
+
+    var feed = new Feed({
+      topic: topic,
+      status: Feed.statusOptions.SUBSCRIBED
+    }).save(function (err, feed) {
+      postParams.url = 'http://localhost:4000/api/v1/feed/'+feed._id;
 
       request.get(postParams, function (err, response, body) {
         expect(response.statusCode).to.equal(200);
         var feed = JSON.parse(body);
-        expect(feed.topic).to.equal('http://testfeedapi.com');
-        expect(feed.status).to.equal('subscribed');
-        expect(feed.secret).to.equal(null);
-        done();
+        expect(feed.topic).to.equal(topic);
+        expect(feed.status).to.equal(Feed.statusOptions.SUBSCRIBED);
+        return done();
       });
     });
   });
