@@ -17,6 +17,7 @@ var Entry = require('../models/entry');
 
 var thisNow = new Date();
 var topic = 'http://test.com';
+var subTopic = 'http://subtest.com';
 var topicTitle = 'Test Feed';
 var itemTitle = 'This is a test';
 var itemStatus = 'subscribed';
@@ -245,18 +246,45 @@ describe('pubsub', function () {
                 .post('*', '*')
                 .reply(202);
 
-    pubsub.subscribe('http://subtest.com', config.pubsub.hub, function (err, result) {
+    pubsub.subscribe(subTopic, config.pubsub.hub, function (err, result) {
       if(!hub.isDone()) {
         console.error('pending mocks: %j', hub.pendingMocks());
       }
       if (err) console.error(err);
       expect(err, 'error').to.equal(null);
       expect(result, 'result').to.equal('Subscribed');
-      Feed.findOne({ topic: 'http://subtest.com' }, function (err, feed) {
+      Feed.findOne({ topic: subTopic }, function (err, feed) {
         expect(err, 'feed error').to.equal(null);
         expect(feed.status, 'feed status').to.equal(Feed.statusOptions.SUBSCRIBED);
         expect(feed.hub, 'feed hub').to.equal(config.pubsub.hub);
         expect(feed.subtime, 'subtime').to.exist;
+        expect(feed.topic, 'feed topic').to.equal(subTopic);
+        return done();
+      });
+    });
+  });
+
+  it('should unsubscribe from a feed', function (done) {
+    var hub = nock('http://localhost/')
+                .filteringPath(function (path) {
+                  return '*';
+                })
+                .filteringRequestBody(function (path) {
+                  return '*';
+                })
+                .post('*', '*')
+                .reply(202);
+
+    pubsub.unsubscribe(subTopic, function (err, result) {
+      if (err) console.error(err);
+      expect(err, 'error').to.equal(null);
+      expect(result, 'result').to.equal('Unsubscribed');
+      Feed.findOne({ topic: subTopic }, function (err, feed) {
+        expect(err, 'feed error').to.equal(null);
+        expect(feed.unsubtime).to.exist;
+        expect(feed.topic, 'feed topic').to.equal(subTopic);
+        expect(feed.hub, 'feed hub').to.equal(config.pubsub.hub);
+        expect(feed.status, 'feed status').to.equal(Feed.statusOptions.UNSUBSCRIBED);
         return done();
       });
     });

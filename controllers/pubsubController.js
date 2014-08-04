@@ -237,10 +237,6 @@ Pubsub.prototype.notification = function (req, res) {
  * @param callback {Function} Callback containing error and result
  */
 Pubsub.prototype.subscribe = function (topic, hub, callback) {
-  // this.sendSubscription('subscribe', topic, hub, function (err, result) {
-  //   if (err) return callback(err);
-  //   return callback(null, result);
-  // });
   var thisPubsub = this;
 
   Feed.findOne({ topic: topic }, function (err, feed) {
@@ -273,10 +269,7 @@ Pubsub.prototype.subscribe = function (topic, hub, callback) {
  * @param callback {Function} Callback containing error and result
  */
 Pubsub.prototype.unsubscribe = function (topic, callback) {
-  // this.sendSubscription('unsubscribe', topic, hub, function (err, result) {
-  //   if (err) return callback(err);
-  //   return callback(null, result);
-  // });
+  var thisPubsub = this;
 
   Feed.findOne({ topic: topic }, function (err, feed) {
     if (err) return callback(err);
@@ -290,7 +283,7 @@ Pubsub.prototype.unsubscribe = function (topic, callback) {
     feed.status = statusOptions.UNSUBSCRIBED;
     feed.save(function (err) {
       if (err) return callback(err);
-      this.sendSubscription('unsubscribe', feed.topic, feed.hub, function (err, result) {
+      thisPubsub.sendSubscription('unsubscribe', feed.topic, feed.hub, function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
