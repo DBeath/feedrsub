@@ -3,7 +3,9 @@ var request = require('request');
 var crypto = require('crypto');
 var async = require('async');
 var moment = require('moment');
+var nock = require('nock');
 var ObjectID = require('mongodb').ObjectID;
+var config = require('../config');
 
 var pubsub = require('../controllers/pubsub.js').pubsub;
 var server = require('../server.js');
@@ -46,11 +48,47 @@ var response_body = JSON.stringify(
   }
 );
 
-//console.log(response_body);
 var encrypted_secret = crypto.createHmac("sha1", pubsub.secret).update(topic).digest("hex");
 var hub_encryption = crypto.createHmac('sha1', encrypted_secret).update(response_body).digest('hex');
 
 describe('pubsub', function () {
+  before(function (done) {
+    server.start(function () {
+      var newFeed = new Feed({
+        topic: topic,
+        status: Feed.statusOptions.SUBSCRIBED,
+        subtime: Date.now(),
+        secret: encrypted_secret
+      }).save(function (err) {
+        return done();
+      });
+    });
+  });
+
+  after(function (done) {
+    async.parallel([
+      function (callback) {
+        Feed.remove({}, function (err) {
+          return callback(null);
+        });
+      },
+      function (callback) {
+        Entry.remove({}, function (err) {
+          return callback(null);
+        });
+      },
+      function (callback) {
+        Author.remove({}, function (err) {
+          return callback(null);
+        });
+      }
+    ], function (err, results) {
+      server.close(function () {
+        return done();
+      });
+    });
+  });
+
   it('should exist', function () {
     expect(pubsub).to.exist;
   });
@@ -58,48 +96,6 @@ describe('pubsub', function () {
   it('should have correct options', function () {
     expect(pubsub.secret).to.equal('supersecret');
     expect(pubsub.format).to.equal('json');
-  });
-});
-
-describe('pubsub notification', function () {
-  before(function (done) {
-    server.start(function () {
-      async.series({
-        removeFeed: function (callback) {
-          mongo.feeds.collection.remove({topic: topic}, function (err, result) {
-            if (err) return callback(err);
-            return callback(null, result);
-          });
-        },
-        feed: function (callback) {
-          mongo.feeds.subscribe(topic, encrypted_secret, function (err, result) {
-            if (err) return callback(err);
-            return callback(null, result);
-          });
-        },
-        entry: function (callback) {
-          mongo.entries.collection.remove({status: 'Test'}, function (err, result) {
-            if (err) return callback(err);
-            return callback(null, result);
-          });
-        },
-        authors: function (callback) {
-          mongo.authors.collection.remove({}, function (err, result) {
-            if (err) return callback(err);
-            return callback(null, result);
-          });
-        }
-      }, function (err, results) {
-        if (err) throw err;
-        done();
-      });
-    });
-  });
-
-  after(function (done) {
-    server.close(function () {
-      done();
-    });
   });
 
   it('should return 400 - no topic', function (done) {
@@ -236,5 +232,33 @@ describe('pubsub notification', function () {
         done();
       });
     }, 100);
+  });
+
+  it('should successfully subscribe to a feed', function (done) {
+    var hub = nock('http://localhost/')
+                .filteringPath(function (path) {
+                  return '*';
+                })
+                .filteringRequestBody(function (path) {
+                  return '*';
+                })
+                .post('*', '*')
+                .reply(202);
+
+    pubsub.subscribe('http://subtest.com', config.pubsub.hub, function (err, result) {
+      if(!hub.isDone()) {
+        console.error('pending mocks: %j', hub.pendingMocks());
+      }
+      if (err) console.error(err);
+      expect(err, 'error').to.equal(null);
+      expect(result, 'result').to.equal('Subscribed');
+      Feed.findOne({ topic: 'http://subtest.com' }, function (err, feed) {
+        expect(err, 'feed error').to.equal(null);
+        expect(feed.status, 'feed status').to.equal(Feed.statusOptions.SUBSCRIBED);
+        expect(feed.hub, 'feed hub').to.equal(config.pubsub.hub);
+        expect(feed.subtime, 'subtime').to.exist;
+        return done();
+      });
+    });
   });
 });

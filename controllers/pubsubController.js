@@ -241,6 +241,7 @@ Pubsub.prototype.subscribe = function (topic, hub, callback) {
   //   if (err) return callback(err);
   //   return callback(null, result);
   // });
+  var thisPubsub = this;
 
   Feed.findOne({ topic: topic }, function (err, feed) {
     if (err) return callback(err);
@@ -255,7 +256,7 @@ Pubsub.prototype.subscribe = function (topic, hub, callback) {
 
     feed.save(function (err) {
       if (err) return callback(err);
-      this.sendSubscription('subscribe', topic, hub, function (err, result) {
+      thisPubsub.sendSubscription('subscribe', topic, hub, function (err, result) {
         if (err) return callback(err);
         return callback(null, result);
       });
@@ -367,8 +368,9 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
         if (err.code === 'ETIMEDOUT') {
           return callback(new Error('Request to '+hub+' timed out'));
         };
+        console.log('Received error: ' + err);
         return callback(err);
-      }
+      };
 
       // Subscription was successful
       if (res.statusCode === 202 || res.statusCode === 204 || res.statusCode === 200) {
@@ -396,8 +398,9 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
           case 'subscribe':
             console.log('Feed: '+feed);
             feed.update({
-              $set: { status: statusOptions.SUBSCRIBED,
-                      subtime: Date.now
+              $set: { 
+                      status: statusOptions.SUBSCRIBED,
+                      subtime: Date.now()
                     }
             }, function (err) {
               if (err) return callback(err);
@@ -406,8 +409,10 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
             break;
           case 'unsubscribe':
             feed.update({
-              $set: { status: statusOptions.UNSUBSCRIBED,
-                      unsubtime: Date.now }
+              $set: { 
+                      status: statusOptions.UNSUBSCRIBED,
+                      unsubtime: Date.now() 
+                    }
             }, function (err) {
               if (err) return callback(err);
               return callback(null, 'Unsubscribed');
@@ -456,9 +461,15 @@ Pubsub.prototype.retrieveFeed = function (options, callback) {
   var form = {
     'hub.mode': 'retrieve',
     'hub.topic': topic,
-    'count': count,
-    'before': before,
-    'after': after
+    'count': count
+  };
+
+  if (before) {
+    form['before'] = before;
+  };
+
+  if (after) {
+    form['after'] = after;
   };
 
   if (this.format === 'json' || this.format === 'JSON') {
