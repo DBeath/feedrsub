@@ -1,4 +1,3 @@
-var db = require('../models/db.js');
 var config = require('../config');
 var pubsub = require('./pubsub.js').pubsub;
 var validator = require('validator');
@@ -39,14 +38,20 @@ Subscriptions.prototype.subscribe = function (req, res, next) {
     return next(new StatusError(400, 'Topic is not valid URL'));
   };
 
-  db.feeds.updateStatus(topic, 'pending', function (err, doc) {
+  // db.feeds.updateStatus(topic, 'pending', function (err, doc) {
+  //   if (err) return next(err);
+  //   console.log('Subscribing to %s', doc.topic);
+  //   pubsub.subscribe(doc.topic, config.pubsub.hub, function (err, result) {
+  //     if (err) return next(err);
+  //     console.log('%s to %s at %s', result, doc.topic, moment().format());
+  //     return res.send(200, doc.topic);
+  //   });
+  // });
+
+  pubsub.subscribe(topic, config.pubsub.hub, function (err, result) {
     if (err) return next(err);
-    console.log('Subscribing to %s', doc.topic);
-    pubsub.subscribe(doc.topic, config.pubsub.hub, function (err, result) {
-      if (err) return next(err);
-      console.log('%s to %s at %s', result, doc.topic, moment().format());
-      return res.send(200, doc.topic);
-    });
+    console.log('%s to %s at %s', result, doc.topic, moment().format());
+    return res.send(200, doc.topic);
   });
 };
 
@@ -67,14 +72,20 @@ Subscriptions.prototype.unsubscribe = function (req, res, next) {
     return next(new StatusError(400, 'Topic is not valid URL'));
   };
 
-  db.feeds.updateStatus(topic, 'pending', function (err, doc) {
+  // db.feeds.updateStatus(topic, 'pending', function (err, doc) {
+  //   if (err) return next(err);
+  //   console.log('Unsubscribing from %s', doc.topic);
+  //   pubsub.unsubscribe(doc.topic, config.pubsub.hub, function (err, result) {
+  //     if (err) return next(err);
+  //     console.log('%s from %s at %s', result, doc.topic, moment().format());
+  //     return res.send(200, doc.topic);
+  //   });
+  // });
+
+  pubsub.unsubscribe(doc.topic, function (err, result) {
     if (err) return next(err);
-    console.log('Unsubscribing from %s', doc.topic);
-    pubsub.unsubscribe(doc.topic, config.pubsub.hub, function (err, result) {
-      if (err) return next(err);
-      console.log('%s from %s at %s', result, doc.topic, moment().format());
-      return res.send(200, doc.topic);
-    });
+    console.log('%s from %s at %s', result, doc.topic, moment().format());
+    return res.send(200, doc.topic);
   });
 };
 

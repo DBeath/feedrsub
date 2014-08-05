@@ -1,5 +1,4 @@
 var config = require('../config');
-var db = require('../models/db.js');
 var request = require('request');
 var crypto = require('crypto');
 var util = require('util');
@@ -7,6 +6,9 @@ var events = require('events');
 var moment = require('moment');
 var http = require('http');
 var StatusError = require('../lib/errors.js').StatusError;
+
+var Feed = require('../models/feed');
+var statusOptions = Feed.statusOptions;
 
 /**
  * Provides the base Pubsubhubbub controller
@@ -78,26 +80,27 @@ Pubsub.prototype.verification = function (req, res) {
     // If sent denied then unsubscribe from topic.
     case 'denied':
       res.send(200);
-      db.feeds.unsubscribe(topic, function (err, result) {
-        if (err) return console.log(err);
-        return console.log('Unsubscribed from %s', topic);
-      });
+        Feed.update({ topic: topic }, {
+          $set: { status: statusOptions.UNSUBSCRIBED,
+                  unsubtime: Date.now }
+        }, function (err) {
+          if (err) return console.log(err);
+          return console.log('Unsubscribed from %s', topic);
+        });
       break;
     // If subscribing or unsubscribing check that topic is pending, then echo challenge.
     case 'subscribe':
     case 'unsubscribe':
-      db.feeds.verifyRequest(topic, function (err, isPending) {
-        if (err) {
-          console.error(err);
-          return res.send(403);
-        };
-        if (isPending) {
+      Feed.findOne({ topic: topic }, function (err, feed) {
+        if (err) return res.send(403);
+        if (!feed) return res.send(403);
+
+        if (feed.isPending) {
           if (lease_seconds && mode === 'subscribe') {
-            db.feeds.updateLeaseSeconds(topic, lease_seconds, function (err, result) {
-              if (err) {
-                return console.error(err);
-              };
-              console.log('Updated lease time for %s', topic);
+            feed.update({
+              $set: { leaseSeconds: lease_seconds }
+            }, function (err) {
+              if (err) return console.error(err);
             });
           };
           return res.send(200, challenge);
@@ -150,7 +153,7 @@ Pubsub.prototype.notification = function (req, res) {
   };
 
   // Topic must be in the database, else discard notification. 
-  db.feeds.findOneByTopic(topic, (function (err, doc) {
+  Feed.findOne({ topic: topic }, (function (err, doc) {
     if (err) {
       console.log(err);
       return res.send(403);
@@ -234,9 +237,26 @@ Pubsub.prototype.notification = function (req, res) {
  * @param callback {Function} Callback containing error and result
  */
 Pubsub.prototype.subscribe = function (topic, hub, callback) {
-  this.sendSubscription('subscribe', topic, hub, function (err, result) {
+  var thisPubsub = this;
+
+  Feed.findOne({ topic: topic }, function (err, feed) {
     if (err) return callback(err);
-    return callback(null, result);
+    if (!feed) {
+      var feed = new Feed({
+        topic: topic,
+        hub: hub
+      });
+    } else {
+      feed.status = statusOptions.PENDING;
+    };
+
+    feed.save(function (err) {
+      if (err) return callback(err);
+      thisPubsub.sendSubscription('subscribe', topic, hub, function (err, result) {
+        if (err) return callback(err);
+        return callback(null, result);
+      });
+    });
   });
 };
 
@@ -248,10 +268,26 @@ Pubsub.prototype.subscribe = function (topic, hub, callback) {
  * @param hub {String} The URL of the hub to send the request to
  * @param callback {Function} Callback containing error and result
  */
-Pubsub.prototype.unsubscribe = function (topic, hub, callback) {
-  this.sendSubscription('unsubscribe', topic, hub, function (err, result) {
+Pubsub.prototype.unsubscribe = function (topic, callback) {
+  var thisPubsub = this;
+
+  Feed.findOne({ topic: topic }, function (err, feed) {
     if (err) return callback(err);
-    return callback(null, result);
+    if (!feed) {
+      return callback(new Error('Feed not in database.'));
+    };
+    if (feed.status != statusOptions.SUBSCRIBED) {
+      return callback(new Error('Not subscribed to feed.'));
+    };
+
+    feed.status = statusOptions.UNSUBSCRIBED;
+    feed.save(function (err) {
+      if (err) return callback(err);
+      thisPubsub.sendSubscription('unsubscribe', feed.topic, feed.hub, function (err, result) {
+        if (err) return callback(err);
+        return callback(null, result);
+      });
+    });
   });
 };
 
@@ -292,21 +328,21 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
   };
 
   // Only attempt subscription/unsubscription if feed in database 
-  db.feeds.findOneByTopic(topic, (function (err, feed) {
+  Feed.findOne({ topic: topic }, (function (err, feed) {
     if (err) return callback(err);
 
     // If feed already has a secret then use that, else create one if config has secret.
     if (feed.secret) {
       form['hub.secret'] = feed.secret;
-    } else {
-      if (this.secret && mode === 'subscribe') {
-        try {
-          feedSecret = crypto.createHmac("sha1", this.secret).update(topic).digest("hex");
-          form['hub.secret'] = feedSecret;
-        } catch (err) {
-          return callback(err);
-        };
-      };
+    // } else {
+    //   if (this.secret && mode === 'subscribe') {
+    //     try {
+    //       feedSecret = crypto.createHmac("sha1", this.secret).update(topic).digest("hex");
+    //       form['hub.secret'] = feedSecret;
+    //     } catch (err) {
+    //       return callback(err);
+    //     };
+    //   };
     };
 
     var postParams = {
@@ -325,8 +361,9 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
         if (err.code === 'ETIMEDOUT') {
           return callback(new Error('Request to '+hub+' timed out'));
         };
+        console.log('Received error: ' + err);
         return callback(err);
-      }
+      };
 
       // Subscription was successful
       if (res.statusCode === 202 || res.statusCode === 204 || res.statusCode === 200) {
@@ -352,13 +389,24 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
         // Set feed to subscribed/unsubscribed
         switch ( mode ) {
           case 'subscribe':
-            db.feeds.subscribe(topic, feedSecret, function (err, result) {
+            console.log('Feed: '+feed);
+            feed.update({
+              $set: { 
+                      status: statusOptions.SUBSCRIBED,
+                      subtime: Date.now()
+                    }
+            }, function (err) {
               if (err) return callback(err);
               return callback(null, 'Subscribed');
             });
             break;
           case 'unsubscribe':
-            db.feeds.unsubscribe(topic, function (err, result) {
+            feed.update({
+              $set: { 
+                      status: statusOptions.UNSUBSCRIBED,
+                      unsubtime: Date.now() 
+                    }
+            }, function (err) {
               if (err) return callback(err);
               return callback(null, 'Unsubscribed');
             });
@@ -406,9 +454,15 @@ Pubsub.prototype.retrieveFeed = function (options, callback) {
   var form = {
     'hub.mode': 'retrieve',
     'hub.topic': topic,
-    'count': count,
-    'before': before,
-    'after': after
+    'count': count
+  };
+
+  if (before) {
+    form['before'] = before;
+  };
+
+  if (after) {
+    form['after'] = after;
   };
 
   if (this.format === 'json' || this.format === 'JSON') {
@@ -416,9 +470,13 @@ Pubsub.prototype.retrieveFeed = function (options, callback) {
   };
 
   // Only attempt retrieval if feed in database
-  db.feeds.findOneByTopic(topic, (function (err, feed) {
+  Feed.findOne({ topic: topic }, (function (err, feed) {
     if (err) {
       return callback(err);
+    };
+
+    if (!feed) {
+      return callback(new Error('Feed is not in database'));
     };
 
     if (feed.secret) {

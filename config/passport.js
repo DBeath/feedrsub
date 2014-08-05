@@ -5,13 +5,17 @@ var config = require('./index.js');
 var db = require('../models/db.js');
 var validator = require('validator');
 
+var User = require('../models/user');
+
+var loginFailureMessage = 'Email or Password is incorrect.';
+
 passport.serializeUser(function (user, done) {
-  return done(null, user._id);
+  return done(null, user.id);
 });
 
 passport.deserializeUser(function (id, done) {
-  db.users.findOneById(id, function (err, user) {
-    if (err) console.log(err);
+  User.findById(id, function (err, user) {
+    if (err) console.error(err);
     return done(err, user);
   });
 });
@@ -27,15 +31,20 @@ function (req, email, password, done) {
     return done(null, false, req.flash('signupMessage', 'Not a valid email address.'));
   };
 
-  db.users.findOne(email, function (err, user) {
+  User.findOne({ email: email }, function (err, user) {
     if (err) return done(err);
     if (user) {
       return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
+    } else {
+      var newUser = new User();
+      newUser.email = email;
+      newUser.password = password;
+
+      newUser.save(function (err) {
+        if (err) throw err;
+        return done(null, newUser);
+      });
     };
-    db.users.create(email, password, 'user', function (err, user) {
-      if (err) return done(err);
-      return done(null, user);
-    });
   });
 }));
 
@@ -47,33 +56,76 @@ passport.use('local-login', new LocalStrategy({
 },
 function (req, email, password, done) {
   process.nextTick(function () {
-    db.users.findOne(email, function (err, user) {
-      if (err) return done(err);
-      if (!user) {
-        console.log('No user found');
-        return done(null, false, req.flash('loginMessage', 'No user found.'));
-      };
-      if (!db.users.validPassword(password, user.password)) {
-        console.log('Wrong password');
-        return done(null, false, req.flash('loginMessage', 'Wrong password.'));
-      };
-      console.log('Valid login');
-      //console.log(user);
+    // User.findOne({email: email }, function (err, user) {
+    //   if (err) return done(err);
+    //   if (!user) {
+    //     console.log('No user found');
+    //     return done(null, false, req.flash('loginMessage', 'No user found.'));
+    //   };
+    //   user.comparePassword(password, function (err, isMatch) {
+    //     if (err) return done(err);
+    //     if (!isMatch) {
+    //       console.log('Wrong password');
+    //       return done(null, false, req.flash('loginMessage', 'Wrong password.'));
+    //     };
+    //     return done(null, user);
+    //   });
+    //   // if (!user.validPassword(password)) {
+    //   //   console.log('Wrong password');
+    //   //   return done(null, false, req.flash('loginMessage', 'Wrong password.'));
+    //   // };
       
-      return done(null, user);
-    }); 
+    //   // return done(null, user);
+    // }); 
+
+    User.getAuthenticated(email, password, function (err, user, reason) {
+      if (err) return done(err);
+      if (user) {
+        console.log('Login success for ' + email);
+        return done(null, user);
+      };
+      var reasons = User.failedLogin;
+      switch (reason) {
+        case reasons.NOT_FOUND:
+        case reasons.PASSWORD_INCORRECT:
+          console.log('Login failed for ' + email);
+          return done(null, false, req.flash('loginMessage', loginFailureMessage));
+          break;
+        case reasons.MAX_ATTEMPTS:
+          console.log('Account locked for ' + email);
+          return done(null, false, req.flash('loginMessage', 'Too many login attempts.'));
+          break;
+      };
+    });
   });
 }));
 
 passport.use('basic', new BasicStrategy(
   function (email, password, done) {
-    db.users.findOne(email, function (err, user) {
+    // User.findOne({ email: email }, function (err, user) {
+    //   if (err) return done(err);
+    //   if (!user) return done(null, false);
+    //   user.comparePassword(password, function (err, isMatch) {
+    //     if (err) return done(err);
+    //     if (!isMatch) {
+    //       return done(null, false);
+    //     } else {
+    //       return done(null, user);
+    //     };
+    //   });
+    //   // if (!user.validPassword(password)) {
+    //   //   return done(null, false);
+    //   // };
+    //   // return done(null, user);
+    // });
+
+    User.getAuthenticated(email, password, function (err, user, reason) {
       if (err) return done(err);
-      if (!user) return done(null, false);
-      if (!db.users.validPassword(password, user.password)) {
+      if (user) {
+        return done(null, user);
+      } else {
         return done(null, false);
       };
-      return done(null, user);
     });
   }
 ));

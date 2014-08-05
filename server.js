@@ -1,5 +1,5 @@
 var express = require('express');
-var db = require('./models/db.js');
+//var db = require('./models/db.js');
 
 var hbs = require('hbs');
 var moment = require('moment');
@@ -16,6 +16,8 @@ var basicAuth = require('basic-auth');
 var passport = require('./config/passport.js').passport;
 var roles = require('./config/roles.js').user;
 var morgan = require('morgan');
+
+var mongoose = require('mongoose');
 
 var app = module.exports = express();
 var server = null;
@@ -94,19 +96,25 @@ require('./lib/hbs_helpers.js')();
 
 // Routes
 app.post('/login', passport.authenticate('local-login', {
-  successRedirect: '/admin/subscribed',
+  successRedirect: '/admin',
   failureRedirect: '/login',
   failureFlash: true
 }));
 
 app.get('/login', function (req, res) {
-  res.render('login', { message: req.flash('message') });
+  res.render('login', { 
+    message: req.flash('message'),
+    layout: 'login_layout' 
+  });
 });
 
 // show the signup form
 app.get('/signup', function (req, res) {
   // render the page and pass in any flash data if it exists
-  res.render('signup', { message: req.flash('signupMessage') });
+  res.render('signup', { 
+    message: req.flash('signupMessage'),
+    layout: 'login_layout' 
+  });
 });
 
 // process the signup form
@@ -151,35 +159,58 @@ app.use(function (req, res, next) {
 var start = function (done) {
   console.log('Starting feedrsub...');
   console.log('Connecting to database...');
-  db.init(function (err, result) {
+  mongoose.connect(config.express.connstring, function (err) {
     if (err) {
       console.error(err);
       process.exit(1);
     };
-    console.log(result);
     console.log('Connected to database. Starting server...');
     server = app.listen(config.express.port);
     console.log('Server listening on port %s', config.express.port);
     return done();
   });
+  // db.init(function (err, result) {
+  //   if (err) {
+  //     console.error(err);
+  //     process.exit(1);
+  //   };
+  //   console.log(result);
+  //   console.log('Connected to database. Starting server...');
+  //   server = app.listen(config.express.port);
+  //   console.log('Server listening on port %s', config.express.port);
+  //   return done();
+  // });
 };
 
 // Closes the server
 var close = function (done) {
   console.log('Closing the database connection...');
-  db.close(function (err) {
-    if (err) console.log(err);
+  mongoose.connection.close(function (err) {
+    if (err) console.error(err);
     console.log('Stopping the server...');
     server.close(function () {
       console.log('Server has shutdown.');
-      console.log('Server was running for',Math.round(process.uptime()),'seconds');
+      console.log('Server was running for', Math.round(process.uptime()),'seconds');
       return done();
     });
     setTimeout(function () {
-      console.log('Server took too long to shutdown, forcing shutdown');
+      console.log('Server took too long to shutdown. Forcing shutdown.');
       return done();
-    }, 2000);
+    }, 5000);
   });
+  // db.close(function (err) {
+  //   if (err) console.log(err);
+  //   console.log('Stopping the server...');
+  //   server.close(function () {
+  //     console.log('Server has shutdown.');
+  //     console.log('Server was running for',Math.round(process.uptime()),'seconds');
+  //     return done();
+  //   });
+  //   setTimeout(function () {
+  //     console.log('Server took too long to shutdown, forcing shutdown');
+  //     return done();
+  //   }, 2000);
+  // });
 };
 
 // Gracefully closes the server on SIGTERM event

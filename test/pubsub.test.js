@@ -3,31 +3,36 @@ var request = require('request');
 var crypto = require('crypto');
 var async = require('async');
 var moment = require('moment');
+var nock = require('nock');
 var ObjectID = require('mongodb').ObjectID;
+var config = require('../config');
 
 var pubsub = require('../controllers/pubsub.js').pubsub;
 var server = require('../server.js');
 var mongo = require('../models/db.js');
 
-var thisNow = moment().unix();
+var Feed = require('../models/feed');
+var Author = require('../models/author');
+var Entry = require('../models/entry');
+
+var thisNow = new Date();
 var topic = 'http://test.com';
+var subTopic = 'http://subtest.com';
 var topicTitle = 'Test Feed';
 var itemTitle = 'This is a test';
-var itemStatus = 'Test';
+var itemStatus = 'subscribed';
 var item2Title = 'This is the second item';
 var authorname = 'Testy Authorson';
 var response_body = JSON.stringify(
   {
     "title": topicTitle,
     "status": {
-      "lastFetch": thisNow,
       "http": 200
     },
     "items": [
       {
         "title": itemTitle,
         "published": thisNow,
-        "status": itemStatus,
         "actor": {
           "displayName": authorname,
           "id": authorname
@@ -35,7 +40,7 @@ var response_body = JSON.stringify(
       },
       {
         "title": item2Title,
-        "status": itemStatus,
+        "published": thisNow,
         "actor": {
           "displayName": authorname,
         }
@@ -43,10 +48,48 @@ var response_body = JSON.stringify(
     ]
   }
 );
+
 var encrypted_secret = crypto.createHmac("sha1", pubsub.secret).update(topic).digest("hex");
 var hub_encryption = crypto.createHmac('sha1', encrypted_secret).update(response_body).digest('hex');
 
 describe('pubsub', function () {
+  before(function (done) {
+    server.start(function () {
+      var newFeed = new Feed({
+        topic: topic,
+        status: Feed.statusOptions.SUBSCRIBED,
+        subtime: Date.now(),
+        secret: encrypted_secret
+      }).save(function (err) {
+        return done();
+      });
+    });
+  });
+
+  after(function (done) {
+    async.parallel([
+      function (callback) {
+        Feed.remove({}, function (err) {
+          return callback(null);
+        });
+      },
+      function (callback) {
+        Entry.remove({}, function (err) {
+          return callback(null);
+        });
+      },
+      function (callback) {
+        Author.remove({}, function (err) {
+          return callback(null);
+        });
+      }
+    ], function (err, results) {
+      server.close(function () {
+        return done();
+      });
+    });
+  });
+
   it('should exist', function () {
     expect(pubsub).to.exist;
   });
@@ -54,48 +97,6 @@ describe('pubsub', function () {
   it('should have correct options', function () {
     expect(pubsub.secret).to.equal('supersecret');
     expect(pubsub.format).to.equal('json');
-  });
-});
-
-describe('pubsub notification', function () {
-  before(function (done) {
-    server.start(function () {
-      async.series({
-        removeFeed: function (callback) {
-          mongo.feeds.collection.remove({topic: topic}, function (err, result) {
-            if (err) return callback(err);
-            return callback(null, result);
-          });
-        },
-        feed: function (callback) {
-          mongo.feeds.subscribe(topic, encrypted_secret, function (err, result) {
-            if (err) return callback(err);
-            return callback(null, result);
-          });
-        },
-        entry: function (callback) {
-          mongo.entries.collection.remove({status: 'Test'}, function (err, result) {
-            if (err) return callback(err);
-            return callback(null, result);
-          });
-        },
-        authors: function (callback) {
-          mongo.authors.collection.remove({}, function (err, result) {
-            if (err) return callback(err);
-            return callback(null, result);
-          });
-        }
-      }, function (err, results) {
-        if (err) throw err;
-        done();
-      });
-    });
-  });
-
-  after(function (done) {
-    server.close(function () {
-      done();
-    });
   });
 
   it('should return 400 - no topic', function (done) {
@@ -184,17 +185,15 @@ describe('pubsub notification', function () {
       expect(eventFired, 'event fired').to.equal(true);
       async.series({
         feed: function (callback) {
-          mongo.feeds.findOneByTopic(topic, function (err, doc) {
+          Feed.findOne({ topic: topic }, function (err, doc) {
             if (err) return callback(err);
             expect(doc.topic, 'feed topic').to.equal(topic);
             expect(doc.title, 'feed title').to.equal(topicTitle);
-            expect(doc.lastFetch, 'feed lastFetch').to.equal(thisNow);
-            expect(doc.http, 'feed http').to.equal(200);
             callback(null);
           });
         },
         author: function (callback) {
-          mongo.authors.findOne(authorname, function (err, doc) {
+          Author.findOne({ displayName: authorname }, function (err, doc) {
             if (err) return callback(err);
             expect(doc.displayName, 'author DisplayName').to.equal(authorname);
             authorId = doc._id;
@@ -202,30 +201,28 @@ describe('pubsub notification', function () {
           });
         },
         entry1: function (callback) {
-          mongo.entries.collection.findOne({title: itemTitle}, function (err, doc) {
+          Entry.findOne({ title: itemTitle }, function (err, doc) {
             if (err) return callback(err);
             console.log(doc);
             expect(doc.topic, 'doc1 topic').to.equal(topic);
             expect(doc.title, 'doc1 title').to.equal(itemTitle);
-            expect(doc.published, 'doc1 published').to.equal(thisNow);
-            expect(doc.status, 'doc1 status').to.equal(itemStatus);
-            expect(doc.actor.displayName, 'doc1 author').to.equal(authorname);
-            expect(doc.actor.id.toHexString(), 'doc1 author id').to.equal(authorId.toHexString());
+            expect(doc.published.toString(), 'doc1 published').to.equal(thisNow.toString());
+            expect(doc.author.displayName, 'doc1 author').to.equal(authorname);
+            expect(doc.author._id.toHexString(), 'doc1 author id').to.equal(authorId.toHexString());
             callback(null);
           });
         },
         entry2: function (callback) {
-          mongo.entries.collection.findOne({title: item2Title}, function (err, doc) {
+          Entry.findOne({ title: item2Title }, function (err, doc) {
             if (err) return callback(err);
             expect(doc.topic, 'doc2 topic').to.equal(topic);
             expect(doc.title, 'doc2 title').to.equal(item2Title);
             expect(doc.published, 'doc2 published').to.exist;
-            expect(doc.status, 'doc2 status').to.equal(itemStatus);
             callback(null);
           });
         },
         authornumber: function (callback) {
-          mongo.authors.count(function (err, result) {
+          Author.count(function (err, result) {
             if (err) return callback(err);
             expect(result, 'number of authors').to.equal(1);
             callback(null);
@@ -235,6 +232,61 @@ describe('pubsub notification', function () {
         if (err) return done();
         done();
       });
-    }, 50);
+    }, 100);
+  });
+
+  it('should successfully subscribe to a feed', function (done) {
+    var hub = nock('http://localhost/')
+                .filteringPath(function (path) {
+                  return '*';
+                })
+                .filteringRequestBody(function (path) {
+                  return '*';
+                })
+                .post('*', '*')
+                .reply(202);
+
+    pubsub.subscribe(subTopic, config.pubsub.hub, function (err, result) {
+      if(!hub.isDone()) {
+        console.error('pending mocks: %j', hub.pendingMocks());
+      }
+      if (err) console.error(err);
+      expect(err, 'error').to.equal(null);
+      expect(result, 'result').to.equal('Subscribed');
+      Feed.findOne({ topic: subTopic }, function (err, feed) {
+        expect(err, 'feed error').to.equal(null);
+        expect(feed.status, 'feed status').to.equal(Feed.statusOptions.SUBSCRIBED);
+        expect(feed.hub, 'feed hub').to.equal(config.pubsub.hub);
+        expect(feed.subtime, 'subtime').to.exist;
+        expect(feed.topic, 'feed topic').to.equal(subTopic);
+        return done();
+      });
+    });
+  });
+
+  it('should unsubscribe from a feed', function (done) {
+    var hub = nock('http://localhost/')
+                .filteringPath(function (path) {
+                  return '*';
+                })
+                .filteringRequestBody(function (path) {
+                  return '*';
+                })
+                .post('*', '*')
+                .reply(202);
+
+    pubsub.unsubscribe(subTopic, function (err, result) {
+      if (err) console.error(err);
+      expect(err, 'error').to.equal(null);
+      expect(result, 'result').to.equal('Unsubscribed');
+      Feed.findOne({ topic: subTopic }, function (err, feed) {
+        expect(err, 'feed error').to.equal(null);
+        expect(feed.unsubtime).to.exist;
+        expect(feed.topic, 'feed topic').to.equal(subTopic);
+        expect(feed.hub, 'feed hub').to.equal(config.pubsub.hub);
+        expect(feed.status, 'feed status').to.equal(Feed.statusOptions.UNSUBSCRIBED);
+        return done();
+      });
+    });
   });
 });

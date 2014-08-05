@@ -1,0 +1,24 @@
+<h3>{{title}}</h3>
+<p>Users: {{results.userCount}}</p>
+<table class="table table-condensed table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Email</th>
+      <th>Role</th>
+      <th>Joined</th>
+      <th>Last Login</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each results.users}}
+    <tr>
+      <td>{{_id}}</td>
+      <td>{{email}}</td>
+      <td>{{role}}</td>
+      <td>{{joined}}</td>
+      <td>{{lastLogin}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
