@@ -3,7 +3,6 @@ var StatusError = require('../lib/errors.js').StatusError;
 var RSS = require('rss');
 var async = require('async');
 var validator = require('validator');
-var ObjectID = require('mongodb').ObjectID;
 var moment = require('moment');
 
 var Author = require('../models/author');

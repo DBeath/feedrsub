@@ -3,7 +3,6 @@ var request = require('request');
 var server = require('../server.js');
 var qs = require('querystring');
 var async = require('async');
-var db = require('../models/db.js');
 
 var User = require('../models/user');
 var Feed = require('../models/feed');

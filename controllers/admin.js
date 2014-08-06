@@ -3,7 +3,6 @@ var validator = require('validator');
 var async = require('async');
 var moment = require('moment');
 var pubsub = require('./pubsub.js').pubsub;
-var ObjectID = require('mongodb').ObjectID;
 
 var Feed = require('../models/feed');
 var Author = require('../models/author');

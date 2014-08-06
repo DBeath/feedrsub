@@ -4,12 +4,10 @@ var crypto = require('crypto');
 var async = require('async');
 var moment = require('moment');
 var nock = require('nock');
-var ObjectID = require('mongodb').ObjectID;
 var config = require('../config');
 
 var pubsub = require('../controllers/pubsub.js').pubsub;
 var server = require('../server.js');
-var mongo = require('../models/db.js');
 
 var Feed = require('../models/feed');
 var Author = require('../models/author');

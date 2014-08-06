@@ -2,7 +2,6 @@ var expect = require('chai').expect;
 var request = require('request');
 var server = require('../server.js');
 var qs = require('querystring');
-var db = require('../models/db.js');
 var config = require('../config');
 
 var User = require('../models/user');

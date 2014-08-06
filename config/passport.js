@@ -2,7 +2,6 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var BasicStrategy = require('passport-http').BasicStrategy;
 var config = require('./index.js');
-var db = require('../models/db.js');
 var validator = require('validator');
 
 var User = require('../models/user');
