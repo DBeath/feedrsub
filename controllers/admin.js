@@ -156,7 +156,7 @@ admin.prototype.feed = function (req, res) {
 
 // Deletes a feed.
 admin.prototype.deletefeed = function (req, res) {
-  db.feeds.delete(req.params.id, function (err, num) {
+  Feed.remove({ _id: req.params.id }, function (err, num) {
     if (err) console.error(err);
     console.log('Deleted %s', req.params.id);
     return res.redirect('/admin');
@@ -165,7 +165,10 @@ admin.prototype.deletefeed = function (req, res) {
 
 // Renders the feed subscription page.
 admin.prototype.newfeed = function (req, res) {
-  return res.render('subscribe', {title: 'Subscribe'});
+  return res.render('subscribe', {
+    title: 'Subscribe',
+    layout: 'admin_layout'
+  });
 };
 
 // Subscribes to a list of feeds.
@@ -185,14 +188,10 @@ admin.prototype.subscribe = function (req, res) {
     if ( !validator.isURL(sub) ) {
       return callback(new Error(sub + ' is not a valid URL'));
     } else {
-      db.feeds.updateStatus(sub, 'pending', function (err, doc) {
+      pubsub.subscribe(doc.topic, config.pubsub.hub, function (err, result) {
         if (err) return callback(err);
-        console.log('Subscribing to %s', doc.topic);
-        pubsub.subscribe(doc.topic, config.pubsub.hub, function (err, result) {
-          if (err) return callback(err);
-          console.log('%s to %s at %s', result, doc.topic, moment().format());
-          return callback(null);
-        });
+        console.log('%s to %s at %s', result, doc.topic, moment().format());
+        return callback(null);
       });
     };
   }, function (err, results) {
@@ -208,47 +207,33 @@ admin.prototype.subscribe = function (req, res) {
 
 // Sends a subscription request for an already existing feed.
 admin.prototype.resubscribe = function (req, res) {
-  db.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
+  console.log('Resubscribing to %s', doc.topic);
+  pubsub.subscribe(doc.topic, config.pubsub.hub, function (err, result) {
     if (err) {
-      console.error(err);
+      console.error(err.stack);
       req.flash('error', err.message);
-      return res.redirect('/admin/subscribed');
+      return res.redirect('/admin/pending');
     };
-    console.log('Resubscribing to %s', doc.topic);
-    pubsub.subscribe(doc.topic, config.pubsub.hub, function (err, result) {
-      if (err) {
-        console.error(err.stack);
-        req.flash('error', err.message);
-        return res.redirect('/admin/pending');
-      };
-      console.log('%s to %s at %s', result, doc.topic, moment().format());
-      var message = 'Resubscribed to ' + doc.topic;
-      req.flash('info', message);
-      return res.redirect('/admin/subscribed');
-    });
+    console.log('%s to %s at %s', result, doc.topic, moment().format());
+    var message = 'Resubscribed to ' + doc.topic;
+    req.flash('info', message);
+    return res.redirect('/admin/subscribed');
   });
 };
 
 // Sends an unsubscribe request for a feed.
 admin.prototype.unsubscribe = function (req, res) {
-  db.feeds.updateStatusById(req.params.id, 'pending', function (err, doc) {
+  console.log('Unsubscribing from %s', doc.topic);
+  pubsub.unsubscribe(doc.topic, config.pubsub.hub, function (err, result) {
     if (err) {
       console.error(err);
       req.flash('error', err.message);
-      return res.redirect('/admin/unsubscribed');
+      return res.redirect('/admin/pending');
     };
-    console.log('Unsubscribing from %s', doc.topic);
-    pubsub.unsubscribe(doc.topic, config.pubsub.hub, function (err, result) {
-      if (err) {
-        console.error(err);
-        req.flash('error', err.message);
-        return res.redirect('/admin/pending');
-      };
-      console.log('%s from %s at %s', result, doc.topic, moment().format());
-      var message = 'Unsubscribed from ' + doc.topic;
-      req.flash('info', message);
-      return res.redirect('/admin/unsubscribed');
-    });
+    console.log('%s from %s at %s', result, doc.topic, moment().format());
+    var message = 'Unsubscribed from ' + doc.topic;
+    req.flash('info', message);
+    return res.redirect('/admin/unsubscribed');
   });
 };
 
@@ -369,6 +354,7 @@ admin.prototype.authors = function (req, res) {
       return res.redirect('/admin');
     };
     return res.render('authors', {
+      layout: 'admin_layout',
       title: 'Authors',
       authors: results.docs,
       count: results.count

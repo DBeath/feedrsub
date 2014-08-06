@@ -246,9 +246,9 @@ Pubsub.prototype.subscribe = function (topic, hub, callback) {
         topic: topic,
         hub: hub
       });
-    } else {
-      feed.status = statusOptions.PENDING;
     };
+
+    feed.status = statusOptions.PENDING;
 
     feed.save(function (err) {
       if (err) return callback(err);
@@ -280,7 +280,8 @@ Pubsub.prototype.unsubscribe = function (topic, callback) {
       return callback(new Error('Not subscribed to feed.'));
     };
 
-    feed.status = statusOptions.UNSUBSCRIBED;
+    feed.status = statusOptions.PENDING;
+    
     feed.save(function (err) {
       if (err) return callback(err);
       thisPubsub.sendSubscription('unsubscribe', feed.topic, feed.hub, function (err, result) {
