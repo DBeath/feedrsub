@@ -8,6 +8,7 @@ var Feed = require('../models/feed');
 var Author = require('../models/author');
 var Entry = require('../models/entry');
 var User = require('../models/user');
+var Subscription = require('../models/subscription');
 
 var statusOptions = Feed.statusOptions;
 
@@ -452,6 +453,20 @@ admin.prototype.users = function (req, res) {
       results: results,
       error: req.flash('error'),
       message: req.flash('info')
+    });
+  });
+};
+
+admin.prototype.user = function (req, res) {
+  User.findById(req.params.id, function (err, user) {
+    Subscription.find({ email: user.email }).exec(function (err, results) {
+      return res.render('user', {
+        layout: 'admin_layout',
+        title: 'Subscriptions for ' + user.email,
+        results: results,
+        error: req.flash('error'),
+        message: req.flash('info')
+      });
     });
   });
 };

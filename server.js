@@ -169,17 +169,6 @@ var start = function (done) {
     console.log('Server listening on port %s', config.express.port);
     return done();
   });
-  // db.init(function (err, result) {
-  //   if (err) {
-  //     console.error(err);
-  //     process.exit(1);
-  //   };
-  //   console.log(result);
-  //   console.log('Connected to database. Starting server...');
-  //   server = app.listen(config.express.port);
-  //   console.log('Server listening on port %s', config.express.port);
-  //   return done();
-  // });
 };
 
 // Closes the server
@@ -198,19 +187,6 @@ var close = function (done) {
       return done();
     }, 5000);
   });
-  // db.close(function (err) {
-  //   if (err) console.log(err);
-  //   console.log('Stopping the server...');
-  //   server.close(function () {
-  //     console.log('Server has shutdown.');
-  //     console.log('Server was running for',Math.round(process.uptime()),'seconds');
-  //     return done();
-  //   });
-  //   setTimeout(function () {
-  //     console.log('Server took too long to shutdown, forcing shutdown');
-  //     return done();
-  //   }, 2000);
-  // });
 };
 
 // Gracefully closes the server on SIGTERM event
