@@ -3,6 +3,7 @@
 <table class="table table-condensed table-striped">
   <thead>
     <tr>
+      <th>Subscriptions</th>
       <th>ID</th>
       <th>Email</th>
       <th>Role</th>
@@ -13,7 +14,14 @@
   <tbody>
     {{#each results.users}}
     <tr>
-      <td><a href="/admin/user/{{_id}}">{{_id}}</a></td>
+      <td>
+        <form method="Get" action="/admin/user/{{_id}}">
+          <button type="submit" class="btn btn-info btn-xs" value="Entries">
+            Subscriptions
+          </button>
+        </form>
+      </td>
+      <td>{{_id}}</td>
       <td>{{email}}</td>
       <td>{{role}}</td>
       <td>{{joined}}</td>

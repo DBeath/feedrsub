@@ -11,6 +11,7 @@ var user = new ConnectRoles({
     // } else {
     //   res.send('Access Denied - You don\'t have permission to: ' + action);
     // }
+    req.session.returnTo = req.originalUrl || req.url;
     res.redirect('/login');
   }
 });

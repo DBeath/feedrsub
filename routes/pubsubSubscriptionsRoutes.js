@@ -1,5 +1,5 @@
 var express = require('express');
-var subscriptions = require('../controllers/subscriptions.js').SubscriptionsController();
+var subscriptions = require('../controllers/pubsubSubscriptions.js').SubscriptionsController();
 
 var subs = express.Router();
 

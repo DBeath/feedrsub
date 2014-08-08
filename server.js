@@ -77,6 +77,7 @@ var isLoggedIn = function (req, res, next) {
   if (req.isAuthenticated()) {
     return next();
   };
+  req.session.returnTo = req.originalUrl || req.url;
   res.redirect('/login');
 };
 
@@ -96,7 +97,7 @@ require('./lib/hbs_helpers.js')();
 
 // Routes
 app.post('/login', passport.authenticate('local-login', {
-  successRedirect: '/admin',
+  successReturnToOrRedirect: '/',
   failureRedirect: '/login',
   failureFlash: true
 }));
@@ -119,7 +120,7 @@ app.get('/signup', function (req, res) {
 
 // process the signup form
 app.post('/signup', passport.authenticate('local-signup', {
-  successRedirect : '/', // redirect to the secure profile section
+  successRedirect : '/',
   failureRedirect : '/signup', // redirect back to the signup page if there is an error
   failureFlash : true // allow flash messages
 }));
@@ -139,7 +140,7 @@ app.use('/admin', require('./routes/adminRoutes.js').admin);
 
 // Api
 app.all('/api/v1*', passport.authenticate('basic', { session: false }));
-app.use('/api/v1', require('./routes/subscriptionsRoutes.js').subs);
+app.use('/api/v1', require('./routes/pubsubSubscriptionsRoutes.js').subs);
 app.use('/api/v1', require('./routes/feedsRoutes.js').feeds);
 app.use('/api/v1', require('./routes/authorRoutes.js').authors);
 
