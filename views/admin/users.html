@@ -1,5 +1,5 @@
 <h3>{{title}}</h3>
-<p>Users: {{results.userCount}}</p>
+<p>Users: {{results.usersCount}}</p>
 <table class="table table-condensed table-striped">
   <thead>
     <tr>
@@ -13,7 +13,7 @@
   <tbody>
     {{#each results.users}}
     <tr>
-      <td>{{_id}}</td>
+      <td><a href="/admin/user/{{_id}}">{{_id}}</a></td>
       <td>{{email}}</td>
       <td>{{role}}</td>
       <td>{{joined}}</td>

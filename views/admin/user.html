@@ -1,0 +1,18 @@
+<h3>{{title}}</h3>
+<p>Subscriptions: {{results.length}}</p>
+<table class="table table-condensed table-striped">
+  <thead>
+    <tr>
+      <th>AuthorID</th>
+      <th>DisplayName</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each results}}
+    <tr>
+      <td>{{authorId}}</td>
+      <td>{{displayName}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>

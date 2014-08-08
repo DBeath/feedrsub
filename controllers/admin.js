@@ -15,6 +15,8 @@ var statusOptions = Feed.statusOptions;
 var dayAgo = moment().subtract('d', 1);
 var weekAgo = moment().subtract('d', 7);
 
+var admin_layout = 'admin/admin_layout';
+
 module.exports.AdminController = function () {
   return new admin();
 };
@@ -77,6 +79,12 @@ admin.prototype.index = function (req, res) {
         if (err) return callback(err);
         return callback(null, result);
       });
+    },
+    subscriptionCount: function (callback) {
+      Subscription.count({}, function (err, result) {
+        if (err) return callback(err);
+        return callback(null, result);
+      });
     }
   }, function (err, results) {
     if (err) {
@@ -84,8 +92,8 @@ admin.prototype.index = function (req, res) {
       req.flash('error', err.message);
       return next(err);
     };
-    return res.render('admin_page', {
-      layout: 'admin_layout',
+    return res.render('admin/admin_page', {
+      layout: admin_layout,
       title: 'Admin',
       results: results,
       error: req.flash('error'),
@@ -145,8 +153,8 @@ admin.prototype.feed = function (req, res) {
         return res.redirect('/admin');
       };
       var title = doc.title || doc.topic;
-      return res.render('feed', {
-        layout: 'admin_layout',
+      return res.render('admin/feed', {
+        layout: admin_layout,
         title: 'Entries for ' + title,
         results: results
       });
@@ -165,9 +173,9 @@ admin.prototype.deletefeed = function (req, res) {
 
 // Renders the feed subscription page.
 admin.prototype.newfeed = function (req, res) {
-  return res.render('subscribe', {
+  return res.render('admin/subscribe', {
     title: 'Subscribe',
-    layout: 'admin_layout'
+    layout: admin_layout
   });
 };
 
@@ -258,8 +266,8 @@ admin.prototype.unsubscribed_feeds = function (req, res) {
       req.flash('error', err.message);
       return next(err);
     };
-    return res.render('unsubscribed_feed_list', {
-      layout: 'admin_layout',
+    return res.render('admin/unsubscribed_feed_list', {
+      layout: admin_layout,
       title: 'Unsubscribed Feeds',
       feeds: results.docs,
       unsubscribedCount: results.count,
@@ -290,8 +298,8 @@ admin.prototype.subscribed_feeds = function (req, res) {
       req.flash('error', err.message);
       return next(err);
     };
-    return res.render('subscribed_feed_list', {
-      layout: 'admin_layout',
+    return res.render('admin/subscribed_feed_list', {
+      layout: admin_layout,
       title: 'Subscribed Feeds',
       feeds: results.docs,
       subscribedCount: results.count,
@@ -322,8 +330,8 @@ admin.prototype.pending_feeds = function (req, res) {
       req.flash('error', err.message);
       return res.redirect('/admin');
     };
-    return res.render('pending_feed_list', {
-      layout: 'admin_layout',
+    return res.render('admin/pending_feed_list', {
+      layout: admin_layout,
       title: 'Feeds pending subscription/unsubscription',
       feeds: results.docs,
       count: results.count,
@@ -353,8 +361,8 @@ admin.prototype.authors = function (req, res) {
       req.flash('error', err.message);
       return res.redirect('/admin');
     };
-    return res.render('authors', {
-      layout: 'admin_layout',
+    return res.render('admin/authors', {
+      layout: admin_layout,
       title: 'Authors',
       authors: results.docs,
       count: results.count
@@ -413,8 +421,8 @@ admin.prototype.authorEntries = function (req, res) {
         req.flash('error', err.message);
         return res.redirect('/admin');
       };
-      return res.render('authorEntries', {
-        layout: 'admin_layout',
+      return res.render('admin/authorEntries', {
+        layout: admin_layout,
         title: 'Entries for ' + author.displayName,
         author: author,
         results: results,
@@ -447,8 +455,8 @@ admin.prototype.users = function (req, res) {
       req.flash('error', err.message);
       return res.redirect('/admin');
     };
-    return res.render('users', {
-      layout: 'admin_layout',
+    return res.render('admin/users', {
+      layout: admin_layout,
       title: 'Users',
       results: results,
       error: req.flash('error'),
@@ -460,8 +468,8 @@ admin.prototype.users = function (req, res) {
 admin.prototype.user = function (req, res) {
   User.findById(req.params.id, function (err, user) {
     Subscription.find({ email: user.email }).exec(function (err, results) {
-      return res.render('user', {
-        layout: 'admin_layout',
+      return res.render('admin/user', {
+        layout: admin_layout,
         title: 'Subscriptions for ' + user.email,
         results: results,
         error: req.flash('error'),
