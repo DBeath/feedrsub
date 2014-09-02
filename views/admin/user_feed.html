@@ -1,0 +1,28 @@
+<h3>{{title}}</h3>
+<!-- <a href="/api/v1/author/rss/?{{authorQuery author.displayName}}" class="btn btn-warning btn-xs">RSS</a> -->
+<!-- <p>Entries: {{results.entriesCount}}</p>
+<p>Entries in Last Day: {{results.entriesInLastDay}}</p>
+<p>Entries in Last Week: {{results.entriesInLastWeek}}</p> -->
+<table class="table table-condensed table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Published</th>
+      <th>Title</th>
+      <th>Author</th>
+      <th>Permalink</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each results}}
+    <tr>
+      <td>{{_id}}</td>
+      <!-- <td>{{unix_to_date published}}</td> -->
+      <td>{{published}}</td>
+      <td>{{title}}</td>
+      <td>{{author.displayName}}</td>
+      <td><a href="{{permalinkUrl}}">{{permalinkUrl}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>

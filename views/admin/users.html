@@ -4,6 +4,7 @@
   <thead>
     <tr>
       <th>Subscriptions</th>
+      <th>Feed</th>
       <th>ID</th>
       <th>Email</th>
       <th>Role</th>
@@ -16,10 +17,16 @@
     <tr>
       <td>
         <form method="Get" action="/admin/user/{{_id}}">
-          <button type="submit" class="btn btn-info btn-xs" value="Entries">
+          <button type="submit" class="btn btn-info btn-xs" value="Subscriptions">
             Subscriptions
           </button>
         </form>
+      </td>
+      <td>
+        <form method="Get" action="/admin/user/{{_id}}/feed">
+          <button type="submit" class="btn btn-info btn-xs" value="Feed">
+            Feed
+          </button>
       </td>
       <td>{{_id}}</td>
       <td>{{email}}</td>

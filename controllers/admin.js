@@ -479,6 +479,32 @@ admin.prototype.user = function (req, res) {
   });
 };
 
+admin.prototype.userFeed = function (req, res) {
+  User.findById(req.params.id, function (err, user) {
+    Subscription.find({ email: user.email }, 'authorId').exec(function (err, results) {
+      console.log(results);
+      var subs = [];
+      for (var i = results.length - 1; i >= 0; i--) {
+        subs.push(results[i].authorId);
+      };
+      console.log(subs);
+      Entry.find({ 'author._id': subs[0] }).sort('-published').limit(10).exec(function (err, result) {
+        console.log('Author entries: ' + result);
+      });
+      Entry.find({ 'author._id': { $in: subs } }).sort('-published').limit(10).exec(function (err, entries) {
+        console.log(entries);
+        return res.render('admin/user_feed', {
+          layout: admin_layout,
+          title: 'Entries for ' + user.email,
+          results: entries,
+          error: req.flash('error'),
+          message: req.flash('info')
+        });
+      });
+    });
+  });
+};
+
 function error(err, req, path) {
   console.error(err.stack);
   req.flash('error', err.message);
