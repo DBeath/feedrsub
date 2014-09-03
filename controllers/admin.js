@@ -467,7 +467,9 @@ admin.prototype.users = function (req, res) {
 
 admin.prototype.user = function (req, res) {
   User.findById(req.params.id, function (err, user) {
+    if (err) return pathError(err, req, res, '/admin');
     Subscription.find({ email: user.email }).exec(function (err, results) {
+      if (err) return pathError(err, req, res, '/admin');
       return res.render('admin/user', {
         layout: admin_layout,
         title: 'Subscriptions for ' + user.email,
@@ -481,32 +483,47 @@ admin.prototype.user = function (req, res) {
 
 admin.prototype.userFeed = function (req, res) {
   User.findById(req.params.id, function (err, user) {
-    Subscription.find({ email: user.email }, 'authorId').exec(function (err, results) {
-      console.log(results);
-      var subs = [];
-      for (var i = results.length - 1; i >= 0; i--) {
-        subs.push(results[i].authorId);
-      };
-      console.log(subs);
-      Entry.find({ 'author._id': subs[0] }).sort('-published').limit(10).exec(function (err, result) {
-        console.log('Author entries: ' + result);
-      });
-      Entry.find({ 'author._id': { $in: subs } }).sort('-published').limit(10).exec(function (err, entries) {
-        console.log(entries);
-        return res.render('admin/user_feed', {
-          layout: admin_layout,
-          title: 'Entries for ' + user.email,
-          results: entries,
-          error: req.flash('error'),
-          message: req.flash('info')
+    if (err) return pathError(err, req, res, '/admin');
+
+    async.waterfall([
+      function (callback) {
+        Subscription.find({ userId: user._id }).select('authorId').exec(function (err, results) {
+          if (err) return callback(err);
+          return callback(null, results);
         });
+      },
+      function (results, callback) {
+        var subs = [];
+        for (var i = results.length - 1; i >= 0; i--) {
+          subs.push(results[i].authorId);
+        };
+        callback(null, subs);
+      },
+      function (subs, callback) {
+        Entry.find({ 'author._id': { $in: subs } }).sort('-published').limit(100).exec(function (err, entries) {
+          if (err) return callback(err);
+          return callback(null, entries);
+        });
+      }
+    ], function (err, entries) {
+      if (err) {
+        console.error(err);
+        req.flash('error', err.message);
+        return res.redirect('/admin');
+      };
+      return res.render('admin/user_feed', {
+        layout: admin_layout,
+        title: 'Entries for ' + user.email,
+        results: entries,
+        error: req.flash('error'),
+        message: req.flash('info')
       });
     });
   });
 };
 
-function error(err, req, path) {
+function pathError(err, req, res, path) {
   console.error(err.stack);
   req.flash('error', err.message);
-  return req.redirect(path);
+  return res.redirect(path);
 };

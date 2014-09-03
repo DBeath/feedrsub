@@ -3,8 +3,8 @@ var validator = require('validator');
 var ObjectId = mongoose.Schema.Types.ObjectId;
 
 var SubSchema = mongoose.Schema({
-  userId: { type: ObjectId },
-  email: { type: String, required: true, index: true },
+  userId: { type: ObjectId, required: true },
+  email: { type: String, required: true },
   authorId: { type: ObjectId, required: true, index: true },
   displayName: { type: String, required: true }
 });
