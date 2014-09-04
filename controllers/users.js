@@ -16,5 +16,35 @@ module.exports.UsersController = function () {
 function Users () {};
 
 Users.prototype.rss = function (req, res, next) {
+  if (!req.params.id) {
+    return next(new StatusError(400, 'UserID not given.'));
+  };
 
-}
+  if (!validator.isHexadecimal(req.params.id)) {
+    return next(new StatusError(400, 'UserID is not valid.'));
+  };
+
+  User.findById(req.params.id, function (err, user) {
+    async.waterfall([
+      function (callback) {
+        Subscription.find({ userId: user._id }).select('authorId').exec(function (err, results) {
+          if (err) return callback(err);
+          return callback(null, results);
+        });
+      },
+      function (results, callback) {
+        var subs = [];
+        for (var i = results.length - 1; i >= 0; i--) {
+          subs.push(results[i].authorId);
+        };
+        callback(null, subs);
+      },
+      function (subs, callback) {
+        Entry.find({ 'author._id': { $in: subs } }).sort('-published').limit(100).exec(function (err, entries) {
+          if (err) return callback(err);
+          return callback(null, entries);
+        });
+      }
+    ], function (err, entries) {
+  }
+};

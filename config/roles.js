@@ -21,10 +21,17 @@ user.use(function (req, action) {
 });
 
 user.use('access admin page', function (req) {
-  //console.log(req.session);
-  //console.log(req.user);
   if (req.user.role === 'admin') {
     return true;
+  };
+});
+
+user.use('access user', function (req) {
+  if (req.user._id.toString() === req.params.id.toString()) {
+    console.log('returning true');
+    return true;
+  } else {
+    console.log('returning false');
   };
 });
 

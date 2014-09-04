@@ -143,6 +143,7 @@ app.all('/api/v1*', passport.authenticate('basic', { session: false }));
 app.use('/api/v1', require('./routes/pubsubSubscriptionsRoutes.js').subs);
 app.use('/api/v1', require('./routes/feedsRoutes.js').feeds);
 app.use('/api/v1', require('./routes/authorRoutes.js').authors);
+app.use('/api/v1', require('./routes/userRoutes.js').users);
 
 // Error Handlers
 app.use(require('./lib/errors.js').StatusErrorHandler);
