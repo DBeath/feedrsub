@@ -44,7 +44,38 @@ Users.prototype.rss = function (req, res, next) {
           if (err) return callback(err);
           return callback(null, entries);
         });
+      },
+      function (entries, callback) {
+        var feed = new RSS({
+          title: 'Entries for ' + user.email,
+          description: 'Custom rss feed for ' + user.email,
+          feed_url: config.pubsub.domain + req.originalUrl,
+          site_url: config.pubsub.domain,
+          ttl: '60'
+        });
+
+        async.eachSeries(entries, function (entry, cb) {
+          var content = entry.content || entry.summary;
+
+          feed.item({
+            title: entry.title,
+            description: content,
+            date: moment.unix(entry.published),
+            author: entry.author.displayName,
+            url: entry.permalinkUrl,
+            guid: entry._id.toHexString()
+          });
+
+          return cb();
+        }, function (err) {
+          if (err) return callback(err);
+          var xml = feed.xml();
+          return callback(null, xml);
+        })
       }
-    ], function (err, entries) {
-  }
+    ], function (err, xml) {
+      if (err) return next(err);
+      return res.send(200, xml);
+    });
+  });
 };

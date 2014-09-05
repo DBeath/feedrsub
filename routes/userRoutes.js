@@ -1,5 +1,5 @@
 var express = require('express');
-var userController = require('../controllers/user.js').UserController();
+var userController = require('../controllers/users.js').UsersController();
 var roles = require('../config/roles.js').user;
 
 var userRouter = express.Router();
