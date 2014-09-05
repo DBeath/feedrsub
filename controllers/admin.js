@@ -405,11 +405,19 @@ admin.prototype.authorEntries = function (req, res) {
             if (err) return callback(err);
             return callback(null, result);
           });
-      } ,
+      },
       entriesInLastWeek: function (callback) {
         Entry
           .count({ 'author._id': author._id })
           .where('published').gte(weekAgo)
+          .exec(function (err, result) {
+            if (err) return callback(err);
+            return callback(null, result);
+          });
+      },
+      subscriberCount: function (callback) {
+        Subscription
+          .count({ authorId: author._id })
           .exec(function (err, result) {
             if (err) return callback(err);
             return callback(null, result);
