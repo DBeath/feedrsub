@@ -198,7 +198,7 @@ admin.prototype.subscribe = function (req, res) {
     } else {
       pubsub.subscribe(sub, config.pubsub.hub, function (err, result) {
         if (err) return callback(err);
-        console.log('%s to %s at %s', result, doc.topic, moment().format());
+        console.log('%s to %s at %s', result, sub, moment().format());
         return callback(null);
       });
     };

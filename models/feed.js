@@ -17,9 +17,12 @@ var FeedSchema = mongoose.Schema({
 
 FeedSchema.pre('save', function (next) {
   var feed = this;
+
+  // feed must have a hub
   if (!feed.hub) {
     feed.hub = config.pubsub.hub;
   };
+  
   if (feed.secret) return next();
   if (!config.pubsub.secret) return next();
   feed.secret = crypto.createHmac('sha1', config.pubsub.secret).update(feed.topic).digest('hex');
@@ -45,8 +48,6 @@ Feed.schema.path('status').validate(function (value) {
 
 Feed.schema.path('topic').validate(function (value) {
   return validator.isURL(value);
-}, 'Topic is not URL');
-
-
+}, 'Invalid URL');
 
 module.exports = Feed;

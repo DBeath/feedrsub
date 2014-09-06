@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt');
+var validator = require('validator');
 
 var SALT_WORK_FACTOR = 10;
 var MAX_LOGIN_ATTEMPTS = 5;
@@ -125,7 +126,13 @@ UserSchema.statics.getAuthenticated = function (email, password, callback) {
   });
 };
 
-module.exports = mongoose.model('User', UserSchema);
+var User = mongoose.model('User', UserSchema);
+
+User.schema.path('email').validate(function (value) {
+  return validator.isEmail(value);
+}, 'Invalid email');
+
+module.exports = User;
 
 // Encryption fuctionality from: http://devsmash.com/blog/password-authentication-with-mongoose-and-bcrypt
 // Locking from: http://devsmash.com/blog/implementing-max-login-attempts-with-mongoose
