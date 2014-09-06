@@ -277,7 +277,7 @@ Pubsub.prototype.unsubscribe = function (topic, callback) {
       return callback(new Error('Feed not in database.'));
     };
     if (feed.status != statusOptions.SUBSCRIBED) {
-      return callback(new Error('Not subscribed to feed.'));
+      return callback(new Error("Not subscribed to feed."));
     };
 
     feed.status = statusOptions.PENDING;
@@ -356,6 +356,8 @@ Pubsub.prototype.sendSubscription = function (mode, topic, hub, callback) {
     if (this.auth) {
       postParams.auth = this.auth;
     };
+
+    console.log(postParams);
 
     request.post(postParams, (function (err, res, body) {
       if (err) {

@@ -6,7 +6,7 @@ var config = require('../config');
 var FeedSchema = mongoose.Schema({
   topic: { type: String, required: true, index: { unique: true } },
   status: { type: String, default: 'pending', required: true },
-  hub: String,
+  hub: { type: String, required: true },
   subtime: { type: Date },
   unsubtime: Date,
   secret: String,

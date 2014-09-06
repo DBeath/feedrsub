@@ -17,9 +17,9 @@ admin.get('/user/:id/feed', adminController.userFeed );
 
 admin.get('/subscribe', adminController.newfeed );
 admin.post('/subscribe', adminController.subscribe );
-admin.put('/subscribe/:id', adminController.resubscribe );
+admin.post('/subscribe/:id', adminController.resubscribe );
 
-admin.put('/unsubscribe/:id', adminController.unsubscribe );
+admin.post('/unsubscribe/:id', adminController.unsubscribe );
 
 admin.get('/feed/:id', adminController.feed );
 admin.delete('/feed/:id', adminController.deletefeed );
