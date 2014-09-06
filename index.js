@@ -1,6 +1,5 @@
 var config = require('./config/');
 var server = require('./server.js');
-var db = require('./models/db.js');
 
 var User = require('./models/user');
 
