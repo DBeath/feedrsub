@@ -57,7 +57,8 @@ describe('pubsub', function () {
         topic: topic,
         status: Feed.statusOptions.SUBSCRIBED,
         subtime: Date.now(),
-        secret: encrypted_secret
+        secret: encrypted_secret,
+        hub: 'https://push.superfeedr.com'
       }).save(function (err) {
         return done();
       });

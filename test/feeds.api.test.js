@@ -64,8 +64,10 @@ describe('feeds', function () {
 
     var feed = new Feed({
       topic: topic,
-      status: Feed.statusOptions.SUBSCRIBED
+      status: Feed.statusOptions.SUBSCRIBED,
+      hub: 'http://push.superfeedr.com'
     }).save(function (err, feed) {
+      console.log(feed);
       postParams.url = 'http://localhost:4000/api/v1/feed/'+feed._id;
 
       request.get(postParams, function (err, response, body) {

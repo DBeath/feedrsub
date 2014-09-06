@@ -17,6 +17,9 @@ var FeedSchema = mongoose.Schema({
 
 FeedSchema.pre('save', function (next) {
   var feed = this;
+  if (!feed.hub) {
+    feed.hub = config.pubsub.hub;
+  };
   if (feed.secret) return next();
   if (!config.pubsub.secret) return next();
   feed.secret = crypto.createHmac('sha1', config.pubsub.secret).update(feed.topic).digest('hex');
