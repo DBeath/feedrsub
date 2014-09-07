@@ -63,15 +63,17 @@ pubsub.on('feed_update', function (data) {
         for (var i = json.items.length - 1; i >= 0; i--) {
           var item = json.items[i];
 
-          var author = getAuthorId(authors, item.actor.displayName);
-          console.log(author);
+          if (item.actor) {
+            var author = getAuthorId(authors, item.actor.displayName);
+            console.log(author);
+          };
 
           var entry = new Entry();
           entry.title = item.title;
           entry.topic = data.topic;
           entry.published = item.published;
           entry.updated = item.updated;
-          entry.content = item.content;
+          entry.content = item.content || item.summary;
           entry.permalinkUrl = item.permalinkUrl;
           entry.summary = item.summary;
           entry.author = author;

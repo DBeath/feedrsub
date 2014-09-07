@@ -73,13 +73,13 @@ Pubsub.prototype.verification = function (req, res) {
   // Verfication must contain topic, mode, and challenge
   if ( !topic || !mode || !challenge) {
     console.log('Verification request was not valid');
-    return res.send(400);
+    return res.status(400).end();
   };
 
   switch ( mode ) {
     // If sent denied then unsubscribe from topic.
     case 'denied':
-      res.send(200);
+      res.status(200).end();
         Feed.update({ topic: topic }, {
           $set: { status: statusOptions.UNSUBSCRIBED,
                   unsubtime: Date.now }
@@ -92,8 +92,8 @@ Pubsub.prototype.verification = function (req, res) {
     case 'subscribe':
     case 'unsubscribe':
       Feed.findOne({ topic: topic }, function (err, feed) {
-        if (err) return res.send(403);
-        if (!feed) return res.send(403);
+        if (err) return res.status(403).end();
+        if (!feed) return res.status(403).end();
 
         if (feed.isPending) {
           if (lease_seconds && mode === 'subscribe') {
@@ -103,14 +103,14 @@ Pubsub.prototype.verification = function (req, res) {
               if (err) return console.error(err);
             });
           };
-          return res.send(200, challenge);
+          return res.status(200).send(challenge);
         } else {
-          return res.send(404);
+          return res.status(404).end();
         };
       });
       break;
     default:
-      return res.send(403);    
+      return res.status(403).end();    
   };
 };
 
@@ -143,32 +143,32 @@ Pubsub.prototype.notification = function (req, res) {
   // Must have valid hub.
   if (!hub) {
     console.log('Notification did not contain hub');
-    return res.send(400);
+    return res.status(400).end();
   };
 
   // Must have topic.
   if (!topic) {
     console.log('Notification did not contain topic');
-    return res.send(400);
+    return res.status(400).end();
   };
 
   // Topic must be in the database, else discard notification. 
   Feed.findOne({ topic: topic }, (function (err, doc) {
     if (err) {
       console.log(err);
-      return res.send(403);
+      return res.status(403).end();
     };
 
     // Send 403 if topic is not in database.
     if (!doc) {
       console.log('Not subscribed to %s', topic);
-      return res.send(403);
+      return res.status(403).end();
     };
 
     // Send 403 if notification should have secret but does not.
     if (doc.secret && !req.get('x-hub-signature')) {
       console.log('Notification did not contain secret signature');
-      return res.send(403);
+      return res.status(403).end();
     };
 
     // Create HMAC for secret.
@@ -181,7 +181,7 @@ Pubsub.prototype.notification = function (req, res) {
         hmac = crypto.createHmac(algo, doc.secret);
       } catch (e) {
         console.log(e);
-        return res.send(403);
+        return res.status(403).end();
       };
     };
 
@@ -199,7 +199,7 @@ Pubsub.prototype.notification = function (req, res) {
           hmac.update(chunk);
         } catch (e) {
           console.log(e);
-          return res.send(403);
+          return res.status(403).end();
         };
       };
     }).bind(this)); 
@@ -209,12 +209,12 @@ Pubsub.prototype.notification = function (req, res) {
 
       // Must return 2xx code even if signature doesn't match.
       if (doc.secret && hmac.digest('hex').toLowerCase() != signature) {
-        return res.send(202);
+        return res.status(202).end();
       };
 
       // Send acknowledgement of valid notification.
       console.log('Received valid notification from %s at %s', topic, moment().format());
-      res.send(204);
+      res.status(204).end();
 
       // Emit notification event.
       this.emit('feed_update', {

@@ -8,14 +8,14 @@ var Author = require('../models/author');
 var Entry = require('../models/entry');
 var User = require('../models/user');
 
-var authors = [
-  new Author({
-    displayName: 'John Doe'
-  }),
-  new Author({
-    displayName: 'Jane Doe'
-  })
-];
+// var authors = [
+//   new Author({
+//     displayName: 'John Doe'
+//   }),
+//   new Author({
+//     displayName: 'Jane Doe'
+//   })
+// ];
 
 var author1 = new Author({
   displayName: 'John Doe'
@@ -27,6 +27,7 @@ var author2 = new Author({
 
 var entry1 = new Entry({
   title: 'TestTitle',
+  topic: 'http://test.com/feed',
   author: {
     displayName: author1.displayName,
     _id: author1._id
@@ -35,6 +36,7 @@ var entry1 = new Entry({
 
 var entry2 = new Entry({
   title: 'TestTitle 2',
+  topic: 'http://test.com/feed',
   author: {
     displayName: author2.displayName,
     _id: author2._id
@@ -54,39 +56,7 @@ var testUser = new User({
 describe('authors', function () {
   before(function (done) {
     server.start(function () {
-      // Author.collection.remove({}, function (err) {
-      //   if (err) throw err;
-      //   async.each(authors, function (author, callback) {
-      //     author.save(function (err) {
-      //       if (err) return callback(err);
-      //       Author.findOne({displayName: author.displayName}, function (err, result) {
-      //         if (err) return callback(err);
-      //         db.entries.collection.insert({
-      //           title: 'TestTitle',
-      //           actor: {
-      //             displayName: result.displayName,
-      //             id: result._id 
-      //           }
-      //         }, function (err) {
-      //           if (err) return callback(err);
-      //           return callback();
-      //         });
-      //       });
-      //     });
-      //   }, function (err) {
-      //     if (err) throw err;
 
-      //     var testUser = new User();
-      //     testUser.email = testEmail;
-      //     testUser.password = testPassword;
-      //     testUser.role = testRole;
-
-      //     testUser.save(function (err) {
-      //       if (err) throw err;
-      //       return done();
-      //     });
-      //   });
-      // }); 
       async.parallel([
         function (callback) {
           author1.save(function (err) {
@@ -183,6 +153,22 @@ describe('authors', function () {
     });
   });
 
+  it('should return error: author not found', function (done) {
+    var url = 'http://localhost:4000/api/v1/author/?' + qs.stringify({author: 'Jimmy Hendrix'}); 
+    var postParams = {
+      url: url,
+      auth: {
+        user: testEmail,
+        pass: testPassword
+      }
+    };
+
+    request.get(postParams, function (err, response, body) {
+      expect(response.statusCode).to.equal(403);
+      return done();
+    });
+  });
+
   it('should return an rss feed for an author', function (done) {
     var url = 'http://localhost:4000/api/v1/author/rss/?' + qs.stringify({author: 'John Doe'}); 
     var postParams = {
@@ -196,6 +182,22 @@ describe('authors', function () {
     request.get(postParams, function (err, response, body) {
       expect(response.statusCode).to.equal(200);
       console.log(body);
+      return done();
+    });
+  });
+
+  it('should return error for rss feed: author not found', function (done) {
+    var url = 'http://localhost:4000/api/v1/author/rss/?' + qs.stringify({author: 'Jimmy Hendrix'}); 
+    var postParams = {
+      url: url,
+      auth: {
+        user: testEmail,
+        pass: testPassword
+      }
+    };
+
+    request.get(postParams, function (err, response, body) {
+      expect(response.statusCode).to.equal(403);
       return done();
     });
   });

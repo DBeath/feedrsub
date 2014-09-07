@@ -17,7 +17,7 @@ function Authors () {};
 Authors.prototype.list = function (req, res, next) {
   Author.find({}).lean().exec(function (err, result) {
     if (err) return next(err);
-    return res.send(200, result);
+    return res.status(200).send(result);
   });
 };
 
@@ -37,18 +37,16 @@ Authors.prototype.authorEntries = function (req, res, next) {
 
   Author.findOne({ displayName: req.param('author') }).lean().exec(function (err, author) {
     if (err) return next(err);
-    // db.entries.listByAuthor(author._id, 10, function (err, entries) {
-    //   if (err) return next(err);
-    //   return res.send(200, entries);
-    // });
+    if (!author) return next(new StatusError(403, 'Author not found'));
+
     Entry
       .find({ 'author._id': author._id })
       .limit(10)
       .sort('-published')
-      .lean()
       .exec(function (err, entries) {
+        console.log(entries);
         if (err) return next(err);
-        return res.send(200, entries);
+        return res.status(200).send(entries);
       });
   });
 };
@@ -90,6 +88,8 @@ Authors.prototype.rss = function (req, res, next) {
         };
       },
       function (author, callback) {
+        if (!author) return callback(new StatusError(403, 'Author not found'));
+
         var feed = new RSS({
           title: author.displayName,
           description: 'Articles by '+ author.displayName,
@@ -127,6 +127,6 @@ Authors.prototype.rss = function (req, res, next) {
       }
   ], function (err, result) {
     if (err) return next(err);
-    return res.send(200, result);
+    return res.status(200).send(result);
   });
 };
