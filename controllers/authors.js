@@ -40,7 +40,7 @@ Authors.prototype.authorEntries = function (req, res, next) {
     if (!author) return next(new StatusError(403, 'Author not found'));
 
     Entry
-      .find({ 'author._id': author._id })
+      .find({ 'authors.authorId': author._id })
       .limit(10)
       .sort('-published')
       .exec(function (err, entries) {

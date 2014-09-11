@@ -386,7 +386,7 @@ admin.prototype.authorEntries = function (req, res) {
     async.parallel({
       entries: function (callback) {
         Entry
-          .find({ 'author._id': author._id })
+          .find({ 'authors.authorId': author._id })
           .limit(100)
           .sort('-published')
           .exec(function (err, docs) {
@@ -396,7 +396,7 @@ admin.prototype.authorEntries = function (req, res) {
       },
       entriesCount: function (callback) {
         Entry
-          .count({ 'author._id': author._id })
+          .count({ 'authors.authorId': author._id })
           .exec(function (err, result) {
             if (err) return callback(err);
             return callback(null, result);
@@ -404,7 +404,7 @@ admin.prototype.authorEntries = function (req, res) {
       },
       entriesInLastDay: function (callback) {
         Entry
-          .count({ 'author._id': author._id })
+          .count({ 'authors.authorId': author._id })
           .where('published').gte(dayAgo)
           .exec(function (err, result) {
             if (err) return callback(err);
@@ -413,7 +413,7 @@ admin.prototype.authorEntries = function (req, res) {
       },
       entriesInLastWeek: function (callback) {
         Entry
-          .count({ 'author._id': author._id })
+          .count({ 'authors.authorId': author._id })
           .where('published').gte(weekAgo)
           .exec(function (err, result) {
             if (err) return callback(err);
@@ -513,7 +513,7 @@ admin.prototype.userFeed = function (req, res) {
         callback(null, subs);
       },
       function (subs, callback) {
-        Entry.find({ 'author._id': { $in: subs } }).sort('-published').limit(100).exec(function (err, entries) {
+        Entry.find({ 'authors.authorId': { $in: subs } }).sort('-published').limit(100).exec(function (err, entries) {
           if (err) return callback(err);
           return callback(null, entries);
         });

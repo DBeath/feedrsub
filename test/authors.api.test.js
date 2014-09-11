@@ -28,19 +28,19 @@ var author2 = new Author({
 var entry1 = new Entry({
   title: 'TestTitle',
   topic: 'http://test.com/feed',
-  author: {
-    displayName: author1.displayName,
-    _id: author1._id
-  }
+});
+entry1.authors.push({
+  authorId: author1._id,
+  name: author1.displayName
 });
 
 var entry2 = new Entry({
   title: 'TestTitle 2',
   topic: 'http://test.com/feed',
-  author: {
-    displayName: author2.displayName,
-    _id: author2._id
-  }
+});
+entry2.authors.push({
+  authorId: author2._id,
+  name: author2.displayName
 });
 
 var testEmail = 'admin@test.com';
@@ -148,7 +148,7 @@ describe('authors', function () {
       console.log(result);
       expect(result.length).to.equal(1);
       expect(result[0].title).to.equal('TestTitle');
-      expect(result[0].author.displayName).to.equal('John Doe');
+      expect(result[0].authors[0].name).to.equal('John Doe');
       return done();
     });
   });

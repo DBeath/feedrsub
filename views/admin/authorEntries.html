@@ -10,7 +10,7 @@
       <th>ID</th>
       <th>Published</th>
       <th>Title</th>
-      <th>Author</th>
+      <th>Authors</th>
       <th>Permalink</th>
     </tr>
   </thead>
@@ -20,7 +20,11 @@
       <td>{{_id}}</td>
       <td>{{published}}</td>
       <td>{{title}}</td>
-      <td>{{author.displayName}}</td>
+      <td>
+        {{#each authors}}
+          <p>{{name}}</p>
+        {{/each}}
+      </td>
       <td><a href="{{permalinkUrl}}">{{permalinkUrl}}</td>
     </tr>
     {{/each}}
