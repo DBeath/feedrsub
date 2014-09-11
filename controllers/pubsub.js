@@ -71,8 +71,12 @@ pubsub.on('feed_update', function (data) {
           var entry = new Entry();
           entry.title = item.title;
           entry.topic = data.topic;
-          entry.published = item.published;
-          entry.updated = item.updated;
+          if (item.published) {
+            entry.published = new Date(item.published);
+          };
+          if (item.updated) {
+            entry.updated = new Date(item.updated);
+          };
           entry.content = item.content || item.summary;
           entry.permalinkUrl = item.permalinkUrl;
           entry.summary = item.summary;

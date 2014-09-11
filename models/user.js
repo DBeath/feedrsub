@@ -107,7 +107,7 @@ UserSchema.statics.getAuthenticated = function (email, password, callback) {
         var updates = {
           $set: { 
             loginAttempts: 0,
-            lastLogin: Date.now
+            lastLogin: Date.now()
           },
           $unset: { lockUntil: 1 }
         };
